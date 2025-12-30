@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { TextInput, View, Image } from "react-native";
 import { styles } from "../styles/styles";
 import { Arasaac } from "../class/Arasaac/getPictograma";

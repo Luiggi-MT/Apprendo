@@ -10,6 +10,7 @@ import DropDownPicker from "react-native-dropdown-picker";
 import Boton from "../components/Boton";
 import { ActivityIndicator } from "react-native-paper";
 import { Students } from "../class/Interface/Students";
+import { ImagePassword } from "../class/Interface/ImagePassword";
 
 export default function DescripcionEstudiante({
   navigation,
@@ -73,6 +74,11 @@ export default function DescripcionEstudiante({
     { label: "Semanáles", value: "semanales" },
   ]);
 
+  const [passwordImages, setPasswordImages] = useState<ImagePassword[]>([]);
+  const [distractorsImages, setDistractorImages] = useState<ImagePassword[]>(
+    []
+  );
+
   const api = new ConnectApi();
 
   const atras = () => {
@@ -86,11 +92,13 @@ export default function DescripcionEstudiante({
     }
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
       quality: 0.8,
+      aspect: [1, 1],
+      selectionLimit: 1,
     });
     if (!result.canceled) {
       setSelectedImage(result.assets[0].uri);
-      console.log(result.assets[0].uri);
     }
   };
   const handleTextChange = (input: string) => {
@@ -124,7 +132,6 @@ export default function DescripcionEstudiante({
       setWaitting(false);
       setMessageError(true);
       setMessageErrorString(response.message.Error);
-      console.log(response.message.Error);
     } else {
       setTimeout(() => {
         setWaitting(false);
@@ -146,12 +153,16 @@ export default function DescripcionEstudiante({
       preferenciasVisualizacion: visualizacionValue,
       asistenteVoz: asistenteVozValue,
     };
-    const response = await api.updateStudent(updateStudent);
+    const response = await api.updateStudent(
+      updateStudent,
+      passwordImages,
+      distractorsImages
+    );
+
     if (!response.ok) {
       setWaitting(false);
       setMessageError(true);
       setMessageErrorString(response.message.Error);
-      console.log(response.message.Error);
     } else {
       setTimeout(() => {
         setWaitting(false);
@@ -161,7 +172,13 @@ export default function DescripcionEstudiante({
   };
 
   const handleEstablecerContraseñaPress = () => {
-    navigation.navigate("EstablecerContraseña", { student: student });
+    navigation.navigate("EstablecerContraseña", {
+      student: student,
+      onPasswordSelected: (pass: ImagePassword[], dist: ImagePassword[]) => {
+        setPasswordImages(pass);
+        setDistractorImages(dist);
+      },
+    });
   };
   return (
     <SafeAreaProvider>

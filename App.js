@@ -8,7 +8,9 @@ import { PaperProvider } from "react-native-paper";
 
 import HomeScreen from "./Views/HomeScreen";
 import Profesorado from "./Views/Profesorado";
-import LoginAlumno from "./Views/LoginAlumno";
+import LoginAlumnoAlfanumerica from "./Views/LoginAlumnoAlfanumerica";
+import LoginAlumnoImagenes from "./Views/LoginAlumnoImagenes";
+import LoginAlumnoPin from "./Views/LoginAlumnoPin";
 import AdminScreen from "./Views/AdminScreen";
 import ProfesorScreen from "./Views/ProfesorScreen";
 import PerfilScreen from "./Views/PerfilScreen";
@@ -76,8 +78,11 @@ export default function App() {
       >
         <Stack.Screen name="Home" component={HomeScreen}/>
 
+        
         <Stack.Screen name="Profesorado" component={Profesorado} />
-        <Stack.Screen name="LoginAlumno" component={LoginAlumno} />
+        <Stack.Screen name="LoginAlumnoAlfanumerica" component={LoginAlumnoAlfanumerica} />
+        <Stack.Screen name="LoginAlumnoPin" component={LoginAlumnoPin} />
+        <Stack.Screen name="LoginAlumnoImagenes" component={LoginAlumnoImagenes} />
         
         <Stack.Screen name="AdminScreen" component={AdminScreen} />
         <Stack.Screen name="ProfesorScreen" component={ProfesorScreen} />

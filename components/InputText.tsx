@@ -6,11 +6,13 @@ export default function InputText({
   input,
   secure = false,
   value,
+  placehorder,
 }: {
-  nameInput: string;
+  nameInput?: string;
   input: (inputText: string) => void;
   secure?: boolean;
   value: string;
+  placehorder?: string;
 }) {
   const [text, setText] = useState("");
   const handleTextChange = (inputText: string) => {
@@ -25,6 +27,7 @@ export default function InputText({
         onChangeText={handleTextChange}
         value={value}
         secureTextEntry={secure}
+        placeholder={placehorder}
       />
     </View>
   );

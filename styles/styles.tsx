@@ -26,7 +26,7 @@ export const styles = StyleSheet.create({
   header: {
     height: 200,
     width: "100%",
-    backgroundColor: "#EAFFF5",
+    backgroundColor: "#2E4053",
     flexDirection: "row",
     alignItems: "center",
     paddingTop: 30,
@@ -36,7 +36,6 @@ export const styles = StyleSheet.create({
     alignItems: "center",
   },
 
-  // ✅ SOMBRA MULTIPLATAFORMA
   shadow: {
     ...shadowStyle,
   },
@@ -95,6 +94,15 @@ export const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginRight: 5,
   },
+  studentCard: {
+    borderWidth: 1,
+    borderRadius: 5,
+  },
+  studentCardUsername: {
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
 
   studentItem: {
     flex: 1,
@@ -133,7 +141,11 @@ export const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "bold",
   },
-
+  asistente: {
+    borderWidth: 3,
+    borderRadius: 50,
+    borderColor: gradientColors[1],
+  },
   buttonActive: {},
   buttonDissable: {},
 });

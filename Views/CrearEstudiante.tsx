@@ -10,16 +10,22 @@ import DropDownPicker from "react-native-dropdown-picker";
 import Boton from "../components/Boton";
 import { Students } from "../class/Interface/Students";
 import { ActivityIndicator } from "react-native-paper";
+import { ImagePassword } from "../class/Interface/ImagePassword";
 
 export default function CrearEstudiante({ navigation }: { navigation: any }) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const [text, setText] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
+  const [password, setPassword] = useState<string>(null);
   const errores: string[] = [];
   const [error, setError] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string[]>([]);
   const [isCreate, setIsCreate] = useState<boolean>(false);
+
+  const [passwordImages, setPasswordImages] = useState<ImagePassword[]>([]);
+  const [distractorsImages, setDistractorImages] = useState<ImagePassword[]>(
+    []
+  );
 
   const [view, setView] = useState(0);
 
@@ -32,10 +38,11 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
   const [visualizacionValue, setVisualizacionValue] = useState("diarias");
 
   const [openAsistenteVoz, setOpenAsistenteVoz] = useState(false);
-  const [asistenteVozValue, setAsistenteVozValue] = useState(1);
+  const [asistenteVozValue, setAsistenteVozValue] = useState<boolean>(true);
+
   const [asistenteVozItems, setAsistenteVozItems] = useState([
-    { label: "Activado", value: 1 },
-    { label: "Desactivado", value: 0 },
+    { label: "Activado", value: true },
+    { label: "Desactivado", value: false },
   ]);
 
   const [contraseñaItems, setContraseñaItems] = useState([
@@ -93,10 +100,15 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
 
   const handleAddPress = async () => {
     if (!text) errores.push("El nombre de usuario es obligatorio. ");
-    if (!password || password.length < 4)
-      errores.push("La contraseña debe tener al menos 4 caracteres. ");
+
+    if (contraseñaValue === "alfanumerica" || contraseñaValue === "pin") {
+      if (!password || password.length < 4)
+        errores.push("La contraseña debe tener al menos 4 caracteres. ");
+    }
+
     if (accesibilidadValue.length === 0)
       errores.push("Debe seleccionar al menos una opción de accesibilidad. ");
+
     if (errores.length > 0) {
       setError(true);
       setErrorMessage(errores);
@@ -116,12 +128,16 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
       tipoContraseña: contraseñaValue,
       accesibilidad: accesibilidadValue.join(","),
       preferenciasVisualizacion: visualizacionValue,
-      asistenteVoz: false,
+      asistenteVoz: asistenteVozValue,
       contraseña: password,
     };
     setIsCreate(true);
 
-    const response = await api.createStudent(newStudent);
+    const response = await api.createStudent(
+      newStudent,
+      passwordImages,
+      distractorsImages
+    );
     if (response.ok) {
       setTimeout(() => {
         setIsCreate(false);
@@ -129,9 +145,18 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
       }, 2000);
     } else {
       setIsCreate(false);
-      setError(true);
       setErrorMessage(["Error al crear el estudiante."]);
+      return;
     }
+  };
+  const handleEstablecerContraseñaPress = () => {
+    navigation.navigate("EstablecerContraseña", {
+      student: {},
+      onPasswordSelected: (pass: ImagePassword[], dist: ImagePassword[]) => {
+        setPasswordImages(pass);
+        setDistractorImages(dist);
+      },
+    });
   };
 
   return (
@@ -140,7 +165,7 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
         uri="volver"
         nameBottom="Atrás"
         navigation={() => atras()}
-        nameHeader={api.getComponent("DescripcionDelEstudiante.png")}
+        nameHeader={api.getComponent("CrearEstudiante.png")}
         uriPictograma="estudiante"
       />
 
@@ -194,6 +219,7 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
               style={[styles.buscador, styles.shadow]}
               onChangeText={handlePasswordChange}
               value={password}
+              secureTextEntry={true}
             />
           ) : contraseñaValue === "pin" ? (
             <TextInput
@@ -201,12 +227,13 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
               onChangeText={handlePasswordChange}
               value={password}
               keyboardType="number-pad"
+              secureTextEntry={true}
             />
           ) : (
             <Boton
               uri="olvideContraseña"
               nameBottom="Establecer Contraseña"
-              onPress={() => {}}
+              onPress={handleEstablecerContraseñaPress}
             />
           )}
           <View style={styles.navigationButtons}>
@@ -226,6 +253,9 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
               placeholder="Seleccionar opciones"
               mode="BADGE"
               listMode="SCROLLVIEW"
+              dropDownContainerStyle={{
+                maxHeight: 200,
+              }}
               open={openAccesibilidad}
               value={accesibilidadValue}
               items={accesibilidadItems}
@@ -245,6 +275,10 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
               setOpen={setOpenVisualizacion}
               setValue={setVisualizacionValue}
               setItems={setVisualizacionItems}
+              listMode="SCROLLVIEW"
+              dropDownContainerStyle={{
+                maxHeight: 200,
+              }}
               style={[styles.shadow, styles.buscador, { width: "50%" }]}
             />
           </View>
@@ -257,6 +291,10 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
               setOpen={setOpenAsistenteVoz}
               setValue={setAsistenteVozValue}
               setItems={setAsistenteVozItems}
+              listMode="SCROLLVIEW"
+              dropDownContainerStyle={{
+                maxHeight: 200,
+              }}
               style={[styles.shadow, styles.buscador, { width: "50%" }]}
             />
           </View>
