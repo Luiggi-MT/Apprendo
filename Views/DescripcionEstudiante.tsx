@@ -158,7 +158,6 @@ export default function DescripcionEstudiante({
       passwordImages,
       distractorsImages
     );
-
     if (!response.ok) {
       setWaitting(false);
       setMessageError(true);

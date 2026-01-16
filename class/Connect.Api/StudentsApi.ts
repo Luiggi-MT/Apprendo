@@ -1,5 +1,6 @@
 import { ApiResponse } from "../Interface/ApiResponse";
 import { ApiResponseStudents } from "../Interface/ApiResponseStudents";
+import { ContraseñaImage } from "../Interface/ContraseñaImage";
 import { ImagePassword } from "../Interface/ImagePassword";
 import { Students } from "../Interface/Students";
 import { Api } from "./Api";
@@ -40,11 +41,13 @@ export class StudentsApi extends Api{
 
     public async createStudent(student: Students, password: ImagePassword[], distractor: ImagePassword[]): Promise<ApiResponse>{
         try{
+            
             const response = await fetch(`${Api.apiUrl}/student`, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(student)
             });
+            
             if (!response.ok){
                 const errorData = await response.json(); 
                 return {
@@ -52,18 +55,28 @@ export class StudentsApi extends Api{
                     message: errorData
                 }; 
             }
+            
             const data = await response.json()
-            const responseFotoPerfil = await this.uploadStudentPhoto(data.id, student.foto);
-            if(!responseFotoPerfil.ok){
-                return {
-                    ok: false, 
-                    message: "Fallo a la hora de subir la foto de perfil",
-                } 
+            if(student.foto !== "porDefecto.png"){
+                const responseFotoPerfil = await this.uploadStudentPhoto(data.id, student.foto);
+                if(!responseFotoPerfil.ok){
+                    return {
+                        ok: false, 
+                        message: "Fallo a la hora de subir la foto de perfil",
+                    } 
+                }
             }
-            if(password.length !== 0 && distractor.length !== 0){
-                console.log(JSON.stringify(password, null, 2));
-                console.log(JSON.stringify(distractor, null, 2));
+            
+            if(student.tipoContraseña === "imagenes"){
+                if(password.length === 0 || distractor.length === 0){
+                    return {
+                        ok: false, 
+                        message: "Ha habido un error al subir la fotos de la contraseña"
+                    }
+                }
+                
                 const responseFotoPassword = await this.sendPasswordImage(password, data.id);
+                
                 const responseFotoDistractor = await this.sendPasswordImage(distractor, data.id);
                 if(!responseFotoPassword.ok || !responseFotoDistractor.ok){
                     return {
@@ -71,7 +84,9 @@ export class StudentsApi extends Api{
                         message: "Ha habido un error al subir la fotos de la contraseña"
                     }
                 }
+            
             }
+            
             return {ok: true, message: "Estudiante creado correctamente"};
         }catch(error){
             return {ok: false, message: error};
@@ -85,7 +100,7 @@ export class StudentsApi extends Api{
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(student)
             });
-            const data = await response.json();
+            
             if (!response.ok){
                 if(student.foto) {
                     const response = await this.uploadStudentPhoto(student.id, student.foto);
@@ -97,8 +112,8 @@ export class StudentsApi extends Api{
                     message: errorData
                 }; 
             }
-            if(student.foto) this.uploadStudentPhoto(student.id, student.foto);
-            if(password && distractor){
+            if(student.foto !== null) this.uploadStudentPhoto(student.id, student.foto);
+            if(password.length > 0 && distractor.length > 0){
                 const responseFotoPassword = await this.sendPasswordImage(password, student.id);
                 const responseFotoDistractor = await this.sendPasswordImage(distractor, student.id);
                 if(!responseFotoPassword.ok || !responseFotoDistractor.ok){
@@ -165,6 +180,7 @@ export class StudentsApi extends Api{
             method: 'DELETE', 
             headers: {'Content-Type': 'application/jason'}
             });
+            
             if (!response.ok){
                 const errorData = await response.json(); 
                 return {
@@ -277,10 +293,12 @@ export class StudentsApi extends Api{
             }
         }
         const datas = await response.json();
+        console.log(JSON.stringify(datas, null, 2));
         const imagenesModificadas = datas.message.map((item: any) => {
             return {
                 ...item,
-                uri: `${Api.apiUrl}/foto-password/${item.uri}`
+                uri: `${Api.apiUrl}/foto-password/${item.uri}`,
+                
             }
             }
         )
@@ -289,4 +307,5 @@ export class StudentsApi extends Api{
             message: imagenesModificadas,
         }
     }
+    
 }

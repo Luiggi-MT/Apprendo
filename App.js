@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { View, Text, ActivityIndicator } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { ConnectApi } from "./class/Connect.Api/ConnectApi";
 import { UserContext } from "./class/context/UserContext";
 import { PaperProvider } from "react-native-paper";
+import { useFonts } from "expo-font";
+import * as SplashScreen from 'expo-splash-screen'
 
 import HomeScreen from "./Views/HomeScreen";
 import Profesorado from "./Views/Profesorado";
@@ -23,12 +25,13 @@ import EstablecerContraseña from "./Views/EstablecerContraseña";
 
 const Stack = createNativeStackNavigator();
 const api = new ConnectApi();
+SplashScreen.preventAutoHideAsync();
 
 function Splash() {
   return (
     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
       <ActivityIndicator size="large" />
-      <Text>Cargando sesión</Text>
+      <Text>Cargando...</Text>
     </View>
   );
 }
@@ -39,6 +42,14 @@ export default function App() {
     foto: null,
     username: null,
   });
+
+  const [fontLoadded] = useFonts({
+    'massallera' : require('./assets/massallera.ttf'),
+    'escolar' : require('./assets/escolar.ttf'), 
+    'escolar_bold' : require('./assets/escolar_bold.ttf'),
+    'rounded_regular' : require('./assets/rounded_regular.ttf'),
+  });
+  
 
   const checkSession = async () => {
     try {
@@ -59,16 +70,19 @@ export default function App() {
       setUser({ foto: null, username: null });
     }
   };
+  
 
   useEffect(() => {
     checkSession();
   }, []);
-
-
-
-  if (!initialRoute) return <Splash />;
   
+  const onLayoutRootView = useCallback(async () => {
+    if(fontLoadded && initialRoute) await SplashScreen.hideAsync()
+  }, [fontLoadded, initialRoute]);
+  if(!fontLoadded || !initialRoute) return <Splash />; 
+
   return (
+    <View style={{flex: 1}} onLayout={onLayoutRootView}>
     <PaperProvider>
     <UserContext.Provider value={{user, setUser}}>
     <NavigationContainer>
@@ -99,5 +113,6 @@ export default function App() {
     </NavigationContainer>
     </UserContext.Provider>
     </PaperProvider>
+    </View>
   );
 }

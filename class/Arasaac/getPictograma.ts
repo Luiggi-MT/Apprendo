@@ -20,6 +20,18 @@ export class Arasaac {
         ["mas", 3220],
         ["grafica", 9174],
         ["x", 3046],
+        //Numeros
+        ["cero", 6972],
+        ["uno", 35677],
+        ["dos", 35679],
+        ["tres", 35681],
+        ["cuatro", 35665], 
+        ["cinco", 35631], 
+        ["seis",  35683], 
+        ["siete", 35685], 
+        ["ocho", 35687], 
+        ["nueve", 35689], 
+
     ]);
     private apiUrl: string = `https://api.arasaac.org/v1/pictograms/`;
     

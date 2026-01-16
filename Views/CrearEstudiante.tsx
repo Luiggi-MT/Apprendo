@@ -16,7 +16,7 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const [text, setText] = useState<string>("");
-  const [password, setPassword] = useState<string>(null);
+  const [password, setPassword] = useState<string>("");
   const errores: string[] = [];
   const [error, setError] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string[]>([]);
@@ -109,15 +109,22 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
     if (accesibilidadValue.length === 0)
       errores.push("Debe seleccionar al menos una opción de accesibilidad. ");
 
+    const tieneLetras = /[a-zA-Z]/.test(password);
+    if (contraseñaValue === "pin" && tieneLetras) {
+      errores.push("El PIN no puede contener letras.");
+    }
+
+    if (
+      contraseñaValue === "imagenes" &&
+      passwordImages.length === 0 &&
+      distractorsImages.length === 0
+    ) {
+      errores.push("La contraseña de imagenes no puede estar vacio. ");
+    }
+
     if (errores.length > 0) {
       setError(true);
       setErrorMessage(errores);
-      return;
-    }
-    const tieneLetras = /[a-zA-Z]/.test(password);
-    if (contraseñaValue === "pin" && tieneLetras) {
-      setError(true);
-      setErrorMessage(["El PIN no puede contener letras."]);
       return;
     }
     setError(false);
@@ -138,6 +145,7 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
       passwordImages,
       distractorsImages
     );
+
     if (response.ok) {
       setTimeout(() => {
         setIsCreate(false);
@@ -243,78 +251,80 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
           </View>
         </View>
       ) : (
-        <View style={[styles.content, styles.shadow]}>
-          <Text>Accesibilidad:</Text>
-          <View style={{ zIndex: 1000 }}>
-            <DropDownPicker
-              multiple={true}
-              min={1}
-              max={3}
-              placeholder="Seleccionar opciones"
-              mode="BADGE"
-              listMode="SCROLLVIEW"
-              dropDownContainerStyle={{
-                maxHeight: 200,
-              }}
-              open={openAccesibilidad}
-              value={accesibilidadValue}
-              items={accesibilidadItems}
-              setOpen={setOpenAccesibilidad}
-              setValue={setAccesibilidadValue}
-              setItems={setAccesibilidadItems}
-              style={[styles.shadow, styles.buscador, { width: "95%" }]}
-            />
-          </View>
+        <>
+          <View style={[styles.content, styles.shadow]}>
+            <Text>Accesibilidad:</Text>
+            <View style={{ zIndex: 1000 }}>
+              <DropDownPicker
+                multiple={true}
+                min={1}
+                max={3}
+                placeholder="Seleccionar opciones"
+                mode="BADGE"
+                listMode="SCROLLVIEW"
+                dropDownContainerStyle={{
+                  maxHeight: 200,
+                }}
+                open={openAccesibilidad}
+                value={accesibilidadValue}
+                items={accesibilidadItems}
+                setOpen={setOpenAccesibilidad}
+                setValue={setAccesibilidadValue}
+                setItems={setAccesibilidadItems}
+                style={[styles.shadow, styles.buscador, { width: "95%" }]}
+              />
+            </View>
 
-          <Text>Preferencias de visualizacion de tareas:</Text>
-          <View style={{ zIndex: 900 }}>
-            <DropDownPicker
-              open={openVisualizacion}
-              value={visualizacionValue}
-              items={visualizacionItems}
-              setOpen={setOpenVisualizacion}
-              setValue={setVisualizacionValue}
-              setItems={setVisualizacionItems}
-              listMode="SCROLLVIEW"
-              dropDownContainerStyle={{
-                maxHeight: 200,
-              }}
-              style={[styles.shadow, styles.buscador, { width: "50%" }]}
-            />
-          </View>
-          <Text>Asistente de voz:</Text>
-          <View style={{ zIndex: 800 }}>
-            <DropDownPicker
-              open={openAsistenteVoz}
-              value={asistenteVozValue}
-              items={asistenteVozItems}
-              setOpen={setOpenAsistenteVoz}
-              setValue={setAsistenteVozValue}
-              setItems={setAsistenteVozItems}
-              listMode="SCROLLVIEW"
-              dropDownContainerStyle={{
-                maxHeight: 200,
-              }}
-              style={[styles.shadow, styles.buscador, { width: "50%" }]}
-            />
-          </View>
+            <Text>Preferencias de visualizacion de tareas:</Text>
+            <View style={{ zIndex: 900 }}>
+              <DropDownPicker
+                open={openVisualizacion}
+                value={visualizacionValue}
+                items={visualizacionItems}
+                setOpen={setOpenVisualizacion}
+                setValue={setVisualizacionValue}
+                setItems={setVisualizacionItems}
+                listMode="SCROLLVIEW"
+                dropDownContainerStyle={{
+                  maxHeight: 200,
+                }}
+                style={[styles.shadow, styles.buscador, { width: "50%" }]}
+              />
+            </View>
+            <Text>Asistente de voz:</Text>
+            <View style={{ zIndex: 800 }}>
+              <DropDownPicker
+                open={openAsistenteVoz}
+                value={asistenteVozValue}
+                items={asistenteVozItems}
+                setOpen={setOpenAsistenteVoz}
+                setValue={setAsistenteVozValue}
+                setItems={setAsistenteVozItems}
+                listMode="SCROLLVIEW"
+                dropDownContainerStyle={{
+                  maxHeight: 200,
+                }}
+                style={[styles.shadow, styles.buscador, { width: "50%" }]}
+              />
+            </View>
 
-          <View style={styles.navigationButtons}>
-            <Boton uri="atras" onPress={() => handlePerfilPress()} />
+            <View style={styles.navigationButtons}>
+              <Boton uri="atras" onPress={() => handlePerfilPress()} />
 
-            <Boton
-              uri="ok"
-              nameBottom="Anadir estudiante"
-              onPress={() => handleAddPress()}
-            />
+              <Boton
+                uri="ok"
+                nameBottom="Anadir estudiante"
+                onPress={() => handleAddPress()}
+              />
+            </View>
           </View>
-        </View>
+          <View>
+            {error && (
+              <Text style={[styles.error, { margin: 10 }]}>{errorMessage}</Text>
+            )}
+          </View>
+        </>
       )}
-      <View>
-        {error && (
-          <Text style={[styles.error, { margin: 10 }]}>{errorMessage}</Text>
-        )}
-      </View>
     </SafeAreaProvider>
   );
 }

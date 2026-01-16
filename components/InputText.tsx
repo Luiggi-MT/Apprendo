@@ -7,12 +7,14 @@ export default function InputText({
   secure = false,
   value,
   placehorder,
+  editable = true,
 }: {
   nameInput?: string;
   input: (inputText: string) => void;
   secure?: boolean;
   value: string;
   placehorder?: string;
+  editable?: boolean;
 }) {
   const [text, setText] = useState("");
   const handleTextChange = (inputText: string) => {
@@ -28,6 +30,7 @@ export default function InputText({
         value={value}
         secureTextEntry={secure}
         placeholder={placehorder}
+        editable={editable}
       />
     </View>
   );

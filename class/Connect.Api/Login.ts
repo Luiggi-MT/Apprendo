@@ -12,7 +12,7 @@ export class Login extends Api{
 
             if (!response.ok){
 
-                const errorData = await response.json().catch(() => ({})); 
+                const errorData = await response.json(); 
                 return {
                     ok: false,
                     message: errorData.error || `Server error: ${response.statusText}`,
@@ -26,7 +26,6 @@ export class Login extends Api{
             };
         
         }catch (error: any){
-            console.error("Fallo en el inicio de sesión (Error de Red o CORS): ", error.message); 
             return {
                 ok: false, 
                 message: `Error de red: No se pudo conectar al servidor. (${error.message || 'Servidor no disponible'})`
@@ -39,11 +38,9 @@ export class Login extends Api{
             const response = await fetch(`${Api.apiUrl}/logout`, {method: 'POST', credentials: 'include'});
             if (response.ok) return true; 
             else{
-                console.error("Faild logout: " ,response.status);
                 return false
             }
         }catch(error){
-            console.error("Error: ", error); 
             return false;
         }
     }

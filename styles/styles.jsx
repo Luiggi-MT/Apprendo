@@ -1,6 +1,8 @@
 import { StyleSheet, Platform } from "react-native";
 
 export const gradientColors = ["#4C80D7", "#42C9A6", "#FDD050"];
+export const fontFamily = ["massallera", "escolar", "escolar_bold", "rounded_regular"];
+
 
 const shadowStyle = Platform.select({
   ios: {
@@ -42,8 +44,16 @@ export const styles = StyleSheet.create({
 
   image: {
     padding: 2,
-    width: 100,
-    height: 100,
+    width: 80,
+    height: 80,
+  },
+  imageContraseña: {
+    padding: 2,
+    width: 60,
+    height: 60,
+    borderWidth: 1,
+    borderRadius: 5,
+    backgroundColor: "white",
   },
 
   legendBoton: {
@@ -55,9 +65,15 @@ export const styles = StyleSheet.create({
   },
 
   textBoton: {
+    fontSize: 20,
+    fontFamily: fontFamily[1],
+    color: "#FFF",
+    textAlign: "center",
+    margin: 2,
+  },
+  tesxtLegend: {
     fontSize: 16,
     fontWeight: "bold",
-    color: "#FFF",
     textAlign: "center",
     margin: 2,
   },
@@ -95,12 +111,13 @@ export const styles = StyleSheet.create({
     marginRight: 5,
   },
   studentCard: {
+    
     borderWidth: 1,
     borderRadius: 5,
   },
   studentCardUsername: {
-    fontSize: 16,
-    fontWeight: "bold",
+    fontSize: 30,
+    fontFamily: fontFamily[2],
     textAlign: "center",
   },
 

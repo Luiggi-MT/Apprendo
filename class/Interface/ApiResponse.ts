@@ -3,4 +3,5 @@ export interface ApiResponse {
     message: any;
     data?: string;
     id?:number;
+    uri?: string;
 }

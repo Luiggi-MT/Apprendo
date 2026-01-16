@@ -2,7 +2,15 @@ import React, { useEffect, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Header from "../components/Header";
 import { ConnectApi } from "../class/Connect.Api/ConnectApi";
-import { Alert, FlatList, Image, Text, View } from "react-native";
+import {
+  Alert,
+  FlatList,
+  Image,
+  Text,
+  Touchable,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { styles } from "../styles/styles";
 import * as ImagePicker from "expo-image-picker";
 import Boton from "../components/Boton";
@@ -143,9 +151,14 @@ export default function EstablecerContraseña({
       }
     }
   };
-  useEffect(() => {
-    getImagenPassword();
-  }, []);
+  const eliminarImagenPassword = (index: number) => {
+    setPassword((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const eliminarImagenDistractor = (index: number) => {
+    setDistractors((prev) => prev.filter((_, i) => i !== index));
+  };
+
   return (
     <SafeAreaProvider>
       <Header
@@ -158,17 +171,54 @@ export default function EstablecerContraseña({
       {view === 0 ? (
         <>
           <View style={[styles.content, styles.shadow]}>
-            <Text>Subir imagen para la contraseña: </Text>
+            <Text style={styles.tesxtLegend}>
+              Seleccionar imagen para la contraseña:{" "}
+            </Text>
             <View>
               <FlatList
                 data={password}
                 numColumns={3}
                 renderItem={({ item, index }) => (
-                  <Image
-                    key={index}
-                    source={{ uri: item.uri }}
-                    style={{ width: 100, height: 100, margin: 5 }}
-                  />
+                  <View style={{ marginTop: 10 }}>
+                    <Image
+                      key={index}
+                      source={{ uri: item.uri }}
+                      style={{
+                        width: 100,
+                        height: 100,
+                        margin: 5,
+                        borderWidth: 1,
+                      }}
+                    />
+                    <TouchableOpacity
+                      onPress={() => eliminarImagenPassword(index)}
+                      style={{
+                        position: "absolute",
+                        top: -5,
+                        right: 0,
+                        backgroundColor: "red",
+                        borderRadius: 15,
+                        width: 30,
+                        height: 30,
+                        justifyContent: "center",
+                        alignItems: "center",
+                        elevation: 5, // Sombra en Android
+                        shadowColor: "#000", // Sombra en iOS
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.3,
+                      }}
+                    >
+                      <Text
+                        style={{
+                          color: "white",
+                          fontWeight: "bold",
+                          fontSize: 16,
+                        }}
+                      >
+                        ✕
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
                 )}
                 keyExtractor={(item, index) => index.toString()}
                 ListEmptyComponent={
@@ -196,18 +246,56 @@ export default function EstablecerContraseña({
         </>
       ) : (
         <>
-          <View style={[styles.content, styles.shadow]}>
-            <Text>Subir imagenes distractoras: </Text>
+          <View
+            style={[
+              styles.content,
+              styles.shadow,
+              { justifyContent: "center" },
+            ]}
+          >
+            <Text style={styles.tesxtLegend}>
+              Selecciomar imagenes distractoras:{" "}
+            </Text>
             <View>
               <FlatList
                 data={distractors}
                 numColumns={3}
                 renderItem={({ item, index }) => (
-                  <Image
-                    key={index}
-                    source={{ uri: item.uri }}
-                    style={{ width: 100, height: 100, margin: 5 }}
-                  />
+                  <View style={{ marginTop: 10 }}>
+                    <Image
+                      key={index}
+                      source={{ uri: item.uri }}
+                      style={{ width: 100, height: 100, margin: 5 }}
+                    />
+                    <TouchableOpacity
+                      onPress={() => eliminarImagenDistractor(index)}
+                      style={{
+                        position: "absolute",
+                        top: -5,
+                        right: 0,
+                        backgroundColor: "red",
+                        borderRadius: 15,
+                        width: 30,
+                        height: 30,
+                        justifyContent: "center",
+                        alignItems: "center",
+                        elevation: 5, // Sombra en Android
+                        shadowColor: "#000", // Sombra en iOS
+                        shadowOffset: { width: 0, height: 2 },
+                        shadowOpacity: 0.3,
+                      }}
+                    >
+                      <Text
+                        style={{
+                          color: "white",
+                          fontWeight: "bold",
+                          fontSize: 16,
+                        }}
+                      >
+                        ✕
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
                 )}
                 keyExtractor={(item, index) => index.toString()}
                 ListEmptyComponent={

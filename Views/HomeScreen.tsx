@@ -87,7 +87,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
     <SafeAreaProvider style={styles.container}>
       <Header
         uri="profesor"
-        nameBottom="Profesorado"
+        nameBottom="PROFESORADO"
         navigation={() => onProfesoradoPress()}
         nameHeader={api.getComponent("Proyecta.png")}
       />

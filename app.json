@@ -17,20 +17,23 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptative-icon.png",
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
       "package": "com.luiggimt.app"
     },
     "web": {
-      "favicon": "./assets/favico.png",
+      "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
     "extra": {
       "eas": {
         "projectId": "7acb1067-a96a-43c1-bd0a-b55880005325"
       }
-    }
+    },
+    "plugins": [
+      "expo-font"
+    ]
   }
 }

@@ -43,7 +43,7 @@ export default function Header({
       {uriPictograma ? (
         <Image
           source={{ uri: ArasaacService.getPictograma(uriPictograma) }}
-          style={{ width: 80, height: 80 }}
+          style={{ width: 90, height: 90 }}
         />
       ) : (
         <View style={{ flex: 1 }} />
