@@ -1,6 +1,7 @@
 import { Image, Text, View } from "react-native";
 import Boton from "./Boton";
 import { styles } from "../styles/styles";
+import { tarjetaDescipcion_styles } from "../styles/tarjetaDescripcion_styles";
 
 export default function TarjetaDescipcion({
   uri,
@@ -14,13 +15,15 @@ export default function TarjetaDescipcion({
   navigation: () => void;
 }) {
   return (
-    <View style={styles.tarjet}>
+    <View style={tarjetaDescipcion_styles.tarjet}>
       <Image
-        style={[styles.imageTarjet, styles.radius]}
+        style={[tarjetaDescipcion_styles.imageTarjet]}
         source={{ uri: uri }}
       />
       <Text style={styles.name}>{name}</Text>
-      <Boton nameBottom={description} onPress={navigation} />
+      <View style={styles.descriptionContainer}>
+        <Boton nameBottom={description} onPress={navigation} />
+      </View>
     </View>
   );
 }

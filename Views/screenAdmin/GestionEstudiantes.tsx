@@ -1,19 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { ConnectApi } from "../class/Connect.Api/ConnectApi";
-import Header from "../components/Header";
-import Buscador from "../components/Buscador";
-import { Students } from "../class/Interface/Students";
-import { styles } from "../styles/styles";
-import { View, Text } from "react-native";
-import TarjetaDescipcion from "../components/TarjetaDescripcion";
-import Boton from "../components/Boton";
+import { ConnectApi } from "../../class/Connect.Api/ConnectApi";
+import Header from "../../components/Header";
+import Buscador from "../../components/Buscador";
+import { Students } from "../../class/Interface/Students";
+import { scaleFont, styles } from "../../styles/styles";
+import { View, Text, Image } from "react-native";
+import TarjetaDescipcion from "../../components/TarjetaDescripcion";
+import Boton from "../../components/Boton";
+import { Arasaac } from "../../class/Arasaac/getPictograma";
 export default function GestionEstudiantes({
   navigation,
 }: {
   navigation: any;
 }) {
   const api = new ConnectApi();
+  const arasaacService = new Arasaac();
   const [students, setStudents] = useState<Students[]>([]);
   const [offset, setOffset] = useState(0);
   const [limit, setLimit] = useState(0);
@@ -28,7 +30,7 @@ export default function GestionEstudiantes({
       api.getStudents(0, 3).then((data) => {
         setStudents(data.students || []);
         setOffset(data.offset);
-        setLimit(data.cout);
+        setLimit(data.count);
       });
     } else {
       api.getEstudentByName(searchText, 0, 3).then((data) => {
@@ -96,13 +98,14 @@ export default function GestionEstudiantes({
     <SafeAreaProvider>
       <Header
         uri="volver"
-        nameBottom="Atrás"
+        nameBottom="ATRÁS"
         navigation={() => atras()}
-        nameHeader={api.getComponent("GestionDeEstudiantes.png")}
+        nameHeader="GESTIÓN.DE.ESTUDIANTES"
         uriPictograma="estudiante"
+        style={scaleFont(18)}
       />
       <Buscador
-        nameBuscador="Buscar estudiante"
+        nameBuscador="BUSCAR ESTUDIANTE"
         onPress={handleBuscadorPress}
       />
       <View style={[styles.content, styles.shadow]}>
@@ -113,7 +116,7 @@ export default function GestionEstudiantes({
                 key={student.username}
                 name={student.username}
                 uri={api.getFoto(student.foto)}
-                description="Ver alumno"
+                description="VER ALUMNO"
                 navigation={() => handleDescripcionPress(student)}
               />
             ))}
@@ -131,19 +134,22 @@ export default function GestionEstudiantes({
             </View>
           </>
         ) : (
-          <Text
-            style={{
-              textAlign: "center",
-              marginTop: 20,
-              fontSize: 18,
-              fontWeight: "bold",
-            }}
-          >
-            No se ha encontrado alumno
-          </Text>
+          <View style={{ justifyContent: "center", alignItems: "center" }}>
+            <Text style={styles.text}>NO SE HA ENCONTRADO ESTUDIANTE</Text>
+            <View style={[styles.superPuesto]}>
+              <Image
+                source={{ uri: arasaacService.getPictograma("estudiante") }}
+                style={styles.imageBase}
+              />
+              <Image
+                source={{ uri: arasaacService.getPictograma("fallo") }}
+                style={styles.imageOverlay}
+              />
+            </View>
+          </View>
         )}
       </View>
-      <Boton uri="mas" nameBottom="Crear alumno" onPress={handleCreaPress} />
+      <Boton uri="mas" nameBottom="CREAR ALUMNO" onPress={handleCreaPress} />
     </SafeAreaProvider>
   );
 }

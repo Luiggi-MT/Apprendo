@@ -1,16 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import Header from "../components/Header";
-import { ConnectApi } from "../class/Connect.Api/ConnectApi";
+import Header from "../../components/Header";
+import { ConnectApi } from "../../class/Connect.Api/ConnectApi";
 import { Image, View, FlatList, Dimensions, Text } from "react-native";
-import { styles } from "../styles/styles";
-import { BotonPin } from "../class/Interface/BotonPin";
-import BotonContraseña from "../components/BotonContraseña";
-import InputText from "../components/InputText";
-import Boton from "../components/Boton";
-import { speak } from "expo-speech";
-import { Speak } from "../class/Speak/Speak";
+import { styles } from "../../styles/styles";
+import { BotonPin } from "../../class/Interface/BotonPin";
+import BotonContraseña from "../../components/BotonContraseña";
+import InputText from "../../components/InputText";
+import Boton from "../../components/Boton";
+import { Speak } from "../../class/Speak/Speak";
 import { useFocusEffect } from "@react-navigation/native";
+import { tarjetaDescipcion_styles } from "../../styles/tarjetaDescripcion_styles";
+import { homeScreem_styles } from "../../styles/homeScreem_styles";
 
 export default function LoginAlumnoPin({
   navigation,
@@ -78,9 +79,9 @@ export default function LoginAlumnoPin({
       `Bienvenido ${student.username}. Estas en la pantalla para iniciar sesión.`,
       () => {
         speak.hablar(
-          `Escribe tu contraseña y a continuación presiona el botón de confirmar.`
+          `Escribe tu contraseña y a continuación presiona el botón de confirmar.`,
         );
-      }
+      },
     );
   }, []);
   useFocusEffect(() => {
@@ -106,9 +107,11 @@ export default function LoginAlumnoPin({
       >
         <Image
           source={{ uri: api.getFoto(student.foto) }}
-          style={[styles.imageTarjet, { borderWidth: 1 }]}
+          style={[tarjetaDescipcion_styles.imageTarjet, { borderWidth: 1 }]}
         />
-        <Text style={styles.studentCardUsername}>{student.username}</Text>
+        <Text style={homeScreem_styles.studentCardUsername}>
+          {student.username}
+        </Text>
       </View>
       <View
         style={{

@@ -1,8 +1,46 @@
-import { StyleSheet, Platform } from "react-native";
-
+import { StyleSheet, Platform, Dimensions, PixelRatio } from "react-native";
 export const gradientColors = ["#4C80D7", "#42C9A6", "#FDD050"];
-export const fontFamily = ["massallera", "escolar", "escolar_bold", "rounded_regular"];
 
+
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
+/**
+ * Escala el tamaño de la fuente basándose en el ancho de pantalla
+ * y aplica correcciones específicas para Android.
+ */
+export const scaleFont = (size) => {
+  const baseWidth = 375; // iPhone 8 como estándar
+  const scale = SCREEN_WIDTH / baseWidth;
+  const newSize = size * scale;
+
+  // Obtenemos el factor de escalado de fuente del sistema (Accesibilidad)
+  const fontScale = PixelRatio.getFontScale();
+
+  // Aplicamos el cálculo base
+  let finalSize = Math.round(newSize);
+
+  // --- Ajustes específicos para Android ---
+  if (Platform.OS === "android") {
+    // Android suele renderizar fuentes ligeramente más grandes. 
+    // Ajustamos para que se vea similar a iOS.
+    finalSize = Math.round(newSize) - 1;
+
+    // Controlamos que el ajuste de accesibilidad del sistema 
+    // no deforme demasiado el diseño.
+    if (fontScale > 1.2) {
+      finalSize = finalSize * (1.2 / fontScale);
+    }
+  }
+
+  // --- Límites de seguridad (Constraints) ---
+  const minSize = size * 0.85;
+  const maxSize = size * 1.15;
+
+  if (finalSize < minSize) return Math.round(minSize);
+  if (finalSize > maxSize) return Math.round(maxSize);
+
+  return Math.round(finalSize);
+};
 
 const shadowStyle = Platform.select({
   ios: {
@@ -14,30 +52,49 @@ const shadowStyle = Platform.select({
   android: {
     elevation: 10,
   },
-  web: {
-    boxShadow: "0px 4px 8px rgba(0,0,0,0.2)",
-  },
+  
 });
 
 export const styles = StyleSheet.create({
+
+  //Contenedor principal
   container: {
     backgroundColor: "#E9E9E9",
     flex: 1,
+    
   },
 
+
+  //HEADER
+
   header: {
-    height: 200,
+    height: 180,
     width: "100%",
     backgroundColor: "#2E4053",
     flexDirection: "row",
     alignItems: "center",
     paddingTop: 30,
+    fontWeight: ''
+  },
+
+  bottomContainerHeder: {
+    alignItems: "flex-start",
+    marginLeft: 10,
+    flex: 1,
   },
 
   titleHeaderContainer: {
-    alignItems: "center",
+    marginRight: 20,
   },
 
+  titleHeaderText: {
+    fontFamily: 'fredoka', 
+    fontWeight: 'bold',  
+    color: "white",
+    textAlign: 'center'
+  },
+
+  // Sombras
   shadow: {
     ...shadowStyle,
   },
@@ -56,27 +113,22 @@ export const styles = StyleSheet.create({
     backgroundColor: "white",
   },
 
+  //Botones
   legendBoton: {
-    borderWidth: 1,
+    borderWidth: 0.5,
+    borderColor: "white",
     backgroundColor: "#FF8C42",
     width: 120,
+    height: "auto",
     borderRadius: 5,
     marginLeft: 10,
+    justifyContent: "center", 
+    alignItems: "center",
   },
 
-  textBoton: {
-    fontSize: 20,
-    fontFamily: fontFamily[1],
-    color: "#FFF",
-    textAlign: "center",
-    margin: 2,
-  },
-  tesxtLegend: {
-    fontSize: 16,
-    fontWeight: "bold",
-    textAlign: "center",
-    margin: 2,
-  },
+  
+  
+  //Buscador
 
   buscador: {
     height: 50,
@@ -85,10 +137,10 @@ export const styles = StyleSheet.create({
     borderRadius: 5,
     backgroundColor: "#FFF",
     paddingHorizontal: 15,
-    fontSize: 16,
+    fontSize: 20,
+    fontFamily: 'escolar-bold',
     color: "#333",
     textAlign: "center",
-    fontWeight: "bold",
   },
 
   content: {
@@ -97,6 +149,26 @@ export const styles = StyleSheet.create({
     margin: 10,
     borderRadius: 5,
     padding: 10,
+  },
+
+  superPuesto: {
+    width: 100,  
+    height: 100,
+    position: 'relative', 
+  },
+
+  imageBase: {
+    width: 100,
+    height: 100,
+  },
+
+  imageOverlay: {
+    width: 100,       
+    height: 100,
+    position: 'absolute', 
+    top: 0,         
+    left: 0,
+    opacity: 0.8,       
   },
 
   navigationButtons: {
@@ -110,54 +182,65 @@ export const styles = StyleSheet.create({
     justifyContent: "space-between",
     marginRight: 5,
   },
-  studentCard: {
-    
-    borderWidth: 1,
-    borderRadius: 5,
-  },
-  studentCardUsername: {
-    fontSize: 30,
-    fontFamily: fontFamily[2],
+  // tipo de texto
+  text:{
+    fontFamily: 'escolar',
     textAlign: "center",
+    marginTop: 20,
+    fontSize: 18,
+    fontWeight: "bold",
   },
 
-  studentItem: {
-    flex: 1,
-    alignItems: "center",
+  text_legend: {
+    fontFamily: "escolar-bold",
+    fontSize: 16,
+  },
+
+  textBoton: {
+    fontSize: 13,
+    fontFamily: "escolar-bold",
+    color: "white",
     margin: 2,
+  },
+
+  name: {
+    fontSize: scaleFont(16),
+    fontFamily: "escolar-bold",
+
   },
 
   error: {
     color: "tomato",
-    fontSize: 16,
-    fontWeight: "bold",
+    fontSize: scaleFont(16),
+    fontFamily: "escolar-bold",
     textAlign: "center",
   },
 
-  tarjet: {
-    marginBottom: 3,
-    borderWidth: 1,
-    borderRadius: 5,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+  tituloExitoso: {
+    fontFamily: 'escolar-bold', 
+    fontSize: scaleFont(28),
+    color: '#2E7D32',
+    textAlign: 'center',
   },
 
-  imageTarjet: {
-    padding: 2,
-    width: 80,
-    height: 80,
+  dropdownTextStyle: {
+  fontFamily: 'escolar-bold', // O 'escolar-bold' según prefieras
+  fontSize: scaleFont(16),
   },
 
-  radius: {
-    borderWidth: 1,
-    borderRadius: 50,
+  //Containers 
+  descriptionContainer:{
+    padding: 10, 
   },
 
-  name: {
-    fontSize: 16,
-    fontWeight: "bold",
+  containerRefuerzoPositivo:{
+    justifyContent: "center",
+    alignItems: "center", 
   },
+
+  
+
+  
   asistente: {
     borderWidth: 3,
     borderRadius: 50,

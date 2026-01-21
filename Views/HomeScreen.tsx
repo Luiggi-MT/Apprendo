@@ -1,5 +1,5 @@
-import { Text, View, FlatList } from "react-native";
-import { styles } from "../styles/styles";
+import { Text, View, FlatList, Image } from "react-native";
+import { scaleFont, styles } from "../styles/styles";
 import Header from "../components/Header";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Boton from "../components/Boton";
@@ -8,9 +8,12 @@ import { ConnectApi } from "../class/Connect.Api/ConnectApi";
 import { Students } from "../class/Interface/Students";
 import Buscador from "../components/Buscador";
 import BotonPerfil from "../components/BotonPerfil";
+import { homeScreem_styles } from "../styles/homeScreem_styles";
+import { Arasaac } from "../class/Arasaac/getPictograma";
 
 export default function HomeScreen({ navigation }: { navigation: any }) {
   const api = new ConnectApi();
+  const arassacService = new Arasaac();
   const [students, setStudents] = useState<Students[]>([]);
   const [offset, setOffset] = useState(0);
   const [busqueda, setBusqueda] = useState(false);
@@ -89,26 +92,34 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         uri="profesor"
         nameBottom="PROFESORADO"
         navigation={() => onProfesoradoPress()}
-        nameHeader={api.getComponent("Proyecta.png")}
+        nameHeader="PROYECTA"
+        style={scaleFont(36)}
       />
       <View>
         <Buscador
-          nameBuscador="Buscar estudiante"
+          nameBuscador="BUSCAR ESTUDIANTE"
           onPress={handleBuscadorPress}
         />
       </View>
       {students.length === 0 ? (
-        <View style={[styles.content, styles.shadow]}>
-          <Text
-            style={{
-              textAlign: "center",
-              marginTop: 20,
-              fontSize: 18,
-              fontWeight: "bold",
-            }}
-          >
-            No se han encontrado estudiantes
-          </Text>
+        <View
+          style={[
+            styles.content,
+            styles.shadow,
+            { justifyContent: "center", alignItems: "center" },
+          ]}
+        >
+          <Text style={styles.text}>NO SE HAN ENCONTRADO ESTUDIANTES</Text>
+          <View style={styles.superPuesto}>
+            <Image
+              source={{ uri: arassacService.getPictograma("estudiante") }}
+              style={styles.imageBase}
+            />
+            <Image
+              source={{ uri: arassacService.getPictograma("fallo") }}
+              style={styles.imageOverlay}
+            />
+          </View>
         </View>
       ) : (
         <View style={[styles.content, styles.shadow]}>
@@ -119,7 +130,22 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
               <BotonPerfil item={item} navigation={navigation} />
             )}
             keyExtractor={(item, index) => index.toString()}
-            ListEmptyComponent={<Text>No hay estudiantes disponibles</Text>}
+            columnWrapperStyle={homeScreem_styles.columnWrapper}
+            ListEmptyComponent={
+              <View style={{ justifyContent: "center", alignItems: "center" }}>
+                <Text style={styles.text}>NO HAY ESTUDIANTES DISPONIBLES</Text>
+                <View style={styles.superPuesto}>
+                  <Image
+                    source={{ uri: arassacService.getPictograma("estudiante") }}
+                    style={styles.imageBase}
+                  />
+                  <Image
+                    source={{ uri: arassacService.getPictograma("fallo") }}
+                    style={styles.imageOverlay}
+                  />
+                </View>
+              </View>
+            }
             scrollEnabled={false}
           />
           <View style={styles.navigationButtons}>

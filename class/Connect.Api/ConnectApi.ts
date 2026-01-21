@@ -3,6 +3,7 @@ import { ApiResponseStudents } from "../Interface/ApiResponseStudents";
 import { ImagePassword } from "../Interface/ImagePassword";
 import { LoginResponse } from "../Interface/LoginResponse";
 import { Students } from "../Interface/Students";
+import { User } from "../Interface/User";
 import { AdminsApi } from "./AdminsApi";
 import { Api } from "./Api";
 import { ComponentApi } from "./ComponentApi";
@@ -10,6 +11,7 @@ import { FotoApi } from "./FotoApi";
 import { Login } from "./Login";
 import { OpenAI } from "./OpenAi";
 import { StudentsApi } from "./StudentsApi";
+import { LoginResponseStudnet } from "../Interface/LoginResponseStudent";
 
 export class ConnectApi {
     
@@ -66,7 +68,7 @@ export class ConnectApi {
         return this.student.getImagePassword(es_contraseña, id);
     }
     //Admin
-    public async getAdmins(): Promise<string[]> {
+    public async getAdmins(): Promise<User[]> {
         return this.admin.getAdmins();
     }
 
@@ -85,13 +87,21 @@ export class ConnectApi {
         return this.login.loginUser(userName, password);     
     }
 
+    public async loginStudent(id: number, tipoContraseña: string, password?: string, passwordImage?: ImagePassword[], distractor?: ImagePassword[]) : Promise<LoginResponseStudnet>{
+        return this.login.loginStudent(id, tipoContraseña, password, passwordImage, distractor);
+    }
+
     public async logoutUser():Promise<boolean>{
         return this.login.logoutUser();
     }
+
+    
     
     public async checkSession() : Promise<LoginResponse>{
         return this.login.checkSession();
     }
+
+
 
     //OpenAI
     public async enviarAudio(uri: string){

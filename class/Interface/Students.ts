@@ -5,6 +5,7 @@ export interface Students {
     tipoContraseña: string;
     accesibilidad: string;
     preferenciasVisualizacion: string;
-    asistenteVoz: boolean;
+    asistenteVoz: string;
+    sexo: string;
     contraseña?: string;
 }

@@ -1,16 +1,17 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, Image, TextInput } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import Header from "../components/Header";
-import { ConnectApi } from "../class/Connect.Api/ConnectApi";
-import { styles } from "../styles/styles";
+import Header from "../../components/Header";
+import { ConnectApi } from "../../class/Connect.Api/ConnectApi";
+import { scaleFont, styles } from "../../styles/styles";
 import * as ImagePicker from "expo-image-picker";
 import { Alert } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
-import Boton from "../components/Boton";
-import { Students } from "../class/Interface/Students";
+import Boton from "../../components/Boton";
+import { Students } from "../../class/Interface/Students";
 import { ActivityIndicator } from "react-native-paper";
-import { ImagePassword } from "../class/Interface/ImagePassword";
+import { ImagePassword } from "../../class/Interface/ImagePassword";
+import { tarjetaDescipcion_styles } from "../../styles/tarjetaDescripcion_styles";
 
 export default function CrearEstudiante({ navigation }: { navigation: any }) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -24,7 +25,7 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
 
   const [passwordImages, setPasswordImages] = useState<ImagePassword[]>([]);
   const [distractorsImages, setDistractorImages] = useState<ImagePassword[]>(
-    []
+    [],
   );
 
   const [view, setView] = useState(0);
@@ -32,34 +33,44 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
   const [openContraseña, setOpenContraseña] = useState(false);
   const [openAccesibilidad, setOpenAccesibilidad] = useState(false);
   const [openVisualizacion, setOpenVisualizacion] = useState(false);
+  const [openSexo, setOpenSexo] = useState(false);
+  const [openAsistenteVoz, setOpenAsistenteVoz] = useState(false);
 
-  const [contraseñaValue, setContraseñaValue] = useState("alfanumerica");
+  const [contraseñaValue, setContraseñaValue] =
+    useState<string>("alfanumerica");
   const [accesibilidadValue, setAccesibilidadValue] = useState<string[]>([]);
   const [visualizacionValue, setVisualizacionValue] = useState("diarias");
+  const [sexoValue, setSexoValue] = useState("masculino");
 
-  const [openAsistenteVoz, setOpenAsistenteVoz] = useState(false);
-  const [asistenteVozValue, setAsistenteVozValue] = useState<boolean>(true);
+  const [asistenteVozValue, setAsistenteVozValue] = useState<string>("none");
 
   const [asistenteVozItems, setAsistenteVozItems] = useState([
-    { label: "Activado", value: true },
-    { label: "Desactivado", value: false },
+    { label: "NINGUNO", value: "none" },
+    { label: "UNIDIRECCIONAL", value: "unidireccional" },
+    { label: "BIDIRECCIONAL", value: "bidireccional" },
   ]);
 
   const [contraseñaItems, setContraseñaItems] = useState([
-    { label: "Alfanumérica", value: "alfanumerica" },
-    { label: "Pin", value: "pin" },
-    { label: "Imágenes", value: "imagenes" },
+    { label: "ALFANUMÉRICA", value: "alfanumerica" },
+    { label: "PIN", value: "pin" },
+    { label: "IMÁGENES", value: "imagenes" },
   ]);
   const [accesibilidadItems, setAccesibilidadItems] = useState([
-    { label: "Texto", value: "texto" },
-    { label: "Video", value: "video" },
-    { label: "Imágenes", value: "imagenes" },
-    { label: "Pictogramas", value: "pictogramas" },
-    { label: "Audio", value: "auido" },
+    { label: "TEXTO", value: "texto" },
+    { label: "VIDEO", value: "video" },
+    { label: "IMÁGENES", value: "imagenes" },
+    { label: "PICTOGRAMAS", value: "pictogramas" },
+    { label: "AUDIO", value: "audio" },
   ]);
   const [visualizacionItems, setVisualizacionItems] = useState([
-    { label: "Diarias", value: "diarias" },
-    { label: "Semanáles", value: "semanales" },
+    { label: "DIARIAS", value: "diarias" },
+    { label: "SEMANÁLES", value: "semanales" },
+  ]);
+
+  const [sexoItems, setSexoItems] = useState([
+    { label: "MASCULINO", value: "masculino" },
+    { label: "FEMENINO", value: "femenino" },
+    { label: "OTRO", value: "otro" },
   ]);
 
   const api = new ConnectApi();
@@ -133,6 +144,7 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
       username: text,
       foto: selectedImage || "porDefecto.png",
       tipoContraseña: contraseñaValue,
+      sexo: sexoValue,
       accesibilidad: accesibilidadValue.join(","),
       preferenciasVisualizacion: visualizacionValue,
       asistenteVoz: asistenteVozValue,
@@ -143,7 +155,7 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
     const response = await api.createStudent(
       newStudent,
       passwordImages,
-      distractorsImages
+      distractorsImages,
     );
 
     if (response.ok) {
@@ -171,45 +183,55 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
     <SafeAreaProvider>
       <Header
         uri="volver"
-        nameBottom="Atrás"
-        navigation={() => atras()}
-        nameHeader={api.getComponent("CrearEstudiante.png")}
+        nameBottom="ATRÁS"
+        navigation={atras}
+        nameHeader="CREAR.ESTUDIANTE"
         uriPictograma="estudiante"
+        style={scaleFont(20)}
       />
 
       {isCreate ? (
         <View style={[styles.content, styles.shadow]}>
           <ActivityIndicator size="large" color="#FF8C42" />
           <Text
-            style={{
-              marginTop: 20,
-              fontSize: 18,
-              fontWeight: "bold",
-              color: "#333",
-            }}
+            style={[
+              styles.text,
+              {
+                fontFamily: "ecolar-bold",
+                marginTop: 20,
+                fontSize: scaleFont(18),
+                fontWeight: "bold",
+                color: "#333",
+              },
+            ]}
           >
-            Creando al estudiante...
+            CREANDO AL ESTUDIANTE...
           </Text>
-          <Text style={{ marginTop: 10, color: "#666" }}>
-            Por favor, espera un momento.
+          <Text
+            style={[
+              styles.text,
+              { fontSize: scaleFont(15), marginTop: 10, color: "#666" },
+            ]}
+          >
+            POR FAVOR, ESPERE UN MOMENTO.
           </Text>
         </View>
       ) : view === 0 ? (
         <View style={[styles.content, styles.shadow]}>
           <TouchableOpacity onPress={seleccionaImagen}>
-            <Text>Modificar foto:</Text>
+            <Text style={styles.text_legend}>SELECCIONAR FOTO:</Text>
             <Image
-              style={[styles.imageTarjet, styles.radius]}
+              style={[tarjetaDescipcion_styles.imageTarjet]}
               source={{ uri: selectedImage }}
             />
           </TouchableOpacity>
-          <Text>Nombre de usuario:</Text>
+          <Text style={styles.text_legend}>NOMBRE DE USUARIO:</Text>
           <TextInput
             style={[styles.buscador, styles.shadow]}
             onChangeText={handleTextChange}
             value={text}
           />
-          <Text>Tipo de contraseña:</Text>
+          <Text style={styles.text_legend}>TIPO DE CONTRASEÑA:</Text>
           <View style={{ zIndex: 1000 }}>
             <DropDownPicker
               open={openContraseña}
@@ -219,9 +241,23 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
               setValue={setContraseñaValue}
               setItems={setContraseñaItems}
               style={[styles.shadow, styles.buscador, { width: "50%" }]}
+              textStyle={styles.dropdownTextStyle}
             />
           </View>
-          <Text>Nueva contraseña:</Text>
+          <Text style={styles.text_legend}>SEXO:</Text>
+          <View style={{ zIndex: 900 }}>
+            <DropDownPicker
+              open={openSexo}
+              value={sexoValue}
+              items={sexoItems}
+              setOpen={setOpenSexo}
+              setValue={setSexoValue}
+              setItems={setSexoItems}
+              style={[styles.shadow, styles.buscador, { width: "50%" }]}
+              textStyle={styles.dropdownTextStyle}
+            />
+          </View>
+          <Text style={styles.text_legend}>NUEVA CONTRASEÑA:</Text>
           {contraseñaValue === "alfanumerica" ? (
             <TextInput
               style={[styles.buscador, styles.shadow]}
@@ -240,7 +276,7 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
           ) : (
             <Boton
               uri="olvideContraseña"
-              nameBottom="Establecer Contraseña"
+              nameBottom="ESTABLECER.CONTRASEÑA"
               onPress={handleEstablecerContraseñaPress}
             />
           )}
@@ -253,13 +289,13 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
       ) : (
         <>
           <View style={[styles.content, styles.shadow]}>
-            <Text>Accesibilidad:</Text>
+            <Text style={styles.text_legend}>ACCESIBILIDAD:</Text>
             <View style={{ zIndex: 1000 }}>
               <DropDownPicker
                 multiple={true}
                 min={1}
                 max={3}
-                placeholder="Seleccionar opciones"
+                placeholder="SELECCIONAR OPCIONES"
                 mode="BADGE"
                 listMode="SCROLLVIEW"
                 dropDownContainerStyle={{
@@ -272,10 +308,13 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
                 setValue={setAccesibilidadValue}
                 setItems={setAccesibilidadItems}
                 style={[styles.shadow, styles.buscador, { width: "95%" }]}
+                textStyle={styles.dropdownTextStyle}
               />
             </View>
 
-            <Text>Preferencias de visualizacion de tareas:</Text>
+            <Text style={styles.text_legend}>
+              PREFERENCIAS DE VISUALIZACIÓN DE TAREAS:
+            </Text>
             <View style={{ zIndex: 900 }}>
               <DropDownPicker
                 open={openVisualizacion}
@@ -288,10 +327,11 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
                 dropDownContainerStyle={{
                   maxHeight: 200,
                 }}
-                style={[styles.shadow, styles.buscador, { width: "50%" }]}
+                style={[styles.shadow, styles.buscador, { width: "70%" }]}
+                textStyle={styles.dropdownTextStyle}
               />
             </View>
-            <Text>Asistente de voz:</Text>
+            <Text style={styles.text_legend}>ASISTENTE DE VOZ:</Text>
             <View style={{ zIndex: 800 }}>
               <DropDownPicker
                 open={openAsistenteVoz}
@@ -304,7 +344,8 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
                 dropDownContainerStyle={{
                   maxHeight: 200,
                 }}
-                style={[styles.shadow, styles.buscador, { width: "50%" }]}
+                style={[styles.shadow, styles.buscador, { width: "70%" }]}
+                textStyle={styles.dropdownTextStyle}
               />
             </View>
 
@@ -313,7 +354,7 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
 
               <Boton
                 uri="ok"
-                nameBottom="Anadir estudiante"
+                nameBottom="AÑADIR.ESTUDIANTE"
                 onPress={() => handleAddPress()}
               />
             </View>

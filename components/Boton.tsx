@@ -2,7 +2,6 @@ import { Image, TouchableOpacity, Text, View } from "react-native";
 import { Arasaac } from "../class/Arasaac/getPictograma";
 import { styles } from "../styles/styles";
 import { ConnectApi } from "../class/Connect.Api/ConnectApi";
-import { useEffect } from "react";
 
 export default function Boton({
   uri,
@@ -21,6 +20,8 @@ export default function Boton({
 }) {
   const ArasaacService = new Arasaac();
   const api = new ConnectApi();
+  let texts: string[];
+  if (nameBottom) texts = nameBottom.split(".");
   return (
     <TouchableOpacity
       onPress={onPress}
@@ -43,7 +44,11 @@ export default function Boton({
       )}
       {nameBottom && nameBottom.length > 0 && (
         <View style={[styles.legendBoton, styles.shadow]}>
-          <Text style={styles.textBoton}>{nameBottom}</Text>
+          {texts.map((text, it) => (
+            <Text key={it} style={styles.textBoton}>
+              {text}
+            </Text>
+          ))}
         </View>
       )}
     </TouchableOpacity>

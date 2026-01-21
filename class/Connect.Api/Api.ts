@@ -1,7 +1,8 @@
 export class Api {
-    //protected static apiUrl: string = "http://192.168.1.140:5000";
+    protected static apiUrl: string = "http://192.168.1.140:5000";
+    //protected static apiUrl: string = "http://10.0.2.2:5000"; // android 
     //protected static apiUrl: string = "http://localhost/api";
-    protected static apiUrl: string = "http://3.122.246.141/api"
+    //protected static apiUrl: string = "http://3.122.246.141/api"
     protected static readonly LIMIT: number = 6;
     protected static readonly INITIAL_OFFSET: number = 0;
     constructor() {

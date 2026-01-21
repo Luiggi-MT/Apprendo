@@ -23,7 +23,7 @@ export default function InputText({
   };
   return (
     <View>
-      <Text>{nameInput}</Text>
+      <Text style={styles.text_legend}>{nameInput}</Text>
       <TextInput
         style={[styles.buscador, styles.shadow, {}]}
         onChangeText={handleTextChange}

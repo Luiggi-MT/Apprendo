@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ConnectApi } from "../class/Connect.Api/ConnectApi";
 import Header from "../components/Header";
-import { styles } from "../styles/styles";
+import { scaleFont, styles } from "../styles/styles";
 import { View, Text } from "react-native";
 import InputText from "../components/InputText";
 import Boton from "../components/Boton";
@@ -49,21 +49,22 @@ export default function Profesorado({ navigation }: { navigation: any }) {
     <SafeAreaProvider style={styles.container}>
       <Header
         uri="volver"
-        nameBottom="Atrás"
+        nameBottom="ATRÁS"
         navigation={() => atras()}
-        nameHeader={api.getComponent("Entrar.png")}
+        nameHeader="ENTRAR"
         uriPictograma="entrar"
+        style={scaleFont(36)}
       />
       <View
         style={[styles.content, styles.shadow, { justifyContent: "center" }]}
       >
         <InputText
-          nameInput="Usuario:"
+          nameInput="USUARIO:"
           input={handleUsuarioPress}
           value={usuario}
         />
         <InputText
-          nameInput="Contraseña:"
+          nameInput="CONTRASEÑA:"
           input={handleContraseñaPress}
           secure={true}
           value={contraseña}
@@ -74,7 +75,7 @@ export default function Profesorado({ navigation }: { navigation: any }) {
           )}
           <Boton
             uri="olvideContraseña"
-            nameBottom="Olvide mi contraseña"
+            nameBottom="OLVIDE.MI.CONTRASEÑA"
             onPress={() => {}}
           />
         </View>
@@ -86,12 +87,8 @@ export default function Profesorado({ navigation }: { navigation: any }) {
           margin: 10,
         }}
       >
-        <Boton
-          uri="borrar"
-          nameBottom="Borrar"
-          onPress={() => onBorrarPress()}
-        />
-        <Boton uri="ok" nameBottom="Enviar" onPress={onEnviarPress} />
+        <Boton uri="borrar" nameBottom="BORRAR" onPress={onBorrarPress} />
+        <Boton uri="ok" nameBottom="ENVIAR" onPress={onEnviarPress} />
       </View>
     </SafeAreaProvider>
   );

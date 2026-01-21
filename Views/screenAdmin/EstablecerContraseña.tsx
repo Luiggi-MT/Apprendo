@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import Header from "../components/Header";
-import { ConnectApi } from "../class/Connect.Api/ConnectApi";
+import Header from "../../components/Header";
+import { ConnectApi } from "../../class/Connect.Api/ConnectApi";
 import {
   Alert,
   FlatList,
@@ -11,10 +11,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { styles } from "../styles/styles";
+import { styles } from "../../styles/styles";
 import * as ImagePicker from "expo-image-picker";
-import Boton from "../components/Boton";
-import { ImagePassword } from "../class/Interface/ImagePassword";
+import Boton from "../../components/Boton";
+import { ImagePassword } from "../../class/Interface/ImagePassword";
 
 export default function EstablecerContraseña({
   navigation,
@@ -43,11 +43,11 @@ export default function EstablecerContraseña({
   const remainingTotal = MAX_TOTAL_IMAGENES - totalImagenes;
   const remainingPassword = Math.min(
     MAX_PASSWORD - password.length,
-    remainingTotal
+    remainingTotal,
   );
   const remainingDistractor = Math.min(
     MAX_DISTRACTOR - distractors.length,
-    remainingTotal
+    remainingTotal,
   );
 
   const hasMinPassword = password.length >= MIN_PASSWORD;
@@ -59,7 +59,7 @@ export default function EstablecerContraseña({
     if (totalImagenes >= MAX_TOTAL_IMAGENES) {
       Alert.alert(
         "Límite total alcanzado",
-        `Máximo ${MAX_TOTAL_IMAGENES} imágenes en total. Tienes ${totalImagenes}.`
+        `Máximo ${MAX_TOTAL_IMAGENES} imágenes en total. Tienes ${totalImagenes}.`,
       );
       return;
     }
@@ -87,7 +87,7 @@ export default function EstablecerContraseña({
         "No se pueden añadir más imágenes",
         isPassword
           ? `Tienes ${password.length} imágenes de contraseña (máximo: ${MAX_PASSWORD})`
-          : `Tienes ${distractors.length} imágenes distractoras (máximo: ${MAX_DISTRACTOR})`
+          : `Tienes ${distractors.length} imágenes distractoras (máximo: ${MAX_DISTRACTOR})`,
       );
       return;
     }
@@ -171,7 +171,7 @@ export default function EstablecerContraseña({
       {view === 0 ? (
         <>
           <View style={[styles.content, styles.shadow]}>
-            <Text style={styles.tesxtLegend}>
+            <Text style={styles.text_legend}>
               Seleccionar imagen para la contraseña:{" "}
             </Text>
             <View>
@@ -253,7 +253,7 @@ export default function EstablecerContraseña({
               { justifyContent: "center" },
             ]}
           >
-            <Text style={styles.tesxtLegend}>
+            <Text style={styles.text_legend}>
               Selecciomar imagenes distractoras:{" "}
             </Text>
             <View>

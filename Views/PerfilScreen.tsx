@@ -2,13 +2,13 @@ import React, { useContext, useEffect } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Header from "../components/Header";
 import { ConnectApi } from "../class/Connect.Api/ConnectApi";
-import { Profesor } from "../class/Interface/Profesor";
 import { View } from "react-native";
-import { styles } from "../styles/styles";
+import { scaleFont, styles } from "../styles/styles";
 import Boton from "../components/Boton";
 import { UserContext } from "../class/context/UserContext";
 export default function PerfilScreen({ navigation }: { navigation: any }) {
-  const profesor = useContext(UserContext).user;
+  const user = useContext(UserContext).user;
+
   const atras = () => {
     navigation.goBack();
   };
@@ -21,20 +21,25 @@ export default function PerfilScreen({ navigation }: { navigation: any }) {
     <SafeAreaProvider style={styles.container}>
       <Header
         uri="volver"
-        nameBottom="Atrás"
+        nameBottom="ATRÁS"
         navigation={() => atras()}
-        nameHeader={api.getComponent("Perfil.png")}
+        nameHeader="PERFIL"
         uriPictograma="perfil"
+        style={scaleFont(36)}
       />
       <View style={[styles.content, styles.shadow]}>
         <Boton
-          uri={profesor.foto}
-          nameBottom="Cambiar foto de perfil"
+          uri={user.foto}
+          nameBottom="CAMBIAR FOTO.DE PERFIL"
           arasaacService={false}
           onPress={() => {}}
         />
-        <Boton uri="olvideContraseña" nameBottom="Cambiar Contraseña" />
-        <Boton uri="salir" nameBottom="Salir" onPress={() => salir()} />
+        <Boton
+          uri="olvideContraseña"
+          nameBottom="CAMBIAR.CONTRASEÑA"
+          onPress={() => {}}
+        />
+        <Boton uri="salir" nameBottom="SALIR" onPress={() => salir()} />
       </View>
     </SafeAreaProvider>
   );

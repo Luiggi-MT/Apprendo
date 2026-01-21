@@ -1,13 +1,14 @@
 import React, { use, useEffect, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import Header from "../components/Header";
-import { ConnectApi } from "../class/Connect.Api/ConnectApi";
+import Header from "../../components/Header";
+import { ConnectApi } from "../../class/Connect.Api/ConnectApi";
 import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
-import { styles } from "../styles/styles";
-import { ApiResponse } from "../class/Interface/ApiResponse";
-import Boton from "../components/Boton";
-import { Speak } from "../class/Speak/Speak";
+import { styles } from "../../styles/styles";
+import { ApiResponse } from "../../class/Interface/ApiResponse";
+import Boton from "../../components/Boton";
+import { Speak } from "../../class/Speak/Speak";
 import { useFocusEffect } from "@react-navigation/native";
+import { tarjetaDescipcion_styles } from "../../styles/tarjetaDescripcion_styles";
 export default function LoginAlumnoImagenes({
   navigation,
   route,
@@ -100,9 +101,9 @@ export default function LoginAlumnoImagenes({
       `Bienvenido ${student.username}. Estas en la pantalla para iniciar sesión.`,
       () => {
         speak.hablar(
-          `Selecciona las imagenes de tu contraseña y a continuación presiona el botón de confirmar.`
+          `Selecciona las imagenes de tu contraseña y a continuación presiona el botón de confirmar.`,
         );
-      }
+      },
     );
   }, []);
 
@@ -124,9 +125,9 @@ export default function LoginAlumnoImagenes({
       >
         <Image
           source={{ uri: api.getFoto(student.foto) }}
-          style={[styles.imageTarjet, { borderWidth: 1 }]}
+          style={[tarjetaDescipcion_styles.imageTarjet, { borderWidth: 1 }]}
         />
-        <Text style={styles.tesxtLegend}>{student.username}</Text>
+        <Text style={styles.text_legend}>{student.username}</Text>
       </View>
       <View>
         <FlatList

@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Image } from "react-native";
+import { View, Image, Text } from "react-native";
 import Boton from "./Boton";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { styles } from "../styles/styles";
@@ -12,6 +12,7 @@ export default function Header({
   navigation,
   nameHeader,
   arasaacService = true,
+  style,
 }: {
   uri: string;
   uriPictograma?: string;
@@ -19,11 +20,14 @@ export default function Header({
   navigation: () => void;
   nameHeader: string;
   arasaacService?: boolean;
+  style?: any;
 }) {
   const ArasaacService = new Arasaac();
+  const headerText: string[] = nameHeader.split(".");
+
   return (
     <SafeAreaView style={styles.header}>
-      <View style={{ alignItems: "flex-start", marginLeft: 10, flex: 1 }}>
+      <View style={styles.bottomContainerHeder}>
         <Boton
           uri={uri}
           nameBottom={nameBottom}
@@ -34,19 +38,20 @@ export default function Header({
       </View>
 
       <View style={styles.titleHeaderContainer}>
-        <Image
-          source={{ uri: nameHeader }}
-          style={[{ width: 180, height: 180 }, styles.shadow]}
-        />
+        {headerText.map((text) => (
+          <Text
+            key={text}
+            style={[styles.titleHeaderText, styles.shadow, { fontSize: style }]}
+          >
+            {text}
+          </Text>
+        ))}
       </View>
-
-      {uriPictograma ? (
+      {uriPictograma && (
         <Image
           source={{ uri: ArasaacService.getPictograma(uriPictograma) }}
           style={{ width: 90, height: 90 }}
         />
-      ) : (
-        <View style={{ flex: 1 }} />
       )}
     </SafeAreaView>
   );

@@ -2,6 +2,7 @@ import React from "react";
 import { Image, Text, TouchableOpacity } from "react-native";
 import { styles } from "../styles/styles";
 import { ConnectApi } from "../class/Connect.Api/ConnectApi";
+import { homeScreem_styles } from "../styles/homeScreem_styles";
 
 const api = new ConnectApi();
 
@@ -13,7 +14,6 @@ export default function BotonPerfil({
   navigation: any;
 }) {
   const Login = (student) => {
-    console.log(student);
     if (student.tipoContraseña === "alfanumerica")
       navigation.navigate("LoginAlumnoAlfanumerica", { student: student });
     if (student.tipoContraseña === "imagenes")
@@ -22,12 +22,17 @@ export default function BotonPerfil({
       navigation.navigate("LoginAlumnoPin", { student: student });
   };
   return (
-    <TouchableOpacity style={styles.studentItem} onPress={() => Login(item)}>
+    <TouchableOpacity
+      style={homeScreem_styles.studentItem}
+      onPress={() => Login(item)}
+    >
       <Image
         source={{ uri: api.getFoto(item.foto) }}
-        style={[{ width: 100, height: 100 }, styles.studentCard]}
+        style={[homeScreem_styles.studentCard]}
       />
-      <Text style={styles.studentCardUsername}>{item.username}</Text>
+      <Text style={[homeScreem_styles.studentCardUsername]}>
+        {item.username.toUpperCase()}
+      </Text>
     </TouchableOpacity>
   );
 }

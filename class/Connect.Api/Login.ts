@@ -1,4 +1,6 @@
+import { ImagePassword } from "../Interface/ImagePassword";
 import { LoginResponse } from "../Interface/LoginResponse";
+import { LoginResponseStudnet } from "../Interface/LoginResponseStudent";
 import { Api } from "./Api";
 export class Login extends Api{
     public async loginUser(userName: string, password: string): Promise<LoginResponse> {
@@ -81,4 +83,42 @@ export class Login extends Api{
             };
         }
     }
+
+     public async loginStudent(id: number, tipoContraseña: string,  password?: string, passwordImage?: ImagePassword[], distractor?: ImagePassword[]) : Promise<LoginResponseStudnet>{
+        try {
+            const response = await fetch(`${Api.apiUrl}/login_student`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'}, 
+                body: JSON.stringify({
+                    'id': id,
+                    'password': password, 
+                    'tipoContraseña': tipoContraseña,
+                    'passwordImage': passwordImage,
+                    'distractor' : distractor, 
+                }), 
+                credentials: 'include'
+            });
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                return {
+                    ok: false,
+                    message: errorData.error || `Server error: ${response.statusText}`,
+                } as LoginResponseStudnet;
+            }
+            
+            
+            const data: LoginResponseStudnet = await response.json();
+            
+            return {
+                ...data,
+                ok: true,
+            };
+        } catch (error: any) {
+            return {
+                ok: false,
+                message: `Error de red: No se pudo conectar al servidor. (${error.message || 'Servidor no disponible'})`
+            } as LoginResponseStudnet;
+        }
+     }
 }
