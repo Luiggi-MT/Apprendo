@@ -3,6 +3,9 @@
 # dependencies
 node_modules/
 
+# Archivo de exportacion 
+exportar.md
+
 # Expo
 .expo/
 dist/
