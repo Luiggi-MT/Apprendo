@@ -33,6 +33,7 @@ expo start
 
 ## 📂 Estructura de Carpetas
 
+```bash
 ├── src/
 │   ├── components/     # Componentes atómicos reutilizables
 │   ├── screens/        # Pantallas completas (Login, Perfil, Home)
@@ -42,6 +43,8 @@ expo start
 │   └── utils/          # Funciones de ayuda y constantes
 ├── assets/             # Recursos estáticos (imágenes, fuentes)
 └── App.js              # Punto de entrada principal
+
+```
 
 ## 🧪 Testing
 
