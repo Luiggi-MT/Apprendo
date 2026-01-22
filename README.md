@@ -19,7 +19,7 @@ Este es el cliente móvil del proyecto **Cole**, una plataforma educativa inclus
 * **Estado Global**: React Context API.
 * **Estilos**: StyleSheet (Native) y soporte para temas claro/oscuro.
 
-## 📦 Instalacion de dependencias 
+## 📦 Instalación de dependencias
 
 ```bash
 npm install
