@@ -76,7 +76,6 @@ export class Login extends Api{
                 ok: true
             };
         }catch(error: any){
-            console.error("Error checking session: ", error.message);
             return {
                 ok: false,
                 message: `Error checking session: ${error.message || 'Unknown error'}`
