@@ -25,7 +25,7 @@ Este es el cliente móvil del proyecto **Cole**, una plataforma educativa inclus
 npm install
 ```
 
-## Ejecicion
+## Ejecución
 
 ```bash
 expo start
