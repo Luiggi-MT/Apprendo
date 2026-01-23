@@ -291,7 +291,7 @@ export default function DescripcionEstudiante({
           ) : (
             <Boton
               uri="olvideContraseña"
-              nameBottom="Establecer contraseña"
+              nameBottom="ESTABLECER.CONTRASEÑA"
               onPress={handleEstablecerContraseñaPress}
             />
           )}

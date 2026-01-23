@@ -1,14 +1,18 @@
-import React, { use, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Header from "../../components/Header";
 import { ConnectApi } from "../../class/Connect.Api/ConnectApi";
 import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
-import { styles } from "../../styles/styles";
+import { scaleFont, styles } from "../../styles/styles";
 import { ApiResponse } from "../../class/Interface/ApiResponse";
 import Boton from "../../components/Boton";
 import { Speak } from "../../class/Speak/Speak";
 import { useFocusEffect } from "@react-navigation/native";
 import { tarjetaDescipcion_styles } from "../../styles/tarjetaDescripcion_styles";
+import AppbarContent from "react-native-paper/lib/typescript/components/Appbar/AppbarContent";
+import { ImagePassword } from "../../class/Interface/ImagePassword";
+import { Students } from "../../class/Interface/Students";
+import { UserContext } from "../../class/context/UserContext";
 export default function LoginAlumnoImagenes({
   navigation,
   route,
@@ -20,44 +24,32 @@ export default function LoginAlumnoImagenes({
   const api = new ConnectApi();
   const speak = new Speak();
 
-  const [password, setPassword] = useState<ApiResponse[]>([]);
+  const [password, setPassword] = useState<ImagePassword[]>([]);
+  const [selected, setSelected] = useState<ImagePassword[]>([]);
+  const [failedIds, setFailedIds] = useState<number[]>([]);
 
-  const [selected, setSelected] = useState<ApiResponse[]>([]);
+  const [error, setError] = useState<string>("");
+  const [errorValue, setErrorValue] = useState<boolean>(false);
+
+  const { user, setUser } = useContext(UserContext);
 
   const atras = () => {
     speak.detenerAsistente();
     navigation.goBack();
   };
 
-  const shuffleArray = (array: any[]) => {
-    const newArray = [...array];
-    for (let i = newArray.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-    }
-    return newArray;
-  };
-
   const getImage = async () => {
     try {
-      const resCorrectas = await api.getImagePassword(true, student.id);
-      const resDistractoras = await api.getImagePassword(false, student.id);
-
-      const listaCorrectas = resCorrectas.ok ? resCorrectas.message : [];
-      const listaDistractoras = resDistractoras.ok
-        ? resDistractoras.message
-        : [];
-
-      const todasLasImagenes = [...listaCorrectas, ...listaDistractoras];
-
-      const imagenesMezcladas = shuffleArray(todasLasImagenes);
-      setPassword(imagenesMezcladas);
+      const response: ApiResponse = await api.getImagePassword(student.id);
+      if (response.ok && Array.isArray(response.message)) {
+        setPassword(response.message);
+      }
     } catch (error) {
       console.error("Error cargando imágenes de login:", error);
     }
   };
 
-  const handleSelectedPress = (item: ApiResponse) => {
+  const handleSelectedPress = (item: ImagePassword) => {
     const yaSeleccionada = selected.some((img) => img.uri === item.uri);
 
     if (yaSeleccionada) {
@@ -68,11 +60,15 @@ export default function LoginAlumnoImagenes({
   };
 
   const eliminarSeleccionada = (index: number) => {
+    setError("");
+    setErrorValue(false);
     setSelected((prevSelected) => {
       return prevSelected.filter((_, i) => i !== index);
     });
   };
   const handleBorrarPress = () => {
+    setErrorValue(false);
+    setError("");
     setSelected([]);
   };
 
@@ -93,28 +89,89 @@ export default function LoginAlumnoImagenes({
       }
     });
   };
+
+  const handleConfirmarPress = async () => {
+    setErrorValue(false);
+    setFailedIds([]);
+    if (selected.length === 0) {
+      setErrorValue(true);
+      setError("SELECCIONA LAS IMAGENES DE TU CONTRASEÑA");
+      if (student.asistenteVoz !== "none") {
+        speak.hablar(
+          "Selecciona las imagenes de tu contraseña y después presiona el botón de confirmar",
+        );
+      }
+      return;
+    }
+    const response = await api.loginStudent(
+      student.id,
+      student.tipoContraseña,
+      undefined,
+      selected,
+    );
+    if (!response.ok) {
+      setError(response.message.toUpperCase());
+      setErrorValue(true);
+      if (response.fallos) {
+        setFailedIds(response.fallos);
+      }
+      if (student.asistenteVoz !== "none") {
+        speak.hablar(
+          "La contraseña que has introducido no es la correcta. Intentalo de nuevo",
+        );
+      }
+      return;
+    }
+    const studentLogin: Students = {
+      id: student.id,
+      username: student.username,
+      foto: student.foto,
+      tipoContraseña: student.tipoContraseña,
+      accesibilidad: student.accesibilidad,
+      preferenciasVisualizacion: student.preferenciasVisualizacion,
+      asistenteVoz: student.asistenteVoz,
+      sexo: student.sexo,
+    };
+    await setUser(studentLogin);
+
+    if (studentLogin.preferenciasVisualizacion === "diarias")
+      navigation.navigate("DiariasScreem");
+    if (studentLogin.preferenciasVisualizacion === "semanales")
+      //cambiar esto
+      navigation.navigate("MensualScreen");
+  };
   useEffect(() => {
     if (student.tipoContraseña === "imagenes") {
       getImage();
     }
-    speak.hablar(
-      `Bienvenido ${student.username}. Estas en la pantalla para iniciar sesión.`,
-      () => {
-        speak.hablar(
-          `Selecciona las imagenes de tu contraseña y a continuación presiona el botón de confirmar.`,
-        );
-      },
-    );
-  }, []);
+
+    if (student.asistenteVoz !== "none") {
+      speak.hablar(
+        `${
+          student.sexo === "masculino"
+            ? "Bienvenido"
+            : student.sexo === "femenino"
+              ? "Bienvenida"
+              : "Bienvenide"
+        }  ${student.username}. Estas en la pantalla para iniciar sesión.`,
+        () => {
+          speak.hablar(
+            `Escribe tu contraseña y a continuación presiona el botón de confirmar.`,
+          );
+        },
+      );
+    }
+  }, [student]);
 
   return (
     <SafeAreaProvider>
       <Header
         uri="volver"
-        nameBottom="Atrás"
-        navigation={() => atras()}
-        nameHeader={api.getComponent("Entrar.png")}
+        nameBottom="ATRÁS"
+        navigation={atras}
+        nameHeader="ENTRAR"
         uriPictograma="entrar"
+        style={scaleFont(36)}
       />
       <View
         style={[
@@ -163,57 +220,93 @@ export default function LoginAlumnoImagenes({
             },
           ]}
         >
-          {selected.map((item, index) => (
-            <View
-              key={`${item.uri}-${index}`}
-              style={{ position: "relative", margin: 5 }}
-            >
-              <Image
-                source={{ uri: item.uri }}
-                style={{
-                  width: 50,
-                  height: 50,
-                  borderRadius: 10,
-                  borderWidth: 1,
-                  borderColor: "#ddd",
-                  opacity: 0.7,
-                }}
-              />
-              <TouchableOpacity
-                onPress={() => eliminarSeleccionada(index)}
-                style={{
-                  position: "absolute",
-                  top: -8,
-                  right: -8,
-                  backgroundColor: "red",
-                  borderRadius: 12,
-                  width: 24,
-                  height: 24,
-                  justifyContent: "center",
-                  alignItems: "center",
-                  zIndex: 1,
-                  elevation: 3,
-                }}
+          {selected.map((item, index) => {
+            const esFallida = failedIds.includes(item.id);
+            return (
+              <View
+                key={`${item.uri}-${index}`}
+                style={{ position: "relative", margin: 5 }}
               >
-                <Text
-                  style={{ color: "white", fontWeight: "bold", fontSize: 12 }}
+                <Image
+                  source={{ uri: item.uri }}
+                  style={{
+                    width: 50,
+                    height: 50,
+                    borderRadius: 10,
+                    borderWidth: esFallida ? 3 : 1,
+                    borderColor: esFallida ? "red" : "#ddd",
+                    opacity: esFallida ? 0.5 : 0.7,
+                  }}
+                />
+                {esFallida && (
+                  <View
+                    style={{
+                      position: "absolute",
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    <Text
+                      style={{
+                        color: "red",
+                        fontSize: 40,
+                        fontWeight: "bold",
+                        textShadowColor: "black",
+                        textShadowOffset: { width: 1, height: 1 },
+                        textShadowRadius: 2,
+                      }}
+                    >
+                      ✕
+                    </Text>
+                  </View>
+                )}
+                <TouchableOpacity
+                  onPress={() => eliminarSeleccionada(index)}
+                  style={{
+                    position: "absolute",
+                    top: -8,
+                    right: -8,
+                    backgroundColor: "red",
+                    borderRadius: 12,
+                    width: 24,
+                    height: 24,
+                    justifyContent: "center",
+                    alignItems: "center",
+                    zIndex: 1,
+                    elevation: 3,
+                  }}
                 >
-                  ✕
-                </Text>
-              </TouchableOpacity>
-            </View>
-          ))}
+                  <Text
+                    style={{ color: "white", fontWeight: "bold", fontSize: 12 }}
+                  >
+                    ✕
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            );
+          })}
           {selected.length === 0 && (
-            <Text style={{ color: "#999" }}>Selecciona tu clave...</Text>
+            <Text style={[styles.text, { color: "#999" }]}>
+              SELECCIONA TU CLAVE...
+            </Text>
           )}
         </View>
       </View>
+      {errorValue && (
+        <View>
+          <Text style={[styles.error, { margin: 10 }]}>{error}</Text>
+        </View>
+      )}
       <View style={styles.navigationButtons}>
-        <Boton uri="borrar" nameBottom="Borrar" onPress={handleBorrarPress} />
+        <Boton uri="borrar" nameBottom="BORRAR" onPress={handleBorrarPress} />
         {student.asistenteVoz === 1 && (
           <Boton component={true} uri="Cohete.png" onPress={activarAsistente} />
         )}
-        <Boton uri="ok" nameBottom="Confirmar" onPress={() => {}} />
+        <Boton uri="ok" nameBottom="CONFIRMAR" onPress={handleConfirmarPress} />
       </View>
     </SafeAreaProvider>
   );

@@ -31,9 +31,13 @@ export default function Profesorado({ navigation }: { navigation: any }) {
     setError("");
   };
   const onEnviarPress = async () => {
+    if (contraseña.length < 4) {
+      setError("LA CONTRASEÑA TIENE QUE TENER COMO MÍNIMO 4 CARÁCTERES");
+      return;
+    }
     const response: LoginResponse = await api.loginUser(usuario, contraseña);
     if (!response.ok) {
-      setError(response.message);
+      setError(response.message.toUpperCase());
       return;
     }
     const profesor: Profesor = {
@@ -50,7 +54,7 @@ export default function Profesorado({ navigation }: { navigation: any }) {
       <Header
         uri="volver"
         nameBottom="ATRÁS"
-        navigation={() => atras()}
+        navigation={atras}
         nameHeader="ENTRAR"
         uriPictograma="entrar"
         style={scaleFont(36)}
@@ -70,9 +74,7 @@ export default function Profesorado({ navigation }: { navigation: any }) {
           value={contraseña}
         />
         <View style={{ justifyContent: "center", alignItems: "center" }}>
-          {!!error && (
-            <Text style={styles.error}>Usuario o contraseña incorrecto</Text>
-          )}
+          {!!error && <Text style={styles.error}>{error}</Text>}
           <Boton
             uri="olvideContraseña"
             nameBottom="OLVIDE.MI.CONTRASEÑA"

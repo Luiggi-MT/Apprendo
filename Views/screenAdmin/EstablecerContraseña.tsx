@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { styles } from "../../styles/styles";
+import { scaleFont, styles } from "../../styles/styles";
 import * as ImagePicker from "expo-image-picker";
 import Boton from "../../components/Boton";
 import { ImagePassword } from "../../class/Interface/ImagePassword";
@@ -163,16 +163,17 @@ export default function EstablecerContraseña({
     <SafeAreaProvider>
       <Header
         uri="volver"
-        nameBottom="Atrás"
-        navigation={() => atras()}
-        nameHeader={api.getComponent("EstablecerPass.png")}
+        nameBottom="ATRÁS"
+        navigation={atras}
+        nameHeader="ESTABLECER.CONTRASEÑA"
         uriPictograma="olvideContraseña"
+        style={scaleFont(20)}
       />
       {view === 0 ? (
         <>
           <View style={[styles.content, styles.shadow]}>
             <Text style={styles.text_legend}>
-              Seleccionar imagen para la contraseña:{" "}
+              SELECCIONAR LAS IMÁGENES DE LA CONTRASEÑA:
             </Text>
             <View>
               <FlatList
@@ -223,7 +224,7 @@ export default function EstablecerContraseña({
                 keyExtractor={(item, index) => index.toString()}
                 ListEmptyComponent={
                   <Text style={styles.error}>
-                    No se han seleccionado imagenes
+                    NO SE HAN SELECCIONADO IMÁGENES
                   </Text>
                 }
                 scrollEnabled={false}
@@ -233,7 +234,7 @@ export default function EstablecerContraseña({
               <View style={[styles.buttons, { width: "40%" }]}>
                 <Boton
                   uri="mas"
-                  nameBottom="Añadir imagen"
+                  nameBottom="AÑADIR.IMÁGENES"
                   onPress={() => seleccionarImagen(true)}
                 />
               </View>
@@ -254,7 +255,7 @@ export default function EstablecerContraseña({
             ]}
           >
             <Text style={styles.text_legend}>
-              Selecciomar imagenes distractoras:{" "}
+              SELECCIONA LAS IMÁGENES DISTRACTORIAS:
             </Text>
             <View>
               <FlatList
@@ -300,7 +301,7 @@ export default function EstablecerContraseña({
                 keyExtractor={(item, index) => index.toString()}
                 ListEmptyComponent={
                   <Text style={styles.error}>
-                    No se han seleccionado imagenes
+                    NO SE HAN SELECCIONADOO IMÁGENES
                   </Text>
                 }
                 scrollEnabled={false}
@@ -310,7 +311,7 @@ export default function EstablecerContraseña({
               <View style={[styles.buttons]}>
                 <Boton
                   uri="mas"
-                  nameBottom="Añadir imagen"
+                  nameBottom="AÑADIR.IMÁGENES"
                   onPress={() => seleccionarImagen(false)}
                 />
               </View>
@@ -321,7 +322,7 @@ export default function EstablecerContraseña({
             <View>
               <Boton
                 uri="ok"
-                nameBottom="Guardar contraseña"
+                nameBottom="GUARDAR.CONTRASEÑA"
                 onPress={handleGuardarContraseñaPress}
               />
             </View>

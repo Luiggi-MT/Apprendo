@@ -65,16 +65,31 @@ export default function LoginAlumnoAlfanumerica({
   const handleConfirmarPress = async () => {
     setErrorValue(false);
     setError([]);
-    if (password === "")
-      errorMessage.push("El campo contraseña no puede esta vacio");
+    if (password === "") {
+      setErrorValue(true);
+      errorMessage.push("EL CAMPO COONTRASEÑA NO PUEDE ESTA VACIO");
+      if (student.asistenteVoz !== "none") {
+        speak.hablar("Tienes que escribir tu contraseña", () => {
+          speak.hablar("Prueba de nuevo");
+        });
+      }
+      setError(errorMessage);
+      return;
+    }
+
     const response = await api.loginStudent(
       student.id,
       student.tipoContraseña,
       password,
     );
     if (!response.ok) {
-      console.log(JSON.stringify(response, null, 2));
       errorMessage.push(response.message.toUpperCase());
+      if (student.asistenteVoz !== "none") {
+        speak.hablar(
+          "La contraseña que has introducido no es la correcta. Intentalo de nuevo",
+        );
+      }
+      return;
     }
     if (errorMessage.length > 0) {
       setErrorValue(true);

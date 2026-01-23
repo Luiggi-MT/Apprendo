@@ -64,8 +64,8 @@ export class ConnectApi {
         return this.student.setPasswordImage(password, distractor, id);
     }
 
-    public async getImagePassword(es_contraseña: boolean, id: number): Promise<ApiResponse>{
-        return this.student.getImagePassword(es_contraseña, id);
+    public async getImagePassword(id: number): Promise<ApiResponse>{
+        return this.student.getImagePassword(id);
     }
     //Admin
     public async getAdmins(): Promise<User[]> {
@@ -87,8 +87,8 @@ export class ConnectApi {
         return this.login.loginUser(userName, password);     
     }
 
-    public async loginStudent(id: number, tipoContraseña: string, password?: string, passwordImage?: ImagePassword[], distractor?: ImagePassword[]) : Promise<LoginResponseStudnet>{
-        return this.login.loginStudent(id, tipoContraseña, password, passwordImage, distractor);
+    public async loginStudent(id: number, tipoContraseña: string, password?: string, passwordImage?: ImagePassword[]) : Promise<LoginResponseStudnet>{
+        return this.login.loginStudent(id, tipoContraseña, password, passwordImage);
     }
 
     public async logoutUser():Promise<boolean>{

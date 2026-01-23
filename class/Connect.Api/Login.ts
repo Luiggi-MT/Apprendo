@@ -1,123 +1,110 @@
+import * as SecureStore from 'expo-secure-store';
 import { ImagePassword } from "../Interface/ImagePassword";
 import { LoginResponse } from "../Interface/LoginResponse";
 import { LoginResponseStudnet } from "../Interface/LoginResponseStudent";
 import { Api } from "./Api";
-export class Login extends Api{
+
+export class Login extends Api {
+    
+    // Función auxiliar para obtener el token guardado
+    private async getAuthHeader() {
+        const token = await SecureStore.getItemAsync('userToken');
+        return token ? { 'Authorization': `Bearer ${token}` } : {};
+    }
+
     public async loginUser(userName: string, password: string): Promise<LoginResponse> {
-        try{
+        try {
             const response = await fetch(`${Api.apiUrl}/login`, {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'}, 
-                body: JSON.stringify({'username': userName, 'password': password}), 
-                credentials: 'include'
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 'username': userName, 'password': password }),
             });
 
-            if (!response.ok){
+            const data = await response.json();
 
-                const errorData = await response.json(); 
-                return {
-                    ok: false,
-                    message: errorData.error || `Server error: ${response.statusText}`,
-                };
-             }
+            if (!response.ok) {
+                return { ok: false, message: data.error || "Credenciales inválidas" };
+            }
 
-            const data: LoginResponse = await response.json();
-            return {
-                ...data,
-                ok: true, 
-            };
+            // --- PASO CLAVE: Guardar el Token JWT ---
+            if (data.access_token) {
+                await SecureStore.setItemAsync('userToken', data.access_token);
+            }
+
+            return { ...data, ok: true };
         
-        }catch (error: any){
-            return {
-                ok: false, 
-                message: `Error de red: No se pudo conectar al servidor. (${error.message || 'Servidor no disponible'})`
-            };
+        } catch (error: any) {
+            return { ok: false, message: "Error de conexión con el servidor" };
         }
     }
 
-    public async logoutUser():Promise<boolean>{
-        try{
-            const response = await fetch(`${Api.apiUrl}/logout`, {method: 'POST', credentials: 'include'});
-            if (response.ok) return true; 
-            else{
-                return false
-            }
-        }catch(error){
+    public async logoutUser(): Promise<boolean> {
+        try {
+            // En JWT el logout es principalmente borrar el token del cliente
+            await SecureStore.deleteItemAsync('userToken');
+            return true;
+        } catch (error) {
             return false;
         }
     }
 
-    public async checkSession() : Promise<LoginResponse>{
-        try{
+    public async checkSession(): Promise<LoginResponse> {
+        try {
+            const authHeader = await this.getAuthHeader();
+            
+            // Si ni siquiera hay token guardado, no intentamos la petición
+            if (!authHeader.Authorization) {
+                return { ok: false, message: "No active session" };
+            }
+
             const response = await fetch(`${Api.apiUrl}/session`, {
                 method: 'GET',
-                credentials: 'include',
-                mode: 'cors',
                 headers: {
-                    'Content-Type': 'application/json', 
-                    }, 
+                    'Content-Type': 'application/json',
+                    ...authHeader // Enviamos el Bearer Token
+                },
             });
+
+            const data = await response.json();
             
             if (response.status === 401) {
-                return {
-                    ok: false,
-                    message: "No active session"
-                };
+                await SecureStore.deleteItemAsync('userToken'); // Limpiar si el token expiró
+                return { ok: false, message: "Session expired" };
             }
-            if (!response.ok){
-                return {
-                    ok: false, 
-                    message : `Session check failed with status ${response.status}`
-                };
-            }
-            const data: LoginResponse = await response.json();
-            return {
-                ...data,
-                ok: true
-            };
-        }catch(error: any){
-            return {
-                ok: false,
-                message: `Error checking session: ${error.message || 'Unknown error'}`
-            };
+
+            return { ...data, ok: response.ok };
+        } catch (error: any) {
+            return { ok: false, message: "Error checking session" };
         }
     }
 
-     public async loginStudent(id: number, tipoContraseña: string,  password?: string, passwordImage?: ImagePassword[], distractor?: ImagePassword[]) : Promise<LoginResponseStudnet>{
+    public async loginStudent(id: number, tipoContraseña: string, password?: string, passwordImage?: ImagePassword[]): Promise<LoginResponseStudnet> {
         try {
             const response = await fetch(`${Api.apiUrl}/login_student`, {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'}, 
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     'id': id,
-                    'password': password, 
-                    'tipoContraseña': tipoContraseña,
-                    'passwordImage': passwordImage,
-                    'distractor' : distractor, 
-                }), 
-                credentials: 'include'
+                    'password': password,
+                    'tipoContraseña': tipoContraseña, 
+                    'passwordImage' : passwordImage, 
+                }),
             });
             
+            const data = await response.json();
+
             if (!response.ok) {
-                const errorData = await response.json();
-                return {
-                    ok: false,
-                    message: errorData.error || `Server error: ${response.statusText}`,
-                } as LoginResponseStudnet;
+                return { ok: false, message: data.error, fallos: data.fallos } as LoginResponseStudnet;
+            }
+
+            // --- Guardar Token del Estudiante ---
+            if (data.access_token) {
+                await SecureStore.setItemAsync('userToken', data.access_token);
             }
             
-            
-            const data: LoginResponseStudnet = await response.json();
-            
-            return {
-                ...data,
-                ok: true,
-            };
+            return { ...data, ok: true };
         } catch (error: any) {
-            return {
-                ok: false,
-                message: `Error de red: No se pudo conectar al servidor. (${error.message || 'Servidor no disponible'})`
-            } as LoginResponseStudnet;
+            return { ok: false, message: "Error de red" } as LoginResponseStudnet;
         }
-     }
+    }
 }

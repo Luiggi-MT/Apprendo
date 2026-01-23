@@ -3,5 +3,5 @@ export interface ImagePassword {
     id_estudiante: number;
     uri: string; 
     codigo: string;
-    es_contraseña: boolean;
+    es_contraseña?: boolean;
 }

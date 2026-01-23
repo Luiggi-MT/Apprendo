@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Header from "../../components/Header";
 import { ConnectApi } from "../../class/Connect.Api/ConnectApi";
 import { Image, View, FlatList, Dimensions, Text } from "react-native";
-import { styles } from "../../styles/styles";
+import { scaleFont, styles } from "../../styles/styles";
 import { BotonPin } from "../../class/Interface/BotonPin";
 import BotonContraseña from "../../components/BotonContraseña";
 import InputText from "../../components/InputText";
@@ -12,6 +12,8 @@ import { Speak } from "../../class/Speak/Speak";
 import { useFocusEffect } from "@react-navigation/native";
 import { tarjetaDescipcion_styles } from "../../styles/tarjetaDescripcion_styles";
 import { homeScreem_styles } from "../../styles/homeScreem_styles";
+import { Students } from "../../class/Interface/Students";
+import { UserContext } from "../../class/context/UserContext";
 
 export default function LoginAlumnoPin({
   navigation,
@@ -42,6 +44,9 @@ export default function LoginAlumnoPin({
 
   const [botonesPin, setBotonesPin] = useState<BotonPin[]>(opciones);
   const [pinValue, setPinValue] = useState<string>("");
+  const [error, setError] = useState<string>("");
+  const [errorValue, setErrorValue] = useState<boolean>(false);
+  const { user, setUser } = useContext(UserContext);
 
   const atras = () => {
     speak.detenerAsistente();
@@ -49,6 +54,8 @@ export default function LoginAlumnoPin({
   };
 
   const handleBorrarPress = () => {
+    setErrorValue(false);
+    setError("");
     setPinValue("");
   };
 
@@ -74,15 +81,71 @@ export default function LoginAlumnoPin({
     });
   };
 
-  useEffect(() => {
-    speak.hablar(
-      `Bienvenido ${student.username}. Estas en la pantalla para iniciar sesión.`,
-      () => {
+  const handleConfirmarPress = async () => {
+    setErrorValue(false);
+    if (pinValue.length < 4) {
+      setError("LA CONTRASEÑA TIENE QUE TENER 4 CARÁCTERES COMO MÍNIMO");
+      if (student.asistenteVoz !== "none") {
         speak.hablar(
-          `Escribe tu contraseña y a continuación presiona el botón de confirmar.`,
+          "La contraseña tiene que tener 4 carácteres como mínimo.",
+          () => {
+            speak.hablar("Prueba de nuevo.");
+          },
         );
-      },
+      }
+      setErrorValue(true);
+      return;
+    }
+    const response = await api.loginStudent(
+      student.id,
+      student.tipoContraseña,
+      pinValue,
     );
+    if (!response.ok) {
+      setErrorValue(true);
+      setError(response.message.toUpperCase());
+      if (student.asistenteVoz !== "none") {
+        speak.hablar(
+          "La contraseña que has introducido no es la correcta.",
+          () => {
+            speak.hablar("Intentalo de nuevo.");
+          },
+        );
+      }
+      return;
+    }
+    const studentLogin: Students = {
+      id: student.id,
+      username: student.username,
+      foto: student.foto,
+      tipoContraseña: student.tipoContraseña,
+      accesibilidad: student.accesibilidad,
+      preferenciasVisualizacion: student.preferenciasVisualizacion,
+      asistenteVoz: student.asistenteVoz,
+      sexo: student.sexo,
+    };
+    await setUser(studentLogin);
+
+    if (studentLogin.preferenciasVisualizacion === "diarias")
+      navigation.navigate("DiariasScreem");
+    if (studentLogin.preferenciasVisualizacion === "semanales")
+      //cambiar esto
+      navigation.navigate("MensualScreen");
+  };
+
+  console.log(JSON.stringify(student, null, 2));
+
+  useEffect(() => {
+    if (student.asistenteVoz !== "none") {
+      speak.hablar(
+        `Bienvenido ${student.username}. Estas en la pantalla para iniciar sesión.`,
+        () => {
+          speak.hablar(
+            `Escribe tu contraseña y a continuación presiona el botón de confirmar.`,
+          );
+        },
+      );
+    }
   }, []);
   useFocusEffect(() => {
     return () => {
@@ -93,10 +156,11 @@ export default function LoginAlumnoPin({
     <SafeAreaProvider>
       <Header
         uri="volver"
-        nameBottom="Atrás"
-        navigation={() => atras()}
-        nameHeader={api.getComponent("Entrar.png")}
+        nameBottom="ATRÁS"
+        navigation={atras}
+        nameHeader="ENTRAR"
         uriPictograma="entrar"
+        style={scaleFont(36)}
       />
       <View
         style={[
@@ -139,19 +203,24 @@ export default function LoginAlumnoPin({
 
       <View>
         <InputText
-          placehorder="Pin"
+          placehorder="PIN"
           value={pinValue}
           input={setPinValue}
           secure={true}
           editable={false}
         />
       </View>
+      {errorValue && (
+        <View>
+          <Text style={[styles.error]}>{error}</Text>
+        </View>
+      )}
       <View style={styles.navigationButtons}>
-        <Boton uri="borrar" nameBottom="Borrar" onPress={handleBorrarPress} />
+        <Boton uri="borrar" nameBottom="BORRAR" onPress={handleBorrarPress} />
         {student.asistenteVoz === 1 && (
           <Boton component={true} uri="Cohete.png" onPress={activarAsistente} />
         )}
-        <Boton uri="ok" nameBottom="Confirmar" onPress={() => {}} />
+        <Boton uri="ok" nameBottom="CONFIRMAR" onPress={handleConfirmarPress} />
       </View>
     </SafeAreaProvider>
   );

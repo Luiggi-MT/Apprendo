@@ -9,5 +9,6 @@ export interface LoginResponseStudnet{
     preferenciasVisualizacion: string;
     sexo: string;
     tipoContraseña: string;
+    fallos?: number[]; 
   
 }

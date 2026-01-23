@@ -280,12 +280,8 @@ export class StudentsApi extends Api{
         }
     }
 
-    public async getImagePassword(es_contraseña: boolean, id:number): Promise<ApiResponse>{
-        let response: Response; 
-        if(es_contraseña)
-            response = await fetch(`${Api.apiUrl}/student/${id}/es-contraseña`);
-        else response = await fetch(`${Api.apiUrl}/student/${id}/no-es-contraseña`)
-            
+    public async getImagePassword(id:number): Promise<ApiResponse>{   
+        const response = await fetch(`${Api.apiUrl}/student/${id}/contraseña-imagen`);  
         if(!response.ok){
             return{
                 ok: false, 
