@@ -238,6 +238,74 @@ export const styles = StyleSheet.create({
     alignItems: "center", 
   },
 
+  radioButtonContainer:{
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 10,
+  },
+  radioOuter: {
+    height: 24,
+    width: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  radioInner: {
+    height: 12,
+    width: 12,
+    borderRadius: 6,
+    backgroundColor: "#FF0000",
+  },
+
+  overlayCross: {
+    position: "absolute",
+    width: 150, // Ajusta según el tamaño de tu tarjeta
+    height: 150,
+    top: 30, // Ajusta para centrar sobre la imagen
+    opacity: 0.8,
+  },
+  overlayCross: {
+    position: "absolute",
+    width: 150, // Ajusta según el tamaño de tu tarjeta
+    height: 150,
+    top: 30, // Ajusta para centrar sobre la imagen
+    opacity: 0.8,
+  },
+
+  // ... (tus estilos anteriores se mantienen igual)
+
+  footerContainer: {
+    width: '100%',
+    paddingVertical: 10,
+    backgroundColor: "#E9E9E9", 
+    borderTopWidth: 0.5,
+    borderTopColor: '#CCC',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  footerTextMain: {
+    textAlign: "center",
+    fontSize: 12,
+    fontFamily: 'fredoka', 
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  footerTextSub: {
+    textAlign: "center",
+    fontSize: 10,
+    fontFamily: 'escolar-bold',
+    color: '#666',
+    marginTop: 2,
+  },
+  footerLink: {
+    marginTop: 5,
+    fontSize: 12,
+    fontFamily: 'escolar-bold',
+    color: '#4C80D7',
+    textDecorationLine: 'underline',
+  },
+  
   
 
   

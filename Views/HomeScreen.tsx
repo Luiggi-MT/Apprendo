@@ -1,4 +1,4 @@
-import { Text, View, FlatList, Image } from "react-native";
+import { Text, View, FlatList, Image, TouchableOpacity } from "react-native";
 import { scaleFont, styles } from "../styles/styles";
 import Header from "../components/Header";
 import { SafeAreaProvider } from "react-native-safe-area-context";
@@ -19,6 +19,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   const [busqueda, setBusqueda] = useState(false);
   const [message, setMessage] = useState("");
   const [limit, setLimit] = useState(0);
+
   useEffect(() => {
     api.getStudents().then((data) => {
       setStudents(data.students || []);
@@ -51,6 +52,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
       });
     }
   };
+
   const handleSiguentePress = () => {
     if (busqueda) {
       api.getEstudentByName(message, offset).then((data) => {
@@ -66,6 +68,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
       });
     }
   };
+
   const handleAtrasPress = () => {
     if (busqueda) {
       api
@@ -83,9 +86,11 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
       });
     }
   };
+
   const onProfesoradoPress = () => {
     navigation.push("Profesorado");
   };
+
   return (
     <SafeAreaProvider style={styles.container}>
       <Header
@@ -95,73 +100,85 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         nameHeader="PROYECTA"
         style={scaleFont(36)}
       />
-      <View>
-        <Buscador
-          nameBuscador="BUSCAR ESTUDIANTE"
-          onPress={handleBuscadorPress}
-        />
-      </View>
-      {students.length === 0 ? (
-        <View
-          style={[
-            styles.content,
-            styles.shadow,
-            { justifyContent: "center", alignItems: "center" },
-          ]}
-        >
-          <Text style={styles.text}>NO SE HAN ENCONTRADO ESTUDIANTES</Text>
-          <View style={styles.superPuesto}>
-            <Image
-              source={{ uri: arassacService.getPictograma("estudiante") }}
-              style={styles.imageBase}
-            />
-            <Image
-              source={{ uri: arassacService.getPictograma("fallo") }}
-              style={styles.imageOverlay}
-            />
-          </View>
-        </View>
-      ) : (
-        <View style={[styles.content, styles.shadow]}>
-          <FlatList
-            data={students}
-            numColumns={3}
-            renderItem={({ item }) => (
-              <BotonPerfil item={item} navigation={navigation} />
-            )}
-            keyExtractor={(item, index) => index.toString()}
-            columnWrapperStyle={homeScreem_styles.columnWrapper}
-            ListEmptyComponent={
-              <View style={{ justifyContent: "center", alignItems: "center" }}>
-                <Text style={styles.text}>NO HAY ESTUDIANTES DISPONIBLES</Text>
-                <View style={styles.superPuesto}>
-                  <Image
-                    source={{ uri: arassacService.getPictograma("estudiante") }}
-                    style={styles.imageBase}
-                  />
-                  <Image
-                    source={{ uri: arassacService.getPictograma("fallo") }}
-                    style={styles.imageOverlay}
-                  />
-                </View>
-              </View>
-            }
-            scrollEnabled={false}
+
+      <View style={{ flex: 1 }}>
+        <View>
+          <Buscador
+            nameBuscador="BUSCAR ESTUDIANTE"
+            onPress={handleBuscadorPress}
           />
-          <View style={styles.navigationButtons}>
-            <Boton
-              uri="atras"
-              onPress={handleAtrasPress}
-              dissable={offset <= 0}
-            />
-            <Boton
-              uri="delante"
-              onPress={handleSiguentePress}
-              dissable={offset >= limit}
-            />
-          </View>
         </View>
-      )}
+
+        {students.length === 0 ? (
+          <View
+            style={[
+              styles.content,
+              styles.shadow,
+              { justifyContent: "center", alignItems: "center", flex: 1 },
+            ]}
+          >
+            <Text style={styles.text}>NO SE HAN ENCONTRADO ESTUDIANTES</Text>
+            <View style={styles.superPuesto}>
+              <Image
+                source={{ uri: arassacService.getPictograma("estudiante") }}
+                style={styles.imageBase}
+              />
+              <Image
+                source={{ uri: arassacService.getPictograma("fallo") }}
+                style={styles.imageOverlay}
+              />
+            </View>
+          </View>
+        ) : (
+          <View style={[styles.content, styles.shadow, { flex: 1 }]}>
+            <FlatList
+              data={students}
+              numColumns={3}
+              renderItem={({ item }) => (
+                <BotonPerfil item={item} navigation={navigation} />
+              )}
+              keyExtractor={(item, index) => index.toString()}
+              columnWrapperStyle={homeScreem_styles.columnWrapper}
+              scrollEnabled={true}
+              ListEmptyComponent={
+                <View
+                  style={{ justifyContent: "center", alignItems: "center" }}
+                >
+                  <Text style={styles.text}>
+                    NO HAY ESTUDIANTES DISPONIBLES
+                  </Text>
+                </View>
+              }
+            />
+            <View style={styles.navigationButtons}>
+              <Boton
+                uri="atras"
+                onPress={handleAtrasPress}
+                dissable={offset <= 0}
+              />
+              <Boton
+                uri="delante"
+                onPress={handleSiguentePress}
+                dissable={offset >= limit}
+              />
+            </View>
+          </View>
+        )}
+      </View>
+
+      <View style={styles.footerContainer}>
+        <Text style={styles.footerTextMain}>
+          © {new Date().getFullYear()} PROYECTA
+        </Text>
+        <Text style={styles.footerTextSub}>DESARROLLADO POR LUIGGI.MT</Text>
+        <TouchableOpacity
+          onPress={() => {
+            navigation.navigate("AcercaDe");
+          }}
+        >
+          <Text style={styles.footerLink}>ACERCA DE</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaProvider>
   );
 }

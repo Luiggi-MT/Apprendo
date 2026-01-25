@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import Header from "../../components/Header";
-import { ConnectApi } from "../../class/Connect.Api/ConnectApi";
+import Header from "../../../components/Header";
+import { ConnectApi } from "../../../class/Connect.Api/ConnectApi";
 import {
   Alert,
   FlatList,
@@ -11,10 +11,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { scaleFont, styles } from "../../styles/styles";
+import { scaleFont, styles } from "../../../styles/styles";
 import * as ImagePicker from "expo-image-picker";
-import Boton from "../../components/Boton";
-import { ImagePassword } from "../../class/Interface/ImagePassword";
+import Boton from "../../../components/Boton";
+import { ImagePassword } from "../../../class/Interface/ImagePassword";
 
 export default function EstablecerContraseña({
   navigation,
@@ -49,10 +49,6 @@ export default function EstablecerContraseña({
     MAX_DISTRACTOR - distractors.length,
     remainingTotal,
   );
-
-  const hasMinPassword = password.length >= MIN_PASSWORD;
-  const hasMinDistractor = distractors.length >= MIN_DISTRACTOR;
-  const meetsMinimums = hasMinPassword && hasMinDistractor;
 
   const seleccionarImagen = async (isPassword: boolean) => {
     // 1. Verificar límite total
@@ -140,16 +136,6 @@ export default function EstablecerContraseña({
     }
     if (onPasswordSelected) onPasswordSelected(password, distractors);
     navigation.goBack();
-  };
-  const getImagenPassword = async () => {
-    if (student.id) {
-      const responsePassword = await api.getImagePassword(true, student.id);
-      const responseDistractor = await api.getImagePassword(false, student.id);
-      if (responsePassword && responseDistractor) {
-        setPassword(responsePassword.message);
-        setDistractors(responseDistractor.message);
-      }
-    }
   };
   const eliminarImagenPassword = (index: number) => {
     setPassword((prev) => prev.filter((_, i) => i !== index));

@@ -1,3 +1,5 @@
+import { ArasaacPictogram } from "../Interface/ArasaacPictogram";
+
 export class Arasaac {
 
     private pictograma: Map<string, number> = new Map([
@@ -16,6 +18,7 @@ export class Arasaac {
         ["ok", 5584], 
 
         ["olvideContraseña", 27367],
+        ["añadirPictograma", 39557],
 
         //Iconos del Header
         ["paginaPrincipal", 6964],
@@ -48,15 +51,42 @@ export class Arasaac {
         // X en color rojo para cuando hay un error
         ["fallo", 5526],
 
+        // Comanda 
+        ["pollo", 24815],
+        ["comanda", 7144],
+
+        // Material escolar 
+        ["materialEscolar", 34153],
+
+        //Impresora
+        ["impresora", 26138],
+
+        //Arasaac Logo
+        ["arasaacLogo", 35071],
+
     ]);
-    private apiUrl: string = `https://api.arasaac.org/v1/pictograms/`;
-    
+    private apiUrl: string = `https://api.arasaac.org/v1/pictograms`;
+    private apiSearch: string = `https://api.arasaac.org/v1/pictograms/es/search`;
     public getPictograma(word: string): string{
         const id = this.pictograma.get(word);
         if(id){
-            return `${this.apiUrl}${id}`;
+            return `${this.apiUrl}/${id}`;
         }
         return "";
-        
+    }
+    public async searchPictograma(word: string): Promise<ArasaacPictogram[]>{
+        try{
+            const response = await fetch(`${this.apiSearch}/${word}`);
+            if(!response.ok){
+                throw new Error(`Error en la busqueda: ${response.statusText}`);
+            }
+            const data: ArasaacPictogram[] = await response.json();
+            return data;
+        }catch (error){
+            return[];
+        }
+    }
+    public getPictogramaId(id: number): string{
+        return `${this.apiUrl}/${id}`;
     }
 }

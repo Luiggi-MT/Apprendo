@@ -19,7 +19,6 @@ export class StudentsApi extends Api{
             const data:ApiResponseStudents = await response.json();
             return data;
         }catch{
-            console.error("Failed to fetch students");
             return { ok: false, students: [], offset: 0, count: 0 };
         }
     }

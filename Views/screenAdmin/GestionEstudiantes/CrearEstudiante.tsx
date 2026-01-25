@@ -1,17 +1,17 @@
 import React, { useState } from "react";
 import { View, Text, TouchableOpacity, Image, TextInput } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import Header from "../../components/Header";
-import { ConnectApi } from "../../class/Connect.Api/ConnectApi";
-import { scaleFont, styles } from "../../styles/styles";
+import Header from "../../../components/Header";
+import { ConnectApi } from "../../../class/Connect.Api/ConnectApi";
+import { scaleFont, styles } from "../../../styles/styles";
 import * as ImagePicker from "expo-image-picker";
 import { Alert } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
-import Boton from "../../components/Boton";
-import { Students } from "../../class/Interface/Students";
+import Boton from "../../../components/Boton";
+import { Students } from "../../../class/Interface/Students";
 import { ActivityIndicator } from "react-native-paper";
-import { ImagePassword } from "../../class/Interface/ImagePassword";
-import { tarjetaDescipcion_styles } from "../../styles/tarjetaDescripcion_styles";
+import { ImagePassword } from "../../../class/Interface/ImagePassword";
+import { tarjetaDescipcion_styles } from "../../../styles/tarjetaDescripcion_styles";
 
 export default function CrearEstudiante({ navigation }: { navigation: any }) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -195,9 +195,9 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
           <ActivityIndicator size="large" color="#FF8C42" />
           <Text
             style={[
-              styles.text,
+              styles.text_legend,
               {
-                fontFamily: "ecolar-bold",
+                textAlign: "center",
                 marginTop: 20,
                 fontSize: scaleFont(18),
                 fontWeight: "bold",
@@ -283,7 +283,7 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
           <View style={styles.navigationButtons}>
             <View></View>
 
-            <Boton uri="delante" onPress={() => handleAccesibilidadPress()} />
+            <Boton uri="delante" onPress={handleAccesibilidadPress} />
           </View>
         </View>
       ) : (
@@ -350,12 +350,12 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
             </View>
 
             <View style={styles.navigationButtons}>
-              <Boton uri="atras" onPress={() => handlePerfilPress()} />
+              <Boton uri="atras" onPress={handlePerfilPress} />
 
               <Boton
                 uri="ok"
                 nameBottom="AÑADIR.ESTUDIANTE"
-                onPress={() => handleAddPress()}
+                onPress={handleAddPress}
               />
             </View>
           </View>

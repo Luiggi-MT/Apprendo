@@ -6,30 +6,50 @@ import { ConnectApi } from "./class/Connect.Api/ConnectApi";
 import { UserContext } from "./class/context/UserContext";
 import { PaperProvider } from "react-native-paper";
 import { LocaleConfig } from "react-native-calendars";
+import { useFonts } from 'expo-font';
+import { scaleFont, styles } from "./styles/styles";
 
 import * as SplashScreen from 'expo-splash-screen'
 
+//Acerca de
+import AcercaDe from "./Views/AcercaDe/AcercaDe";
+
+//Home 
 import HomeScreen from "./Views/HomeScreen";
 
+//Login
 import Profesorado from "./Views/Profesorado";
 import LoginAlumnoAlfanumerica from "./Views/loginAlumnos/LoginAlumnoAlfanumerica";
 import LoginAlumnoImagenes from "./Views/loginAlumnos/LoginAlumnoImagenes";
 import LoginAlumnoPin from "./Views/loginAlumnos/LoginAlumnoPin";
 
+//Páginas principales de los usuarios
 import AdminScreen from "./Views/homeProfesorado/AdminScreen";
 import DiariasScreem from "./Views/homeAlumnos/DiariasScreem";
 import MensualScreen from "./Views/homeAlumnos/MensualScreen";
-
-
 import ProfesorScreen from "./Views/homeProfesorado/ProfesorScreen";
-import PerfilScreen from "./Views/PerfilScreen";
-import GestionEstudiantes from "./Views/screenAdmin/GestionEstudiantes";
-import DescripcionEstudiante from "./Views/screenAdmin/DescripcionEstudiante";
-import CrearEstudiante from "./Views/screenAdmin/CrearEstudiante";
-import EstablecerContraseña from "./Views/screenAdmin/EstablecerContraseña";
-import { useFonts } from 'expo-font';
-import { scaleFont, styles } from "./styles/styles";
 
+// Perfil 
+import PerfilScreen from "./Views/PerfilScreen";
+
+//Gestión de estudiantes -- Admin
+import GestionEstudiantes from "./Views/screenAdmin/GestionEstudiantes/GestionEstudiantes";
+import DescripcionEstudiante from "./Views/screenAdmin/GestionEstudiantes/DescripcionEstudiante";
+import CrearEstudiante from "./Views/screenAdmin/GestionEstudiantes/CrearEstudiante";
+import EstablecerContraseña from "./Views/screenAdmin/GestionEstudiantes/EstablecerContraseña";
+
+// Gestion de tareas de petición 
+import TareaPeticion from "./Views/screenAdmin/GestionTareasPeticion/TareaPeticion";
+
+// Comanda comedor 
+import ListaMenus from "./Views/screenAdmin/GestionTareasPeticion/ComandaComedor/ListaMenus";
+import ComandaComedor from "./Views/screenAdmin/GestionTareasPeticion/ComandaComedor/ComandaComedor";
+import CrearMenu from "./Views/screenAdmin/GestionTareasPeticion/ComandaComedor/CrearMenu";
+import DetalleMenu from "./Views/screenAdmin/GestionTareasPeticion/ComandaComedor/DetalleMenu";
+
+
+//Añadir Pictograma
+import AñadirPictograma from "./Views/screenAdmin/AñadirPictograma/AñadirPictograma";
 
 
 const Stack = createNativeStackNavigator();
@@ -184,6 +204,7 @@ export default function App() {
         initialRouteName={initialRoute}
         screenOptions={{ headerShown: false }}
       >
+        <Stack.Screen name="AcercaDe" component={AcercaDe} />
         <Stack.Screen name="Home" component={HomeScreen}/>
 
         
@@ -204,6 +225,17 @@ export default function App() {
         <Stack.Screen name="DescripcionEstudiante" component={DescripcionEstudiante}/>
         <Stack.Screen name="CrearEstudiante" component={CrearEstudiante}/>
         <Stack.Screen name="EstablecerContraseña" component={EstablecerContraseña}/>
+
+        <Stack.Screen name="TareaPeticion" component={TareaPeticion} />
+
+        <Stack.Screen name="ListaMenus" component={ListaMenus} />
+        <Stack.Screen name="ComandaComedor" component={ComandaComedor} />
+        <Stack.Screen name="CrearMenu" component={CrearMenu} />
+        <Stack.Screen name="DetalleMenu" component={DetalleMenu} />
+
+
+
+        <Stack.Screen name="AñadirPictograma" component={AñadirPictograma} />
         
       </Stack.Navigator>
     </NavigationContainer>

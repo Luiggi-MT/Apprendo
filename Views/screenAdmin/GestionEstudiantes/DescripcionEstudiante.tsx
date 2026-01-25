@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, Image, TextInput } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import Header from "../../components/Header";
-import { ConnectApi } from "../../class/Connect.Api/ConnectApi";
-import { scaleFont, styles } from "../../styles/styles";
+import Header from "../../../components/Header";
+import { ConnectApi } from "../../../class/Connect.Api/ConnectApi";
+import { scaleFont, styles } from "../../../styles/styles";
 import * as ImagePicker from "expo-image-picker";
 import { Alert } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
-import Boton from "../../components/Boton";
+import Boton from "../../../components/Boton";
 import { ActivityIndicator } from "react-native-paper";
-import { Students } from "../../class/Interface/Students";
-import { ImagePassword } from "../../class/Interface/ImagePassword";
-import { tarjetaDescipcion_styles } from "../../styles/tarjetaDescripcion_styles";
+import { Students } from "../../../class/Interface/Students";
+import { ImagePassword } from "../../../class/Interface/ImagePassword";
+import { tarjetaDescipcion_styles } from "../../../styles/tarjetaDescripcion_styles";
 
 export default function DescripcionEstudiante({
   navigation,

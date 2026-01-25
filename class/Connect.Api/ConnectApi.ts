@@ -12,6 +12,9 @@ import { Login } from "./Login";
 import { OpenAI } from "./OpenAi";
 import { StudentsApi } from "./StudentsApi";
 import { LoginResponseStudnet } from "../Interface/LoginResponseStudent";
+import { Menu } from "./Menu";
+import { ApiResponseMenu } from "../Interface/ApiResponseMenu";
+
 
 export class ConnectApi {
     
@@ -22,6 +25,8 @@ export class ConnectApi {
     private foto: FotoApi; 
     private login: Login; 
     private openAI: OpenAI;
+    private menu: Menu; 
+    
     constructor(){
         this.api = new Api(); 
         this.student = new StudentsApi(); 
@@ -30,6 +35,8 @@ export class ConnectApi {
         this.foto = new FotoApi(); 
         this.login = new Login(); 
         this.openAI = new OpenAI();
+        this.menu = new Menu();
+        
     }
     // APi
     public getLimit(): number{
@@ -106,5 +113,22 @@ export class ConnectApi {
     //OpenAI
     public async enviarAudio(uri: string){
         return this.openAI.enviarAudio(uri);
+    }
+
+    // Menu
+    public async getMenu(offset: number = this.api.getInitial_offset(), limit: number = this.api.getLimit(), fecha: string): Promise<ApiResponseMenu>{
+        return this.menu.getMenu(offset, limit, fecha);
+    }
+
+    public async createMenu(fecha: string, pictogramaMenuId: number, tachado: boolean, descripcion: string, primerPlato: string, primerPlatoId: number, segundoPlato: string, segundoPlatoId: number, guarnicion: string, guarnicionId: number, postre: string, postreId: number): Promise<ApiResponse>{
+        return this.menu.createMenu(fecha, pictogramaMenuId, tachado, descripcion, primerPlato, primerPlatoId, segundoPlato, segundoPlatoId, guarnicion, guarnicionId, postre, postreId);
+    }
+
+    public async getMenuById(menu_id: number): Promise<ApiResponseMenu>{
+        return this.menu.getMenuById(menu_id);
+    }
+
+    public async updateMenuById(menu_id: number, fecha: string, pictogramaMenuId: number, tachado: boolean, descripcion: string, primerPlato: string, primerPlatoId: number, segundoPlato: string, segundoPlatoId: number, guarnicion: string, guarnicionId: number, postre: string, postreId: number): Promise<ApiResponse>{
+        return this.menu.updateMenuById( menu_id, fecha, pictogramaMenuId, tachado, descripcion, primerPlato, primerPlatoId, segundoPlato, segundoPlatoId, guarnicion, guarnicionId, postre, postreId);
     }
 }

@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { ConnectApi } from "../../class/Connect.Api/ConnectApi";
-import Header from "../../components/Header";
-import Buscador from "../../components/Buscador";
-import { Students } from "../../class/Interface/Students";
-import { scaleFont, styles } from "../../styles/styles";
+import { ConnectApi } from "../../../class/Connect.Api/ConnectApi";
+import Header from "../../../components/Header";
+import Buscador from "../../../components/Buscador";
+import { Students } from "../../../class/Interface/Students";
+import { scaleFont, styles } from "../../../styles/styles";
 import { View, Text, Image } from "react-native";
-import TarjetaDescipcion from "../../components/TarjetaDescripcion";
-import Boton from "../../components/Boton";
-import { Arasaac } from "../../class/Arasaac/getPictograma";
+import TarjetaDescipcion from "../../../components/TarjetaDescripcion";
+import Boton from "../../../components/Boton";
+import { Arasaac } from "../../../class/Arasaac/getPictograma";
 export default function GestionEstudiantes({
   navigation,
 }: {
@@ -17,10 +17,10 @@ export default function GestionEstudiantes({
   const api = new ConnectApi();
   const arasaacService = new Arasaac();
   const [students, setStudents] = useState<Students[]>([]);
-  const [offset, setOffset] = useState(0);
-  const [limit, setLimit] = useState(0);
-  const [busqueda, setBusqueda] = useState(false);
-  const [message, setMessage] = useState("");
+  const [offset, setOffset] = useState<number>(0);
+  const [limit, setLimit] = useState<number>(3);
+  const [busqueda, setBusqueda] = useState<boolean>(false);
+  const [message, setMessage] = useState<string>("");
   const atras = () => {
     navigation.goBack();
   };
@@ -88,7 +88,7 @@ export default function GestionEstudiantes({
   };
 
   useEffect(() => {
-    api.getStudents(0, 3).then((data) => {
+    api.getStudents(offset, limit).then((data) => {
       setStudents(data.students || []);
       setOffset(data.offset);
       setLimit(data.count);
@@ -99,7 +99,7 @@ export default function GestionEstudiantes({
       <Header
         uri="volver"
         nameBottom="ATRÁS"
-        navigation={() => atras()}
+        navigation={atras}
         nameHeader="GESTIÓN.DE.ESTUDIANTES"
         uriPictograma="estudiante"
         style={scaleFont(18)}
