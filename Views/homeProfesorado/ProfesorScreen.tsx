@@ -4,6 +4,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import Header from "../../components/Header";
 import { UserContext } from "../../class/context/UserContext";
 import { ConnectApi } from "../../class/Connect.Api/ConnectApi";
+import { scaleFont } from "../../styles/styles";
 export default function ProfesorScreen({ navigation }: { navigation: any }) {
   const profesor = useContext(UserContext).user;
   const api = new ConnectApi();
@@ -14,11 +15,12 @@ export default function ProfesorScreen({ navigation }: { navigation: any }) {
     <SafeAreaProvider>
       <Header
         uri={profesor.foto}
-        nameBottom="Perfil"
-        navigation={() => perfil()}
-        nameHeader={api.getComponent("PaginaPrincipal.png")}
+        nameBottom="PERFIL"
+        navigation={perfil}
+        nameHeader="Página.Principal"
         uriPictograma="paginaPrincipal"
         arasaacService={false}
+        style={scaleFont(25)}
       />
     </SafeAreaProvider>
   );

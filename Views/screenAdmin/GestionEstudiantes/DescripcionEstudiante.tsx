@@ -182,6 +182,10 @@ export default function DescripcionEstudiante({
     }
   };
 
+  const handleAsignacionTareas = () => {
+    navigation.navigate("AsignacionTareas", { student: student });
+  };
+
   const handleEstablecerContraseñaPress = () => {
     navigation.navigate("EstablecerContraseña", {
       student: student,
@@ -379,7 +383,7 @@ export default function DescripcionEstudiante({
               <Boton
                 uri="tareasPeticion"
                 nameBottom="ASIGNACIÓN.DE.TAREAS"
-                onPress={() => {}}
+                onPress={handleAsignacionTareas}
               />
             </View>
           ) : (

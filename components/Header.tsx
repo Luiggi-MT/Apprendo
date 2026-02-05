@@ -13,6 +13,9 @@ export default function Header({
   nameHeader,
   arasaacService = true,
   style,
+  profesor,
+  uriApi = false,
+  uriFoto,
 }: {
   uri: string;
   uriPictograma?: string;
@@ -20,7 +23,10 @@ export default function Header({
   navigation: () => void;
   nameHeader: string;
   arasaacService?: boolean;
-  style?: any;
+  style?: number;
+  profesor?: string;
+  uriApi?: boolean;
+  uriFoto?: string;
 }) {
   const ArasaacService = new Arasaac();
   const headerText: string[] = nameHeader.split(".");
@@ -52,6 +58,19 @@ export default function Header({
           source={{ uri: ArasaacService.getPictograma(uriPictograma) }}
           style={{ width: 90, height: 90 }}
         />
+      )}
+      {uriApi && uriFoto && (
+        <View>
+          <Image source={{ uri: uriFoto }} style={{ width: 90, height: 90 }} />
+          <Text
+            style={[
+              styles.text_legend,
+              { color: "white", fontSize: 17, textAlign: "center" },
+            ]}
+          >
+            {profesor}
+          </Text>
+        </View>
       )}
     </SafeAreaView>
   );

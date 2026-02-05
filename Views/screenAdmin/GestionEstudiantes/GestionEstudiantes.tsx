@@ -9,6 +9,7 @@ import { View, Text, Image } from "react-native";
 import TarjetaDescipcion from "../../../components/TarjetaDescripcion";
 import Boton from "../../../components/Boton";
 import { Arasaac } from "../../../class/Arasaac/getPictograma";
+
 export default function GestionEstudiantes({
   navigation,
 }: {
@@ -16,84 +17,92 @@ export default function GestionEstudiantes({
 }) {
   const api = new ConnectApi();
   const arasaacService = new Arasaac();
+
   const [students, setStudents] = useState<Students[]>([]);
   const [offset, setOffset] = useState<number>(0);
-  const [limit, setLimit] = useState<number>(3);
+  const [limit] = useState<number>(3);
+  const [total, setTotal] = useState<number>(0);
   const [busqueda, setBusqueda] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
+
+  const totalPaginas = Math.ceil(total / limit) || 1;
+  const paginaActual = offset <= limit ? 1 : Math.ceil(offset / limit);
+
   const atras = () => {
     navigation.goBack();
   };
+
   const handleBuscadorPress = (searchText: string) => {
-    if (searchText.length === 0) {
+    if (searchText.trim().length === 0) {
       setBusqueda(false);
-      api.getStudents(0, 3).then((data) => {
+      setMessage("");
+
+      api.getStudents(0, limit).then((data) => {
         setStudents(data.students || []);
         setOffset(data.offset);
-        setLimit(data.count);
+        setTotal(data.count);
       });
     } else {
-      api.getEstudentByName(searchText, 0, 3).then((data) => {
+      api.getEstudentByName(searchText, 0, limit).then((data) => {
         setBusqueda(true);
-        if (data.students || []) {
-          setStudents(data.students || []);
-          setOffset(data.offset);
-          setLimit(data.count);
-          setMessage(searchText);
-        } else {
-          setStudents([]);
-          setOffset(0);
-          setLimit(0);
-        }
-      });
-    }
-  };
-  const handleAtrasPress = () => {
-    if (busqueda) {
-      api
-        .getEstudentByName(message, offset - 2 * api.getLimit(), 3)
-        .then((data) => {
-          setStudents(data.students);
-          setOffset(data.offset);
-          setLimit(data.count);
-        });
-    } else {
-      api.getStudents(offset - 2 * api.getLimit(), 3).then((data) => {
-        setStudents(data.students);
+        setMessage(searchText);
+        setStudents(data.students || []);
         setOffset(data.offset);
-        setLimit(data.count);
+        setTotal(data.count);
       });
     }
   };
+
+  const handleAtrasPress = () => {
+    const previousOffset = offset - 2 * limit;
+
+    if (busqueda) {
+      api.getEstudentByName(message, previousOffset, limit).then((data) => {
+        setStudents(data.students || []);
+        setOffset(data.offset);
+        setTotal(data.count);
+      });
+    } else {
+      api.getStudents(previousOffset, limit).then((data) => {
+        setStudents(data.students || []);
+        setOffset(data.offset);
+        setTotal(data.count);
+      });
+    }
+  };
+
   const handleSiguientePress = () => {
     if (busqueda) {
-      api.getEstudentByName(message, offset, 3).then((data) => {
-        setStudents(data.students);
+      api.getEstudentByName(message, offset, limit).then((data) => {
+        setStudents(data.students || []);
         setOffset(data.offset);
-        setLimit(data.count);
+        setTotal(data.count);
       });
     } else {
-      api.getStudents(offset, 3).then((data) => {
-        setStudents(data.students);
+      api.getStudents(offset, limit).then((data) => {
+        setStudents(data.students || []);
         setOffset(data.offset);
-        setLimit(data.count);
+        setTotal(data.count);
       });
     }
   };
-  const handleDescripcionPress = (student) => {
-    navigation.replace("DescripcionEstudiante", { student });
+
+  const handleDescripcionPress = (student: Students) => {
+    navigation.navigate("DescripcionEstudiante", { student });
   };
+
   const handleCreaPress = () => {
     navigation.navigate("CrearEstudiante");
   };
 
   useEffect(() => {
-    api.getStudents(offset, limit).then((data) => {
+    api.getStudents(0, limit).then((data) => {
       setStudents(data.students || []);
       setOffset(data.offset);
-      setLimit(data.count);
+      setTotal(data.count);
     });
   }, []);
+
   return (
     <SafeAreaProvider>
       <Header
@@ -116,20 +125,31 @@ export default function GestionEstudiantes({
                 key={student.username}
                 name={student.username}
                 uri={api.getFoto(student.foto)}
-                description="VER ALUMNO"
+                description="VER.ALUMNO"
                 navigation={() => handleDescripcionPress(student)}
               />
             ))}
+
             <View style={styles.navigationButtons}>
               <Boton
                 uri="atras"
                 onPress={handleAtrasPress}
-                dissable={offset <= 0}
+                dissable={offset <= limit}
               />
+
+              <Text
+                style={[
+                  styles.text,
+                  { fontSize: scaleFont(20), marginHorizontal: 10 },
+                ]}
+              >
+                {paginaActual} / {totalPaginas}
+              </Text>
+
               <Boton
                 uri="delante"
                 onPress={handleSiguientePress}
-                dissable={offset >= limit}
+                dissable={offset >= total}
               />
             </View>
           </>

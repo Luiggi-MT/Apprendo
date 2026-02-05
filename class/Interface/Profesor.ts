@@ -1,5 +1,6 @@
 export interface Profesor{
     username: string; 
     foto: string; 
-    tipo: string;
+    tipo?: string;
+    id?: number;
 }

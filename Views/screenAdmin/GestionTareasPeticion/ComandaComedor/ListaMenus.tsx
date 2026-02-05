@@ -39,6 +39,9 @@ export default function ComandaComedor({
     navigation.goBack();
   };
 
+  const handleVerComandaPress = () => {
+    navigation.navigate("VerComanda", { fecha: fecha });
+  };
   useEffect(() => {
     api.getMenu(offset, limit, fecha).then((data) => {
       setMenus(data.menus || []);
@@ -103,7 +106,11 @@ export default function ComandaComedor({
       </View>
       <View style={styles.navigationButtons}>
         <Boton uri="mas" nameBottom="CREAR.MENÚ" onPress={handleCreaPress} />
-        <Boton uri="comanda" nameBottom="VER.COMANDA" onPress={() => {}} />
+        <Boton
+          uri="comanda"
+          nameBottom="VER.COMANDA"
+          onPress={handleVerComandaPress}
+        />
       </View>
     </SafeAreaProvider>
   );

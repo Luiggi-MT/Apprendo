@@ -2,18 +2,27 @@ import React, { useContext, useEffect, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Header from "../../components/Header";
 import { ConnectApi } from "../../class/Connect.Api/ConnectApi";
-import { Image, View, FlatList, Dimensions, Text } from "react-native";
+import {
+  Image,
+  View,
+  FlatList,
+  Dimensions,
+  Text,
+  TouchableOpacity,
+  TextInput,
+  ScrollView,
+  Platform, // Importante para detectar Web
+} from "react-native";
 import { scaleFont, styles } from "../../styles/styles";
 import { BotonPin } from "../../class/Interface/BotonPin";
 import BotonContraseña from "../../components/BotonContraseña";
-import InputText from "../../components/InputText";
 import Boton from "../../components/Boton";
 import { Speak } from "../../class/Speak/Speak";
 import { useFocusEffect } from "@react-navigation/native";
-import { tarjetaDescipcion_styles } from "../../styles/tarjetaDescripcion_styles";
 import { homeScreem_styles } from "../../styles/homeScreem_styles";
 import { Students } from "../../class/Interface/Students";
 import { UserContext } from "../../class/context/UserContext";
+import { Arasaac } from "../../class/Arasaac/getPictograma";
 
 export default function LoginAlumnoPin({
   navigation,
@@ -25,9 +34,10 @@ export default function LoginAlumnoPin({
   const { student } = route.params;
   const speak = new Speak();
   const api = new ConnectApi();
+  const arasaacService = new Arasaac();
 
   const windowWidth = Dimensions.get("window").width;
-  const buttonWidth = Math.min(windowWidth / 2 - 15, 100);
+  const buttonWidth = Math.min(windowWidth / 3 - 25, 85);
 
   const opciones: BotonPin[] = [
     { id: "1", uriPictograma: "uno", nameBottom: "uno" },
@@ -42,11 +52,12 @@ export default function LoginAlumnoPin({
     { id: "0", uriPictograma: "cero", nameBottom: "cero" },
   ];
 
-  const [botonesPin, setBotonesPin] = useState<BotonPin[]>(opciones);
+  const [botonesPin] = useState<BotonPin[]>(opciones);
   const [pinValue, setPinValue] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [errorValue, setErrorValue] = useState<boolean>(false);
-  const { user, setUser } = useContext(UserContext);
+  const { setUser } = useContext(UserContext);
+  const [secureText, setSecureText] = useState(true);
 
   const atras = () => {
     speak.detenerAsistente();
@@ -60,40 +71,17 @@ export default function LoginAlumnoPin({
   };
 
   const handleNumberPress = (number: string) => {
-    setPinValue((prev) => prev + number);
-  };
-
-  const activarAsistente = async () => {
-    speak.hablar("Te escucho", async () => {
-      const comando = await speak.procesarComandoVoz();
-      if (comando.toLowerCase().includes("confirmar")) {
-        speak.hablar("Has dicho confirmar");
-      } else if (comando.toLocaleLowerCase().includes("borrar")) {
-        speak.hablar("Se ha borrado el campo contraseña");
-        setPinValue("");
-      } else if (comando.toLocaleLowerCase().includes("atrás")) {
-        speak.hablar("Volviendo a la página de inicio");
-        speak.detenerAsistente();
-        navigation.goBack();
-      } else {
-        speak.hablar("Lo siento, no te he entendido");
-      }
-    });
+    if (pinValue.length < 6) {
+      setPinValue((prev) => prev + number);
+    }
   };
 
   const handleConfirmarPress = async () => {
     setErrorValue(false);
     if (pinValue.length < 4) {
-      setError("LA CONTRASEÑA TIENE QUE TENER 4 CARÁCTERES COMO MÍNIMO");
-      if (student.asistenteVoz !== "none") {
-        speak.hablar(
-          "La contraseña tiene que tener 4 carácteres como mínimo.",
-          () => {
-            speak.hablar("Prueba de nuevo.");
-          },
-        );
-      }
+      setError("MÍNIMO 4 CARACTERES");
       setErrorValue(true);
+      if (student.asistenteVoz !== "none") speak.hablar("PIN demasiado corto");
       return;
     }
     const response = await api.loginStudent(
@@ -104,124 +92,169 @@ export default function LoginAlumnoPin({
     if (!response.ok) {
       setErrorValue(true);
       setError(response.message.toUpperCase());
-      if (student.asistenteVoz !== "none") {
-        speak.hablar(
-          "La contraseña que has introducido no es la correcta.",
-          () => {
-            speak.hablar("Intentalo de nuevo.");
-          },
-        );
-      }
       return;
     }
-    const studentLogin: Students = {
-      id: student.id,
-      username: student.username,
-      foto: student.foto,
-      tipoContraseña: student.tipoContraseña,
-      accesibilidad: student.accesibilidad,
-      preferenciasVisualizacion: student.preferenciasVisualizacion,
-      asistenteVoz: student.asistenteVoz,
-      sexo: student.sexo,
-    };
-    await setUser(studentLogin);
-
-    if (studentLogin.preferenciasVisualizacion === "diarias")
-      navigation.navigate("DiariasScreem");
-    if (studentLogin.preferenciasVisualizacion === "semanales")
-      //cambiar esto
-      navigation.navigate("MensualScreen");
+    await setUser(student);
+    navigation.navigate(
+      student.preferenciasVisualizacion === "diarias"
+        ? "DiariasScreem"
+        : "MensualScreen",
+    );
   };
 
-  console.log(JSON.stringify(student, null, 2));
+  // Definimos el contenedor dinámicamente
+  const Container = Platform.OS === "web" ? ScrollView : View;
 
-  useEffect(() => {
-    if (student.asistenteVoz !== "none") {
-      speak.hablar(
-        `Bienvenido ${student.username}. Estas en la pantalla para iniciar sesión.`,
-        () => {
-          speak.hablar(
-            `Escribe tu contraseña y a continuación presiona el botón de confirmar.`,
-          );
-        },
-      );
-    }
-  }, []);
-  useFocusEffect(() => {
-    return () => {
-      speak.detenerAsistente();
-    };
-  });
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider style={styles.container}>
       <Header
         uri="volver"
         nameBottom="ATRÁS"
         navigation={atras}
         nameHeader="ENTRAR"
         uriPictograma="entrar"
-        style={scaleFont(36)}
+        style={scaleFont(30)}
       />
-      <View
-        style={[
-          styles.content,
-          styles.shadow,
-          { justifyContent: "center", alignItems: "center", marginBottom: 10 },
-        ]}
+
+      <Container
+        style={{ flex: 1 }}
+        contentContainerStyle={
+          Platform.OS === "web"
+            ? { paddingHorizontal: 15, paddingBottom: 30 }
+            : null
+        }
       >
-        <Image
-          source={{ uri: api.getFoto(student.foto) }}
-          style={[tarjetaDescipcion_styles.imageTarjet, { borderWidth: 1 }]}
-        />
-        <Text style={homeScreem_styles.studentCardUsername}>
-          {student.username}
-        </Text>
-      </View>
-      <View
-        style={{
-          flex: 1,
-          width: "100%",
-          justifyContent: "center",
-        }}
-      >
-        <FlatList
-          columnWrapperStyle={{ justifyContent: "center", margin: 1 }}
-          numColumns={3}
-          scrollEnabled={false}
-          data={botonesPin}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
-            <View style={{ width: buttonWidth }}>
-              <BotonContraseña
-                uri={item.uriPictograma}
-                onPress={() => handleNumberPress(item.id)}
+        <View
+          style={{
+            flex: 1,
+            paddingHorizontal: 15,
+            paddingBottom: 10,
+            justifyContent: "space-between",
+          }}
+        >
+          {/* PERFIL */}
+          <View
+            style={[
+              styles.content,
+              styles.shadow,
+              {
+                backgroundColor: "#F5F5F5",
+                alignItems: "center",
+                paddingVertical: 10,
+                borderRadius: 20,
+                marginTop: 5,
+              },
+            ]}
+          >
+            <Image
+              source={{ uri: api.getFoto(student.foto) }}
+              style={{
+                width: 65,
+                height: 65,
+                borderRadius: 32.5,
+                borderWidth: 2,
+                borderColor: "#FF8C42",
+              }}
+            />
+            <Text
+              style={[
+                homeScreem_styles.studentCardUsername,
+                { marginTop: 5, fontSize: scaleFont(16) },
+              ]}
+            >
+              {student.username.toUpperCase()}
+            </Text>
+          </View>
+
+          {/* VISOR PIN */}
+          <View
+            style={[
+              styles.buscador,
+              styles.shadow,
+              {
+                flexDirection: "row",
+                alignItems: "center",
+                height: 50,
+                backgroundColor: "#FFF",
+                borderRadius: 12,
+                paddingRight: 15,
+                marginVertical: 10,
+              },
+            ]}
+          >
+            <TextInput
+              style={{
+                flex: 1,
+                height: "100%",
+                fontSize: 22,
+                textAlign: "center",
+                fontFamily: "escolar-bold",
+              }}
+              value={pinValue}
+              secureTextEntry={secureText}
+              editable={false}
+              placeholder="PIN"
+            />
+            <TouchableOpacity onPress={() => setSecureText(!secureText)}>
+              <Image
+                source={{
+                  uri: secureText
+                    ? api.getComponent("ojo.png")
+                    : arasaacService.getPictograma("ojo"),
+                }}
+                style={{ width: 30, height: 30 }}
+              />
+            </TouchableOpacity>
+          </View>
+
+          {/* TECLADO NUMÉRICO */}
+          <View style={{ flex: 1, justifyContent: "center" }}>
+            <FlatList
+              columnWrapperStyle={{ justifyContent: "center", gap: 10 }}
+              numColumns={3}
+              scrollEnabled={false}
+              data={botonesPin}
+              keyExtractor={(item) => item.id}
+              renderItem={({ item }) => (
+                <View style={{ width: buttonWidth, marginVertical: 4 }}>
+                  <BotonContraseña
+                    uri={item.uriPictograma}
+                    onPress={() => handleNumberPress(item.id)}
+                  />
+                </View>
+              )}
+            />
+          </View>
+
+          <View style={{ marginTop: 10 }}>
+            {errorValue && (
+              <View style={[styles.errorContainer]}>
+                <Text style={[styles.error]}>{error}</Text>
+              </View>
+            )}
+            <View
+              style={[
+                styles.navigationButtons,
+                { paddingHorizontal: 0, width: "100%" },
+              ]}
+            >
+              <Boton
+                uri="borrar"
+                nameBottom="BORRAR"
+                onPress={handleBorrarPress}
+              />
+              {student.asistenteVoz === "bidireccional" && (
+                <Boton component={true} uri="Cohete.png" onPress={() => {}} />
+              )}
+              <Boton
+                uri="ok"
+                nameBottom="CONFIRMAR"
+                onPress={handleConfirmarPress}
               />
             </View>
-          )}
-        />
-      </View>
-
-      <View>
-        <InputText
-          placehorder="PIN"
-          value={pinValue}
-          input={setPinValue}
-          secure={true}
-          editable={false}
-        />
-      </View>
-      {errorValue && (
-        <View>
-          <Text style={[styles.error]}>{error}</Text>
+          </View>
         </View>
-      )}
-      <View style={styles.navigationButtons}>
-        <Boton uri="borrar" nameBottom="BORRAR" onPress={handleBorrarPress} />
-        {student.asistenteVoz === 1 && (
-          <Boton component={true} uri="Cohete.png" onPress={activarAsistente} />
-        )}
-        <Boton uri="ok" nameBottom="CONFIRMAR" onPress={handleConfirmarPress} />
-      </View>
+      </Container>
     </SafeAreaProvider>
   );
 }

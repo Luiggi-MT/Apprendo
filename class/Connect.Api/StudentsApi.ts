@@ -1,6 +1,5 @@
 import { ApiResponse } from "../Interface/ApiResponse";
 import { ApiResponseStudents } from "../Interface/ApiResponseStudents";
-import { ContraseñaImage } from "../Interface/ContraseñaImage";
 import { ImagePassword } from "../Interface/ImagePassword";
 import { Students } from "../Interface/Students";
 import { Api } from "./Api";
@@ -157,7 +156,7 @@ export class StudentsApi extends Api{
             {
                 method: 'POST',
                 body: formData,
-                // ❌ NO headers
+                
             });
 
             if (!response.ok) {

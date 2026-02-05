@@ -9,4 +9,5 @@ export interface LoginResponse {
     preferenciasVisualizacion?: string; 
     asistenteVoz?: string; 
     sexo?: string;
+    id?: number;
 }

@@ -118,7 +118,8 @@ export const styles = StyleSheet.create({
     borderWidth: 0.5,
     borderColor: "white",
     backgroundColor: "#FF8C42",
-    width: 120,
+    minWidth: 100,      
+    paddingHorizontal: 10, 
     height: "auto",
     borderRadius: 5,
     marginLeft: 10,
@@ -211,7 +212,7 @@ export const styles = StyleSheet.create({
 
   error: {
     color: "tomato",
-    fontSize: scaleFont(16),
+    fontSize: scaleFont(12),
     fontFamily: "escolar-bold",
     textAlign: "center",
   },
@@ -243,6 +244,16 @@ export const styles = StyleSheet.create({
     alignItems: "center",
     marginTop: 10,
   },
+
+  errorContainer: {
+    backgroundColor: "#FFEBEE",
+    marginTop: 15,
+    padding: 8,
+    borderRadius: 10,
+  },
+
+
+
   radioOuter: {
     height: 24,
     width: 24,
@@ -306,9 +317,58 @@ export const styles = StyleSheet.create({
     textDecorationLine: 'underline',
   },
   
-  
 
-  
+  botonDeshabilitado: {
+    backgroundColor: "#CCCCCC", // Un gris claro
+    opacity: 0.5,
+  },
+  textBotonDeshabilitado: {
+    color: "#888888",
+  },
+
+
+  card: {
+    backgroundColor: "#FFFFFF",
+    borderRadius: 20,            // Bordes redondeados suaves
+    marginVertical: 10,          // Separación entre tarjetas
+    marginHorizontal: 5,
+    padding: 15,
+    flexDirection: "row",        // Alinea foto y texto horizontalmente
+    alignItems: "center",        // Centra verticalmente el contenido
+    
+    // --- Sombras para iOS ---
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.1,
+    shadowRadius: 5,
+
+    // --- Sombra para Android ---
+    elevation: 5,
+    
+    // El borde izquierdo se define dinámicamente en el componente 
+    // según si está visitado o no, pero aquí damos el grosor base
+    borderLeftWidth: 10, 
+  },
+
+  // Estilo para el contenedor de texto dentro de la card
+  cardInfo: {
+    flex: 1,
+    marginLeft: 15,
+    justifyContent: "center",
+  },
+
+  // Estilo para la imagen del profesor
+  profesorFoto: {
+    width: 75,
+    height: 75,
+    borderRadius: 37.5, // Totalmente circular
+    backgroundColor: "#F0F0F0",
+    borderWidth: 2,
+    borderColor: "#F5F5F5",
+  },
   asistente: {
     borderWidth: 3,
     borderRadius: 50,
@@ -316,4 +376,14 @@ export const styles = StyleSheet.create({
   },
   buttonActive: {},
   buttonDissable: {},
+  botonSumaResta: {
+    padding: 5,
+  },
+  botonPrincipal: {
+    padding: 20,
+    borderRadius: 15,
+    alignItems: 'center',
+    justifyContent: 'center',
+    elevation: 3,
+  }, 
 });

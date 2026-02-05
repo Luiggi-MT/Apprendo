@@ -25,18 +25,24 @@ export default function AdminScreen({ navigation }: { navigation: any }) {
     },
     {
       id: "3",
+      uriPictograma: "aula",
+      nameBottom: "GESTIÓN.DE.AULAS",
+      navigation: "GestionAulas",
+    },
+    {
+      id: "4",
       uriPictograma: "tareasPeticion",
       nameBottom: "GESTIÓN DE.TAREAS.DE PETICIÓN",
       navigation: "TareaPeticion",
     },
     {
-      id: "4",
+      id: "5",
       uriPictograma: "chat",
       nameBottom: " .CHAT. ",
       navigation: "Chat",
     },
     {
-      id: "5",
+      id: "6",
       uriPictograma: "tareasPorPasos",
       nameBottom: "GESTIÓN DE.TAREAS.POR PASOS",
       navigation: "TareasPorPasos",

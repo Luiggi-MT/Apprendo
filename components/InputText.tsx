@@ -25,7 +25,7 @@ export default function InputText({
     <View>
       <Text style={styles.text_legend}>{nameInput}</Text>
       <TextInput
-        style={[styles.buscador, styles.shadow, {}]}
+        style={[styles.buscador, styles.shadow, { textAlign: "left" }]}
         onChangeText={handleTextChange}
         value={value}
         secureTextEntry={secure}

@@ -1,15 +1,69 @@
-import * as SecureStore from 'expo-secure-store';
 import { ImagePassword } from "../Interface/ImagePassword";
 import { LoginResponse } from "../Interface/LoginResponse";
 import { LoginResponseStudnet } from "../Interface/LoginResponseStudent";
 import { Api } from "./Api";
+import { Storage } from "../Storage/Storage";
+
+
 
 export class Login extends Api {
     
-    // Función auxiliar para obtener el token guardado
+    private static TOKEN_KEY = 'userToken';
+    private static USER_TYPE_KEY = 'userType';
+    private static SESSION_EXPIRY_KEY = 'sessionExpiry';
+
+    private async vincularNotificaciones(idEstudiante: number): Promise<void> {
+        try {
+            
+            const token = await this.registrarDispositivo(idEstudiante);
+            
+            if (!token) {
+                console.warn("No se pudo obtener el Expo Push Token.");
+                return;
+            }
+
+            const response = await fetch(`${Api.apiUrl}/guardar-token`, {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    'id_estudiante': idEstudiante,
+                    'token': token
+                })
+            });
+
+            if (response.ok) {
+                console.log("Token de notificaciones actualizado en el servidor.");
+            } else {
+                console.error("Error al guardar el token en el backend.");
+            }
+        } catch (error) {
+            console.error("Error crítico en el proceso de vinculación de notificaciones:", error);
+        }
+    }
+
     private async getAuthHeader() {
-        const token = await SecureStore.getItemAsync('userToken');
+        const token = await Storage.getItem(Login.TOKEN_KEY);
         return token ? { 'Authorization': `Bearer ${token}` } : {};
+    }
+
+    private async isTokenExpired(): Promise<boolean> {
+        const expiry = await Storage.getItem(Login.SESSION_EXPIRY_KEY);
+        if (!expiry) return true;
+        return new Date(expiry) < new Date();
+    }
+
+    private async saveSessionInfo(token: string, expiresIn?: number): Promise<void> {
+        try{
+            await Storage.setItem(Login.TOKEN_KEY, token);
+            if (expiresIn) {
+                const expiryDate = new Date();
+                expiryDate.setSeconds(expiryDate.getSeconds() + expiresIn);
+                await Storage.setItem(Login.SESSION_EXPIRY_KEY, expiryDate.toISOString());
+            }
+        }catch(e){
+            console.error(e);
+        }
+        
     }
 
     public async loginUser(userName: string, password: string): Promise<LoginResponse> {
@@ -17,94 +71,136 @@ export class Login extends Api {
             const response = await fetch(`${Api.apiUrl}/login`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ 'username': userName, 'password': password }),
+                body: JSON.stringify({
+                    username: userName,
+                    password: password
+                }),
+            });
+
+            const data = await response.json();
+
+            console.log(JSON.stringify(data, null, 2))
+
+            if (!response.ok) {
+                await Storage.deleteItem(Login.TOKEN_KEY);
+                return {
+                    ok: false,
+                    message: data.error || "Credenciales inválidas"
+                };
+            }
+
+            if (data.access_token) {
+                
+                await this.saveSessionInfo(data.access_token, data.expires_in);
+                await Storage.setItem(Login.USER_TYPE_KEY, data.tipo);
+            }
+
+            return { ...data, ok: true };
+
+        } catch (error: any) {
+            console.error('Login error:', error);
+            return { ok: false, message: "Error de conexión con el servidor" };
+        }
+    }
+
+    public async loginStudent(
+        id: number,
+        tipoContraseña: string,
+        password?: string,
+        passwordImage?: ImagePassword[]
+    ): Promise<LoginResponseStudnet> {
+        try {
+            const response = await fetch(`${Api.apiUrl}/login_student`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    id,
+                    password,
+                    tipoContraseña,
+                    passwordImage
+                }),
             });
 
             const data = await response.json();
 
             if (!response.ok) {
-                return { ok: false, message: data.error || "Credenciales inválidas" };
+                return {
+                    ok: false,
+                    message: data.error || "Error en el login",
+                    fallos: data.fallos || [],
+                    statusCode: response.status
+                } as unknown as LoginResponseStudnet;
             }
 
-            // --- PASO CLAVE: Guardar el Token JWT ---
             if (data.access_token) {
-                await SecureStore.setItemAsync('userToken', data.access_token);
+                await this.saveSessionInfo(data.access_token, data.expires_in);
+                await Storage.setItem(Login.USER_TYPE_KEY, 'estudiante');
+
+                
+                await this.vincularNotificaciones(id);
             }
 
-            return { ...data, ok: true };
-        
+            return { ...data, ok: true } as LoginResponseStudnet;
+
         } catch (error: any) {
-            return { ok: false, message: "Error de conexión con el servidor" };
+            console.error('Student login error:', error);
+            return {
+                ok: false,
+                message: "Error de red",
+                error: error.message
+            } as unknown as LoginResponseStudnet;
+        }
+    }
+
+    
+    public async checkSession(): Promise<LoginResponse> {
+        try {
+            const token = await Storage.getItem(Login.TOKEN_KEY);
+            console.log("token", JSON.stringify(token, null, 2))
+            if (!token) return { ok: false, message: "No hay sesión activa" };
+
+            if (await this.isTokenExpired()) {
+                await this.logoutUser();
+                return { ok: false, message: "Sesión expirada" };
+            }
+
+            const response = await fetch(`${Api.apiUrl}/session`, {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${token}` },
+            });
+
+            const data = await response.json();
+            if (response.status === 401) {
+                await this.logoutUser();
+                return { ok: false, message: "Sesión expirada" };
+            }
+
+            return response.ok ? { ...data, ok: true } : { ok: false, message: data.error };
+        } catch (error: any) {
+            return { ok: false, message: "Error al verificar la sesión" };
         }
     }
 
     public async logoutUser(): Promise<boolean> {
         try {
-            // En JWT el logout es principalmente borrar el token del cliente
-            await SecureStore.deleteItemAsync('userToken');
+            await Promise.all([
+                Storage.deleteItem(Login.TOKEN_KEY),
+                Storage.deleteItem(Login.SESSION_EXPIRY_KEY),
+                Storage.deleteItem(Login.USER_TYPE_KEY)
+            ]);
             return true;
         } catch (error) {
             return false;
         }
     }
 
-    public async checkSession(): Promise<LoginResponse> {
-        try {
-            const authHeader = await this.getAuthHeader();
-            
-            // Si ni siquiera hay token guardado, no intentamos la petición
-            if (!authHeader.Authorization) {
-                return { ok: false, message: "No active session" };
-            }
-
-            const response = await fetch(`${Api.apiUrl}/session`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...authHeader // Enviamos el Bearer Token
-                },
-            });
-
-            const data = await response.json();
-            
-            if (response.status === 401) {
-                await SecureStore.deleteItemAsync('userToken'); // Limpiar si el token expiró
-                return { ok: false, message: "Session expired" };
-            }
-
-            return { ...data, ok: response.ok };
-        } catch (error: any) {
-            return { ok: false, message: "Error checking session" };
-        }
+    public async getCurrentToken(): Promise<string | null> {
+        return await Storage.getItem(Login.TOKEN_KEY);
     }
 
-    public async loginStudent(id: number, tipoContraseña: string, password?: string, passwordImage?: ImagePassword[]): Promise<LoginResponseStudnet> {
-        try {
-            const response = await fetch(`${Api.apiUrl}/login_student`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    'id': id,
-                    'password': password,
-                    'tipoContraseña': tipoContraseña, 
-                    'passwordImage' : passwordImage, 
-                }),
-            });
-            
-            const data = await response.json();
-
-            if (!response.ok) {
-                return { ok: false, message: data.error, fallos: data.fallos } as LoginResponseStudnet;
-            }
-
-            // --- Guardar Token del Estudiante ---
-            if (data.access_token) {
-                await SecureStore.setItemAsync('userToken', data.access_token);
-            }
-            
-            return { ...data, ok: true };
-        } catch (error: any) {
-            return { ok: false, message: "Error de red" } as LoginResponseStudnet;
-        }
+    public async isAuthenticated(): Promise<boolean> {
+        const token = await this.getCurrentToken();
+        if (!token) return false;
+        return !(await this.isTokenExpired());
     }
 }

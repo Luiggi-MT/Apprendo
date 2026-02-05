@@ -13,20 +13,23 @@ export default function Boton({
 }: {
   uri?: string;
   nameBottom?: string;
-  onPress: () => void;
+  onPress?: () => void;
   dissable?: boolean;
   arasaacService?: boolean;
   component?: boolean;
 }) {
   const ArasaacService = new Arasaac();
   const api = new ConnectApi();
-  let texts: string[];
-  if (nameBottom) texts = nameBottom.split(".");
+  const texts = typeof nameBottom === "string" ? nameBottom.split(".") : [];
+
+  const opacityStyle = dissable ? { opacity: 0.4 } : { opacity: 1 };
+  const grayscaleStyle = dissable ? { tintColor: "gray" } : {};
+
   return (
     <TouchableOpacity
       onPress={onPress}
       disabled={dissable}
-      style={{ justifyContent: "center", alignItems: "center" }}
+      style={[{ justifyContent: "center", alignItems: "center" }, opacityStyle]}
     >
       {component ? (
         <View style={styles.asistente}>
@@ -42,8 +45,15 @@ export default function Boton({
       ) : (
         <Image source={{ uri: api.getFoto(uri) }} style={styles.image} />
       )}
+
       {nameBottom && nameBottom.length > 0 && (
-        <View style={[styles.legendBoton, styles.shadow]}>
+        <View
+          style={[
+            styles.legendBoton,
+            styles.shadow,
+            dissable && { backgroundColor: "#A9A9A9", borderColor: "#888" },
+          ]}
+        >
           {texts.map((text, it) => (
             <Text key={it} style={styles.textBoton}>
               {text}

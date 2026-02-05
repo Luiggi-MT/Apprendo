@@ -61,8 +61,19 @@ export class Arasaac {
         //Impresora
         ["impresora", 26138],
 
+        //Aula
+        ["aula", 9814],
+        ["asignarAula", 33072],
+
+        //Ojo
+        ["ojo", 6573],
+
+        //Hecho
+        ["hecho", 11599],
+
         //Arasaac Logo
         ["arasaacLogo", 35071],
+
 
     ]);
     private apiUrl: string = `https://api.arasaac.org/v1/pictograms`;

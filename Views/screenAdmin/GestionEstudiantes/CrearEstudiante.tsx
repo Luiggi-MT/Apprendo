@@ -12,6 +12,7 @@ import { Students } from "../../../class/Interface/Students";
 import { ActivityIndicator } from "react-native-paper";
 import { ImagePassword } from "../../../class/Interface/ImagePassword";
 import { tarjetaDescipcion_styles } from "../../../styles/tarjetaDescripcion_styles";
+import { Arasaac } from "../../../class/Arasaac/getPictograma";
 
 export default function CrearEstudiante({ navigation }: { navigation: any }) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -22,6 +23,7 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
   const [error, setError] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string[]>([]);
   const [isCreate, setIsCreate] = useState<boolean>(false);
+  const [secureText, setSecureText] = useState(true);
 
   const [passwordImages, setPasswordImages] = useState<ImagePassword[]>([]);
   const [distractorsImages, setDistractorImages] = useState<ImagePassword[]>(
@@ -74,6 +76,7 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
   ]);
 
   const api = new ConnectApi();
+  const arasaacService = new Arasaac();
 
   const atras = () => {
     navigation.goBack();
@@ -231,21 +234,8 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
             onChangeText={handleTextChange}
             value={text}
           />
-          <Text style={styles.text_legend}>TIPO DE CONTRASEÑA:</Text>
-          <View style={{ zIndex: 1000 }}>
-            <DropDownPicker
-              open={openContraseña}
-              value={contraseñaValue}
-              items={contraseñaItems}
-              setOpen={setOpenContraseña}
-              setValue={setContraseñaValue}
-              setItems={setContraseñaItems}
-              style={[styles.shadow, styles.buscador, { width: "50%" }]}
-              textStyle={styles.dropdownTextStyle}
-            />
-          </View>
           <Text style={styles.text_legend}>SEXO:</Text>
-          <View style={{ zIndex: 900 }}>
+          <View style={{ zIndex: 1000 }}>
             <DropDownPicker
               open={openSexo}
               value={sexoValue}
@@ -257,22 +247,90 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
               textStyle={styles.dropdownTextStyle}
             />
           </View>
+          <Text style={styles.text_legend}>TIPO DE CONTRASEÑA:</Text>
+          <View style={{ zIndex: 900 }}>
+            <DropDownPicker
+              open={openContraseña}
+              value={contraseñaValue}
+              items={contraseñaItems}
+              setOpen={setOpenContraseña}
+              setValue={setContraseñaValue}
+              setItems={setContraseñaItems}
+              style={[styles.shadow, styles.buscador, { width: "50%" }]}
+              textStyle={styles.dropdownTextStyle}
+            />
+          </View>
+
           <Text style={styles.text_legend}>NUEVA CONTRASEÑA:</Text>
           {contraseñaValue === "alfanumerica" ? (
-            <TextInput
-              style={[styles.buscador, styles.shadow]}
-              onChangeText={handlePasswordChange}
-              value={password}
-              secureTextEntry={true}
-            />
+            <View
+              style={[
+                styles.buscador,
+                styles.shadow,
+                {
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  paddingRight: 15,
+                },
+              ]}
+            >
+              <TextInput
+                style={{ flex: 1, height: "100%" }}
+                onChangeText={handlePasswordChange}
+                value={password}
+                secureTextEntry={secureText}
+              />
+              <TouchableOpacity onPress={() => setSecureText(!secureText)}>
+                {secureText && (
+                  <Image
+                    source={{ uri: api.getComponent("ojo.png") }}
+                    style={styles.image}
+                  />
+                )}
+                {!secureText && (
+                  <Image
+                    source={{ uri: arasaacService.getPictograma("ojo") }}
+                    style={styles.image}
+                  />
+                )}
+              </TouchableOpacity>
+            </View>
           ) : contraseñaValue === "pin" ? (
-            <TextInput
-              style={[styles.buscador, styles.shadow]}
-              onChangeText={handlePasswordChange}
-              value={password}
-              keyboardType="number-pad"
-              secureTextEntry={true}
-            />
+            <View
+              style={[
+                styles.buscador,
+                styles.shadow,
+                {
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  paddingRight: 15,
+                },
+              ]}
+            >
+              <TextInput
+                style={{ flex: 1, height: "100%" }}
+                onChangeText={handlePasswordChange}
+                value={password}
+                keyboardType="number-pad"
+                secureTextEntry={secureText}
+              />
+              <TouchableOpacity onPress={() => setSecureText(!secureText)}>
+                {secureText && (
+                  <Image
+                    source={{ uri: api.getComponent("ojo.png") }}
+                    style={styles.image}
+                  />
+                )}
+                {!secureText && (
+                  <Image
+                    source={{ uri: arasaacService.getPictograma("ojo") }}
+                    style={styles.image}
+                  />
+                )}
+              </TouchableOpacity>
+            </View>
           ) : (
             <Boton
               uri="olvideContraseña"

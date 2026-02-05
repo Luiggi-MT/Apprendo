@@ -1,18 +1,25 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Image, Text, View } from "react-native";
-import { useFocusEffect } from "@react-navigation/native";
+import {
+  Image,
+  Text,
+  TouchableOpacity,
+  View,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  TouchableWithoutFeedback,
+  Keyboard,
+} from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import { ConnectApi } from "../../class/Connect.Api/ConnectApi";
 import { scaleFont, styles } from "../../styles/styles";
-import InputText from "../../components/InputText";
 import Boton from "../../components/Boton";
 import Header from "../../components/Header";
 import { Speak } from "../../class/Speak/Speak";
 import { homeScreem_styles } from "../../styles/homeScreem_styles";
-import { Students } from "../../class/Interface/Students";
 import { UserContext } from "../../class/context/UserContext";
-import { tarjetaDescipcion_styles } from "../../styles/tarjetaDescripcion_styles";
+import { Arasaac } from "../../class/Arasaac/getPictograma";
 
 export default function LoginAlumnoAlfanumerica({
   navigation,
@@ -24,158 +31,176 @@ export default function LoginAlumnoAlfanumerica({
   const { student } = route.params;
   const api = new ConnectApi();
   const speak = new Speak();
+  const arasaacService = new Arasaac();
 
   const [password, setPassword] = useState<string>("");
   const [error, setError] = useState<string[]>([]);
-  const { user, setUser } = useContext(UserContext);
+  const { setUser } = useContext(UserContext);
   const [errorValue, setErrorValue] = useState<boolean>(false);
+  const [secureText, setSecureText] = useState(true);
 
-  const errorMessage: string[] = [];
-
-  const handleContraseñaPress = (inputContraseña: string) => {
-    setPassword(inputContraseña);
-  };
   const handleBorrarPress = () => {
     setPassword("");
+    setErrorValue(false);
   };
-
   const atras = () => {
     speak.detenerAsistente();
     navigation.goBack();
   };
 
-  const activarAsistente = async () => {
-    speak.hablar("Te escucho", async () => {
-      const comando = await speak.procesarComandoVoz();
-      if (comando.toLowerCase().includes("confirmar")) {
-        speak.hablar("Has dicho confirmar");
-      } else if (comando.toLocaleLowerCase().includes("borrar")) {
-        speak.hablar("Se ha borrado el campo contraseña");
-        setPassword("");
-      } else if (comando.toLocaleLowerCase().includes("atrás")) {
-        speak.hablar("Volviendo a la página de inicio");
-        speak.detenerAsistente();
-        navigation.goBack();
-      } else {
-        speak.hablar("Lo siento, no te he entendido");
-      }
-    });
+  const activarAsistente = () => {
+    // Implementar lógica del asistente si es necesario
   };
 
   const handleConfirmarPress = async () => {
     setErrorValue(false);
-    setError([]);
     if (password === "") {
       setErrorValue(true);
-      errorMessage.push("EL CAMPO COONTRASEÑA NO PUEDE ESTA VACIO");
-      if (student.asistenteVoz !== "none") {
-        speak.hablar("Tienes que escribir tu contraseña", () => {
-          speak.hablar("Prueba de nuevo");
-        });
-      }
-      setError(errorMessage);
+      setError(["CAMPO VACÍO"]);
       return;
     }
-
     const response = await api.loginStudent(
       student.id,
       student.tipoContraseña,
       password,
     );
     if (!response.ok) {
-      errorMessage.push(response.message.toUpperCase());
-      if (student.asistenteVoz !== "none") {
-        speak.hablar(
-          "La contraseña que has introducido no es la correcta. Intentalo de nuevo",
-        );
-      }
-      return;
-    }
-    if (errorMessage.length > 0) {
       setErrorValue(true);
-      setError(errorMessage);
+      setError([response.message.toUpperCase()]);
       return;
     }
-    const studentLogin: Students = {
-      id: student.id,
-      username: student.username,
-      foto: student.foto,
-      tipoContraseña: student.tipoContraseña,
-      accesibilidad: student.accesibilidad,
-      preferenciasVisualizacion: student.preferenciasVisualizacion,
-      asistenteVoz: student.asistenteVoz,
-      sexo: student.sexo,
-    };
-    await setUser(studentLogin);
-
-    if (studentLogin.preferenciasVisualizacion === "diarias")
-      navigation.navigate("DiariasScreem");
-    if (studentLogin.preferenciasVisualizacion === "semanales")
-      //cambiar esto
-      navigation.navigate("MensualScreen");
+    await setUser(student);
+    navigation.navigate(
+      student.preferenciasVisualizacion === "diarias"
+        ? "DiariasScreem"
+        : "MensualScreen",
+    );
   };
 
   useEffect(() => {
     if (student.asistenteVoz !== "none") {
       speak.hablar(
-        `${
-          student.sexo === "masculino"
-            ? "Bienvenido"
-            : student.sexo === "femenino"
-              ? "Bienvenida"
-              : "Bienvenide"
-        }  ${student.username}. Estas en la pantalla para iniciar sesión.`,
-        () => {
-          speak.hablar(
-            `Escribe tu contraseña y a continuación presiona el botón de confirmar.`,
-          );
-        },
+        `Hola ${student.username}. Introduce tu contraseña y a continuación presiona continuar`,
       );
     }
   }, []);
-  useFocusEffect(() => {
-    return () => {
-      speak.detenerAsistente();
-    };
-  });
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider style={styles.container}>
       <Header
         uri="volver"
         nameBottom="ATRÁS"
-        navigation={() => atras()}
+        navigation={atras}
         nameHeader="ENTRAR"
         uriPictograma="entrar"
-        style={scaleFont(36)}
+        style={scaleFont(28)}
       />
-      <View style={{ flex: 1, width: "100%", paddingHorizontal: 10 }}>
+
+      <View
+        style={{
+          flex: 1,
+          paddingHorizontal: 20,
+          justifyContent: "space-evenly",
+          paddingBottom: 10,
+        }}
+      >
         <View
           style={[
             styles.content,
             styles.shadow,
-            { justifyContent: "center", alignItems: "center" },
+            {
+              backgroundColor: "#F5F5F5",
+              alignItems: "center",
+              paddingVertical: 15,
+              borderRadius: 20,
+              marginVertical: 5,
+            },
           ]}
         >
           <Image
             source={{ uri: api.getFoto(student.foto) }}
-            style={[tarjetaDescipcion_styles.imageTarjet, { borderWidth: 1 }]}
+            style={{
+              width: 90,
+              height: 90,
+              borderRadius: 45,
+              borderWidth: 2,
+              borderColor: "#FF8C42",
+            }}
           />
-          <Text style={homeScreem_styles.studentCardUsername}>
+          <Text
+            style={[
+              homeScreem_styles.studentCardUsername,
+              { marginTop: 5, fontSize: scaleFont(18) },
+            ]}
+          >
             {student.username.toUpperCase()}
           </Text>
         </View>
-        <InputText
-          placehorder="CONTRASEÑA"
-          value={password}
-          input={handleContraseñaPress}
-          secure={true}
-        />
-        {errorValue && (
-          <View>
-            <Text style={[styles.error, { margin: 10 }]}>{error}</Text>
+
+        <View>
+          <Text
+            style={[
+              styles.text_legend,
+              { marginBottom: 5, textAlign: "center" },
+            ]}
+          >
+            CONTRASEÑA:
+          </Text>
+          <View
+            style={[
+              styles.buscador,
+              styles.shadow,
+              {
+                flexDirection: "row",
+                alignItems: "center",
+                height: 55,
+                backgroundColor: "#FFF",
+                borderRadius: 12,
+                paddingRight: 15,
+                margin: 0,
+              },
+            ]}
+          >
+            <TextInput
+              style={{
+                flex: 1,
+                height: "100%",
+                fontSize: 20,
+                paddingLeft: 15,
+                fontFamily: "escolar-bold",
+              }}
+              onChangeText={setPassword}
+              value={password}
+              secureTextEntry={secureText}
+              autoCapitalize="none"
+            />
+            <TouchableOpacity onPress={() => setSecureText(!secureText)}>
+              {secureText && (
+                <Image
+                  source={{ uri: api.getComponent("ojo.png") }}
+                  style={{ width: 35, height: 35 }}
+                />
+              )}
+              {!secureText && (
+                <Image
+                  source={{ uri: arasaacService.getPictograma("ojo") }}
+                  style={{ width: 35, height: 35 }}
+                />
+              )}
+            </TouchableOpacity>
           </View>
-        )}
-        <View style={styles.navigationButtons}>
+          {errorValue && (
+            <View style={[styles.errorContainer]}>
+              <Text style={[styles.error]}>{error}</Text>
+            </View>
+          )}
+        </View>
+
+        <View
+          style={[
+            styles.navigationButtons,
+            { paddingHorizontal: 0, marginVertical: 5 },
+          ]}
+        >
           <Boton uri="borrar" nameBottom="BORRAR" onPress={handleBorrarPress} />
           <Boton
             uri="ok"
@@ -183,8 +208,9 @@ export default function LoginAlumnoAlfanumerica({
             onPress={handleConfirmarPress}
           />
         </View>
+
         {student.asistenteVoz === "bidireccional" && (
-          <View>
+          <View style={{ alignItems: "center" }}>
             <Boton
               component={true}
               uri="Cohete.png"

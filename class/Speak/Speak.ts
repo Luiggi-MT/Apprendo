@@ -71,6 +71,43 @@ export class Speak {
   }
 
   public async hablar(texto: string, onDone?: () => void) {
+    /*
+    try {
+      // 1. Configurar el modo para REPRODUCCIÓN (importante tras haber grabado)
+      await Audio.setAudioModeAsync({
+        allowsRecordingIOS: false, // Desactivar grabación para dar prioridad al altavoz
+        playsInSilentModeIOS: true,
+        shouldDuckAndroid: true,
+        playThroughEarpieceAndroid: false,
+      });
+
+      // 2. Cargar el sonido
+      const { sound } = await Audio.Sound.createAsync(
+        { uri: `${this.api.getUrl()}/generar-voz?texto=${encodeURIComponent(texto)}` },
+        { shouldPlay: true } // Que empiece a sonar en cuanto cargue
+      );
+
+      // 3. Manejar el evento onDone
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (status.isLoaded && status.didJustFinish) {
+          sound.unloadAsync(); // Liberar memoria
+          if (onDone) onDone();
+        }
+      });
+
+    } catch (error) {
+      console.error("Error reproduciendo audio del servidor:", error);
+    }*/
+    
+    // 1. Obtener todas las voces disponibles en el dispositivo
+    const voices = await Speech.getAvailableVoicesAsync();
+  
+    // 2. Intentar buscar una voz premium o específica de España (es-es)
+    // En iOS, las voces que terminan en 'enhanced' suenan mucho mejor.
+    const selectedVoice = voices.find(v => 
+      v.language.includes("es") && (v.name.includes("premium") || v.name.includes("enhanced"))
+      ) || voices.find(v => v.language.includes("es"));
+
     await Audio.setAudioModeAsync({
       allowsRecordingIOS: false,
       playsInSilentModeIOS: true,
@@ -78,7 +115,8 @@ export class Speak {
 
     Speech.speak(texto, {
       language: "es-ES",
-      rate: 0.9,
+      voice: selectedVoice?.identifier,
+      rate: 1.0,
       pitch: 1.0,
       onDone,
     });
