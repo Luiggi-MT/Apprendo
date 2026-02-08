@@ -38,7 +38,6 @@ export default function AsignacionTareas({
       setTareas(response.tareas);
       setOffset(response.offset);
       setTotal(response.count);
-      console.log(JSON.stringify(response, null, 2));
     });
   }, []);
 

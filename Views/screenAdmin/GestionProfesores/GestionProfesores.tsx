@@ -31,7 +31,6 @@ export default function GestionProfesores({ navigation }: { navigation: any }) {
   };
   useEffect(() => {
     api.getProfesores(offset, limit).then((response) => {
-      console.log(response);
       setOffset(response.offset);
       setTotal(response.total);
       setProfesores(response.profesores);

@@ -79,8 +79,6 @@ export class Login extends Api {
 
             const data = await response.json();
 
-            console.log(JSON.stringify(data, null, 2))
-
             if (!response.ok) {
                 await Storage.deleteItem(Login.TOKEN_KEY);
                 return {
@@ -156,7 +154,6 @@ export class Login extends Api {
     public async checkSession(): Promise<LoginResponse> {
         try {
             const token = await Storage.getItem(Login.TOKEN_KEY);
-            console.log("token", JSON.stringify(token, null, 2))
             if (!token) return { ok: false, message: "No hay sesión activa" };
 
             if (await this.isTokenExpired()) {

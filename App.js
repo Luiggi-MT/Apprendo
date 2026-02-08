@@ -194,7 +194,11 @@ export default function App() {
   const onLayoutRootView = useCallback(async () => {
     if(fontsLoaded && initialRoute) await SplashScreen.hideAsync()
   }, [fontsLoaded, initialRoute]);
-  if(!fontsLoaded || !initialRoute) return <Splash name="CARGANDO SESIÓN" />; 
+  if(!fontsLoaded || !initialRoute) 
+    return 
+      <View style={{justifyContent: "center", alignItems: "center"}}>
+        <Splash name="CARGANDO SESIÓN" />; 
+      </View>
 
   return (
     <View style={{flex: 1}} onLayout={onLayoutRootView}>

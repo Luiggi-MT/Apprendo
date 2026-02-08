@@ -30,10 +30,6 @@ export class TareasApi extends Api{
 
     public async createTareaComanda(uri: number, titulo: string, id_profesor: number): Promise<boolean>{
         try{
-            console.log("TAREAS.TS")
-            console.log("uri", uri)
-            console.log("titulo", titulo)
-            console.log("id_profesor", id_profesor)
 
             const response = await fetch(`${Api.apiUrl}/tareas-comanda`, {
                 method: "POST", 

@@ -38,7 +38,6 @@ export default function CrearMenu({ navigation }: { navigation: any }) {
     setIsLoading(true);
     setError(false);
 
-    console.log(JSON.stringify(user, null, 2));
     const response = await api.createTareaComanda(
       uriCoamanda,
       "COMANDA",

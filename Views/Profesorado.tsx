@@ -1,16 +1,6 @@
 import React, { useContext, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  TouchableWithoutFeedback,
-  Keyboard,
-} from "react-native";
+import { View, Text, TextInput, TouchableOpacity, Image } from "react-native";
 import { ConnectApi } from "../class/Connect.Api/ConnectApi";
 import Header from "../components/Header";
 import { scaleFont, styles } from "../styles/styles";
@@ -33,6 +23,14 @@ export default function Profesorado({ navigation }: { navigation: any }) {
 
   const atras = () => navigation.goBack();
 
+  const handleUsuarioChange = (word: string) => {
+    setUsuario(word.toUpperCase());
+  };
+
+  const handleContraseñaChange = (word: string) => {
+    setContraseña(word.toUpperCase());
+  };
+
   const onBorrarPress = () => {
     setUsuario("");
     setContraseña("");
@@ -44,7 +42,10 @@ export default function Profesorado({ navigation }: { navigation: any }) {
       setError("LA CONTRASEÑA DEBE TENER AL MENOS 4 CARACTERES");
       return;
     }
-    const response: LoginResponse = await api.loginUser(usuario, contraseña);
+    const response: LoginResponse = await api.loginUser(
+      usuario.toLowerCase(),
+      contraseña.toLowerCase(),
+    );
     if (!response.ok) {
       setError(response.message.toUpperCase());
       return;
@@ -86,7 +87,11 @@ export default function Profesorado({ navigation }: { navigation: any }) {
             },
           ]}
         >
-          <InputText nameInput="USUARIO:" input={setUsuario} value={usuario} />
+          <InputText
+            nameInput="USUARIO:"
+            input={handleUsuarioChange}
+            value={usuario}
+          />
 
           <Text style={[styles.text_legend, { marginTop: 15 }]}>
             CONTRASEÑA:
@@ -115,7 +120,7 @@ export default function Profesorado({ navigation }: { navigation: any }) {
                 fontFamily: "escolar-bold",
                 color: "#000",
               }}
-              onChangeText={setContraseña}
+              onChangeText={handleContraseñaChange}
               value={contraseña}
               secureTextEntry={secureText}
               autoCapitalize="none"

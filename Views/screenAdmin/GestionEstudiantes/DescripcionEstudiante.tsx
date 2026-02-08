@@ -195,9 +195,7 @@ export default function DescripcionEstudiante({
       },
     });
   };
-  useEffect(() => {
-    console.log(JSON.stringify(student, null, 2));
-  }, [student]);
+
   return (
     <SafeAreaProvider>
       <Header

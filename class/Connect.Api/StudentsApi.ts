@@ -287,7 +287,6 @@ export class StudentsApi extends Api{
             }
         }
         const datas = await response.json();
-        console.log(JSON.stringify(datas, null, 2));
         const imagenesModificadas = datas.message.map((item: any) => {
             return {
                 ...item,

@@ -58,8 +58,6 @@ export default function ComandaAula({
     // IMPORTANTE: Asegúrate de pasar aula.id_visita en la llamada a la API
     const res = await api.getMenuPorFecha(fecha, 100, 0, aula.id_visita);
 
-    console.log(JSON.stringify(res, null, 2));
-
     if (res.platos && res.platos.length > 0) {
       setTodosLosPlatos(res.platos);
       setMenuActivo(res.platos[0].nombre_menu);

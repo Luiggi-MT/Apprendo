@@ -31,7 +31,12 @@ export default function CrearProfesor({ navigation }: { navigation: any }) {
       return;
     }
     api.createProfesor(username, palabraClave).then((response) => {
-      console.log(response);
+      if (response) {
+        setTimeout(() => {
+          setIsloading(false);
+          navigation.goBack();
+        }, 2000);
+      }
     });
   };
   const atras = () => {
