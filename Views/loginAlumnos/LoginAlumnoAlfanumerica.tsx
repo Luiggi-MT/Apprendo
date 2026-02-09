@@ -30,7 +30,7 @@ export default function LoginAlumnoAlfanumerica({
 }) {
   const { student } = route.params;
   const api = new ConnectApi();
-  const speak = new Speak();
+  //const speak = new Speak();
   const arasaacService = new Arasaac();
 
   const [password, setPassword] = useState<string>("");
@@ -44,7 +44,7 @@ export default function LoginAlumnoAlfanumerica({
     setErrorValue(false);
   };
   const atras = () => {
-    speak.detenerAsistente();
+    //speak.detenerAsistente();
     navigation.goBack();
   };
 
@@ -79,9 +79,9 @@ export default function LoginAlumnoAlfanumerica({
 
   useEffect(() => {
     if (student.asistenteVoz !== "none") {
-      speak.hablar(
-        `Hola ${student.username}. Introduce tu contraseña y a continuación presiona continuar`,
-      );
+      //speak.hablar(
+      //  `Hola ${student.username}. Introduce tu contraseña y a continuación presiona continuar`,
+      //);
     }
   }, []);
   return (

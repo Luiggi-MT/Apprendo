@@ -32,7 +32,7 @@ export default function LoginAlumnoPin({
   route: any;
 }) {
   const { student } = route.params;
-  const speak = new Speak();
+  //const speak = new Speak();
   const api = new ConnectApi();
   const arasaacService = new Arasaac();
 
@@ -60,7 +60,7 @@ export default function LoginAlumnoPin({
   const [secureText, setSecureText] = useState(true);
 
   const atras = () => {
-    speak.detenerAsistente();
+    //speak.detenerAsistente();
     navigation.goBack();
   };
 
@@ -81,7 +81,7 @@ export default function LoginAlumnoPin({
     if (pinValue.length < 4) {
       setError("MÍNIMO 4 CARACTERES");
       setErrorValue(true);
-      if (student.asistenteVoz !== "none") speak.hablar("PIN demasiado corto");
+      //if (student.asistenteVoz !== "none") speak.hablar("PIN demasiado corto");
       return;
     }
     const response = await api.loginStudent(

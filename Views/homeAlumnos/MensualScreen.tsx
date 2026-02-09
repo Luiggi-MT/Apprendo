@@ -19,7 +19,7 @@ export default function MensualScreen({ navigation }: { navigation: any }) {
   const [loading, setLoading] = useState<boolean>(false);
 
   const api = new ConnectApi();
-  const speak = new Speak();
+  //const speak = new Speak();
   const semanales: boolean = true;
 
   const cargarResumenDelMes = async (fechaString: string) => {
@@ -60,16 +60,17 @@ export default function MensualScreen({ navigation }: { navigation: any }) {
     cargarResumenDelMes(hoy);
 
     if (student.asistenteVoz !== "none") {
-      speak.hablar("Estás en el calendario. Elige un día para ver tus tareas.");
+      //speak.hablar("Estás en el calendario. Elige un día para ver tus tareas.");
     }
   }, []);
 
   const perfil = () => {
-    speak.detenerAsistente();
+    //speak.detenerAsistente();
     navigation.navigate("PerfilScreen");
   };
 
   const activarAsistente = async () => {
+    /*
     speak.hablar("Te escucho", async () => {
       const comando = await speak.procesarComandoVoz();
       if (
@@ -80,7 +81,7 @@ export default function MensualScreen({ navigation }: { navigation: any }) {
       } else {
         speak.hablar("Dime 'volver' para ir a la pantalla anterior");
       }
-    });
+    });*/
   };
 
   return (
@@ -118,7 +119,7 @@ export default function MensualScreen({ navigation }: { navigation: any }) {
           onMonthChange={(month) => {
             cargarResumenDelMes(month.dateString);
             if (student.asistenteVoz !== "none") {
-              speak.hablar(`Cambiando al mes de ${month.month}`);
+              //speak.hablar(`Cambiando al mes de ${month.month}`);
             }
           }}
           theme={{

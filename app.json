@@ -19,7 +19,8 @@
       "infoPlist": {
         "NSCameraUsageDescription": "La cámara se usa para seleccionar imágenes de perfil",
         "NSMicrophoneUsageDescription": "El micrófono se usa para funciones educativas",
-        "NSPhotoLibraryUsageDescription": "Acceso a la galería para seleccionar imágenes"
+        "NSPhotoLibraryUsageDescription": "Acceso a la galería para seleccionar imágenes",
+        "NSSpeechRecognitionUsageDescription": "El micrófono se usa para el reconocimiento de voz para procesar comandos."
       }
     },
     "android": {

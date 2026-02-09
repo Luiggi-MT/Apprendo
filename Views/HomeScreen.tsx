@@ -78,7 +78,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
         uri="profesor"
         nameBottom="PROFESORADO"
         navigation={onProfesoradoPress}
-        nameHeader="PROYECTA"
+        nameHeader="APPRENDO"
         style={scaleFont(36)}
       />
 
@@ -157,7 +157,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
 
       <View style={styles.footerContainer}>
         <Text style={styles.footerTextMain}>
-          © {new Date().getFullYear()} PROYECTA
+          © {new Date().getFullYear()} APPRENDO
         </Text>
         <Text style={styles.footerTextSub}>DESARROLLADO POR LUIGGI.MT</Text>
         <TouchableOpacity onPress={() => navigation.navigate("AcercaDe")}>
