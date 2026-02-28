@@ -38,6 +38,7 @@ export default function AsignacionTareas({
       setTareas(response.tareas);
       setOffset(response.offset);
       setTotal(response.count);
+      console.log(JSON.stringify(response, null, 2));
     });
   }, []);
 
@@ -67,9 +68,9 @@ export default function AsignacionTareas({
             {tareas.map((tarea) => (
               <TarjetaDescipcion
                 key={tarea.id}
-                uri={arasaacService.getPictogramaId(tarea.uri)}
+                uri={arasaacService.getPictogramaId(tarea.id_pictograma)}
                 description="ASIGNAR.TAREA"
-                name={tarea.titulo}
+                name={tarea.nombre.toUpperCase()}
                 navigation={() => handleAsignaTareaPress(tarea.id)}
               />
             ))}

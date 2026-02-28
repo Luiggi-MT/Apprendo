@@ -6,28 +6,19 @@ import {
   Image,
   ActivityIndicator,
   StyleSheet,
-  TouchableOpacity,
 } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Header from "../../../../components/Header";
 import { scaleFont, styles } from "../../../../styles/styles";
 import { ConnectApi } from "../../../../class/Connect.Api/ConnectApi";
 import { Arasaac } from "../../../../class/Arasaac/getPictograma";
-import Boton from "../../../../components/Boton"; // Reutilizamos tu componente Boton
+import Boton from "../../../../components/Boton";
 
-export default function DetalleComandaAula({
-  navigation,
-  route,
-}: {
-  navigation: any;
-  route: any;
-}) {
+export default function DetalleComandaAula({ navigation, route }: any) {
   const { id_aula, fecha, nombre_aula } = route.params;
 
-  const [todosLosPlatos, setTodosLosPlatos] = useState<any[]>([]);
-  const [platosFiltrados, setPlatosFiltrados] = useState<any[]>([]);
-  const [menusDisponibles, setMenusDisponibles] = useState<string[]>([]);
-  const [menuSeleccionado, setMenuSeleccionado] = useState<string>("");
+  const [menus, setMenus] = useState<any[]>([]);
+  const [menuSeleccionado, setMenuSeleccionado] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
   const api = new ConnectApi();
@@ -37,17 +28,11 @@ export default function DetalleComandaAula({
     setLoading(true);
     try {
       const data = await api.getComandaDetalladaPorFecha(fecha, id_aula);
-      setTodosLosPlatos(data);
+      console.log(JSON.stringify(data, null, 2));
+      setMenus(data);
 
-      const nombresMenus = [...new Set(data.map((item: any) => item.menu))];
-      setMenusDisponibles(nombresMenus);
-
-      if (nombresMenus.length > 0) {
-        setMenuSeleccionado(nombresMenus[0]);
-        const iniciales = data.filter(
-          (item: any) => item.menu === nombresMenus[0],
-        );
-        setPlatosFiltrados(iniciales);
+      if (data.length > 0) {
+        setMenuSeleccionado(data[0]);
       }
     } catch (error) {
       console.error("Error al cargar detalles:", error);
@@ -57,20 +42,19 @@ export default function DetalleComandaAula({
   };
 
   const cambiarMenu = (direccion: "atras" | "delante") => {
-    const indiceActual = menusDisponibles.indexOf(menuSeleccionado);
+    if (!menuSeleccionado) return;
+    const indiceActual = menus.findIndex(
+      (m) => m.id_menu === menuSeleccionado.id_menu,
+    );
     let nuevoIndice;
 
     if (direccion === "delante") {
-      nuevoIndice = (indiceActual + 1) % menusDisponibles.length;
+      nuevoIndice = (indiceActual + 1) % menus.length;
     } else {
-      nuevoIndice =
-        (indiceActual - 1 + menusDisponibles.length) % menusDisponibles.length;
+      nuevoIndice = (indiceActual - 1 + menus.length) % menus.length;
     }
 
-    const nuevoMenu = menusDisponibles[nuevoIndice];
-    setMenuSeleccionado(nuevoMenu);
-    const filtrados = todosLosPlatos.filter((item) => item.menu === nuevoMenu);
-    setPlatosFiltrados(filtrados);
+    setMenuSeleccionado(menus[nuevoIndice]);
   };
 
   useEffect(() => {
@@ -92,25 +76,25 @@ export default function DetalleComandaAula({
         <Text style={localStyles.tituloAula}>{nombre_aula?.toUpperCase()}</Text>
       </View>
 
-      {/* SELECTOR DE MENÚS CON FLECHAS DE ACCESIBILIDAD */}
-      {!loading && menusDisponibles.length > 0 && (
+      {/* SELECTOR DE MENÚS */}
+      {!loading && menus.length > 0 && (
         <View style={localStyles.containerAccesibilidad}>
           <Boton
             uri="atras"
             onPress={() => cambiarMenu("atras")}
-            dissable={menusDisponibles.length <= 1}
+            dissable={menus.length <= 1}
           />
 
           <View style={localStyles.indicadorMenu}>
             <Text style={localStyles.textoMenuActivo}>
-              {menuSeleccionado.toUpperCase()}
+              {menuSeleccionado?.menu.trim().toUpperCase()}
             </Text>
           </View>
 
           <Boton
             uri="delante"
             onPress={() => cambiarMenu("delante")}
-            dissable={menusDisponibles.length <= 1}
+            dissable={menus.length <= 1}
           />
         </View>
       )}
@@ -122,7 +106,7 @@ export default function DetalleComandaAula({
             color="#FF8C42"
             style={{ marginTop: 50 }}
           />
-        ) : platosFiltrados.length === 0 ? (
+        ) : !menuSeleccionado || menuSeleccionado.platos.length === 0 ? (
           <View
             style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
           >
@@ -130,8 +114,8 @@ export default function DetalleComandaAula({
           </View>
         ) : (
           <FlatList
-            data={platosFiltrados}
-            keyExtractor={(_, index) => index.toString()}
+            data={menuSeleccionado.platos}
+            keyExtractor={(item) => item.id_plato.toString()}
             contentContainerStyle={{ padding: 15 }}
             renderItem={({ item }) => (
               <View
@@ -147,10 +131,10 @@ export default function DetalleComandaAula({
                 </View>
                 <View style={{ flex: 1, marginLeft: 15 }}>
                   <Text style={localStyles.platoNombre}>
-                    {item.plato.toUpperCase()}
+                    {item.nombre.toUpperCase()}
                   </Text>
                   <Text style={localStyles.menuNombre}>
-                    {item.menu.toUpperCase()}
+                    {item.categoria.toUpperCase()}
                   </Text>
                 </View>
                 <View style={localStyles.cantidadBadge}>
@@ -173,7 +157,6 @@ const localStyles = StyleSheet.create({
     color: "#4C80D7",
   },
 
-  // Estilos del nuevo contenedor de flechas
   containerAccesibilidad: {
     backgroundColor: "#FFF",
     flexDirection: "row",
@@ -205,7 +188,7 @@ const localStyles = StyleSheet.create({
     backgroundColor: "#FFF",
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 2,
+    marginBottom: 10,
     padding: 9,
     borderRadius: 25,
     borderWidth: 2,

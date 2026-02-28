@@ -1,8 +1,11 @@
 import { StyleSheet, Platform, Dimensions, PixelRatio } from "react-native";
+import * as Device from "expo-device";
 export const gradientColors = ["#4C80D7", "#42C9A6", "#FDD050"];
 
+const isPhone = Device.deviceType === Device.DeviceType.PHONE;
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
 
 /**
  * Escala el tamaño de la fuente basándose en el ancho de pantalla
@@ -175,7 +178,7 @@ export const styles = StyleSheet.create({
   navigationButtons: {
     flexDirection: "row",
     justifyContent: "space-between",
-    padding: 20,
+    padding: 5,
   },
 
   buttons: {
@@ -386,4 +389,33 @@ export const styles = StyleSheet.create({
     justifyContent: 'center',
     elevation: 3,
   }, 
+  vistaSelectorContainer: {
+  flexDirection: "row",
+  justifyContent: isPhone ? "flex-end" : "center",
+  position: "absolute", // Para ponerlo abajo del header
+  bottom: 10,           // Espacio desde la base del header
+  width: "100%",
+},
+
+vistaSelectorButton: {
+  paddingVertical: 10,
+  paddingHorizontal: isPhone ? 12 : 25,
+  marginHorizontal: isPhone ? 5 : 10,
+  borderRadius: 20,
+  borderWidth: 2,
+  borderColor: "white",
+  backgroundColor: "transparent",
+},
+
+vistaSelectorButtonActive: {
+  backgroundColor: "#4C80D7", // Resalta el botón activo
+},
+
+vistaSelectorText: {
+  color: "white",
+  fontSize: isPhone ? 14 : 18,
+  fontFamily: "escolar-bold",
+  textAlign: "center",
+},
+
 });

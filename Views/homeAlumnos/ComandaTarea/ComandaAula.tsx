@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   Image,
   ActivityIndicator,
-  ScrollView,
 } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Header from "../../../components/Header";
@@ -18,100 +17,219 @@ import { UserContext } from "../../../class/context/UserContext";
 import { Students } from "../../../class/Interface/Students";
 import { Speak } from "../../../class/Speak/Speak";
 import Boton from "../../../components/Boton";
+import Buscador from "../../../components/Buscador";
+import { tarjetaDescipcion_styles } from "../../../styles/tarjetaDescripcion_styles";
 
-export default function ComandaAula({
-  navigation,
-  route,
-}: {
-  navigation: any;
-  route: any;
-}) {
-  const { aula, fecha } = route.params;
+export default function ComandaAula({ navigation, route }: any) {
+  const { aula, fecha, id_tarea_estudiante } = route.params;
 
-  const [todosLosPlatos, setTodosLosPlatos] = useState<any[]>([]);
-  const [menuActivo, setMenuActivo] = useState<string>("");
   const [loading, setLoading] = useState(true);
   const [cantidades, setCantidades] = useState<{ [key: string]: number }>({});
   const [enviando, setEnviando] = useState(false);
+  const [menus, setMenus] = useState<any[]>([]);
+  const [vista, setVista] = useState<"menu" | "postre">("menu");
+
+  const [limit] = useState(3);
+  const [offset, setOffset] = useState(0);
+  const [count, setCount] = useState(0);
 
   const { user } = useContext(UserContext);
   const student = user as Students;
 
   const api = new ConnectApi();
   const arasaac = new Arasaac();
-  const speak = new Speak();
+  const speak = Speak.getInstance();
+
+  const totalPages = Math.ceil(count / limit) || 1;
+  const currentPage = Math.floor(offset / limit) + 1;
 
   useEffect(() => {
-    cargarMenu();
+    cargarMenu(0);
   }, []);
 
   useEffect(() => {
+    console.log("Student data changed:", JSON.stringify(student, null, 2));
     if (student.asistenteVoz !== "none") {
-      speak.hablar(
-        "En la parte superior tienes los diferentes menús, seleccionalos para pedir la cantidad de cada uno de los platos",
-      );
+      speak.hablar("Selecciona el menú o los postres para hacer la comanda");
     }
   }, [student]);
 
-  const cargarMenu = async () => {
+  useEffect(() => {
+    setOffset(0);
+    cargarMenu(0);
+  }, [vista]);
+
+  // --- Cargar menús con paginación ---
+  const cargarMenu = async (nuevoOffset: number = 0) => {
+    if (nuevoOffset < 0) nuevoOffset = 0;
+    if (nuevoOffset >= count) nuevoOffset = Math.max(0, count - limit);
+
     setLoading(true);
-    // IMPORTANTE: Asegúrate de pasar aula.id_visita en la llamada a la API
-    const res = await api.getMenuPorFecha(fecha, 100, 0, aula.id_visita);
 
-    if (res.platos && res.platos.length > 0) {
-      setTodosLosPlatos(res.platos);
-      setMenuActivo(res.platos[0].nombre_menu);
+    try {
+      const res = await api.getMenusConCantidades(
+        limit,
+        nuevoOffset,
+        id_tarea_estudiante,
+        student.id,
+        fecha,
+        aula.id_visita,
+        vista,
+      );
+      if (!res) {
+        setMenus([]);
+        setCount(0);
+        setLoading(false);
+        return;
+      }
 
-      // Mapeamos las cantidades guardadas al estado local
-      const inicial: { [key: string]: number } = {};
-      res.platos.forEach((p: any) => {
-        if (p.cantidad_guardada > 0) {
-          const key = `${p.id_menu}_${p.id_plato}`;
-          inicial[key] = p.cantidad_guardada;
-        }
+      console.log("Menús obtenidos:", JSON.stringify(res, null, 2));
+      setCount(res.total || res.menu.length);
+
+      const nuevasCantidades: { [key: string]: number } = {};
+      res.menu.forEach((menu: any) => {
+        menu.platos.forEach((plato: any) => {
+          const key = `${menu.id}_${plato.id}`;
+          nuevasCantidades[key] = plato.cantidad;
+        });
       });
-      setCantidades(inicial);
+
+      setCantidades(nuevasCantidades);
+      setMenus(res.menu);
+      setOffset(nuevoOffset);
+    } catch (error) {
+      console.error("Error cargando menús:", error);
+      setMenus([]);
     }
+
     setLoading(false);
   };
 
-  // Obtenemos los nombres de menús únicos para las pestañas
-  const nombresMenus = [...new Set(todosLosPlatos.map((p) => p.nombre_menu))];
+  const handleBuscarMenu = async (
+    search: string,
+    categoria: "menu" | "postre",
+  ) => {
+    if (search.trim() === "") {
+      cargarMenu(0);
+      return;
+    }
 
-  // Filtramos platos según la pestaña activa
-  const platosVisibles = todosLosPlatos.filter(
-    (p) => p.nombre_menu === menuActivo,
-  );
+    setLoading(true);
 
-  const modificarCantidad = (
+    try {
+      const res = await api.getMenusConCantidadesByName(
+        limit,
+        0,
+        id_tarea_estudiante,
+        student.id,
+        fecha,
+        aula.id_visita,
+        search,
+        categoria,
+      );
+
+      if (res && res.menu) {
+        const nuevasCantidades: { [key: string]: number } = {};
+
+        res.menu.forEach((menu: any) => {
+          menu.platos.forEach((plato: any) => {
+            const key = `${menu.id}_${plato.id}`;
+            nuevasCantidades[key] = plato.cantidad;
+          });
+        });
+
+        setCantidades(nuevasCantidades);
+        setMenus(res.menu);
+        setCount(res.total || res.menu.length);
+        setOffset(0);
+      } else {
+        setMenus([]);
+      }
+    } catch (error) {
+      console.error("Error en búsqueda:", error);
+    }
+
+    setLoading(false);
+  };
+
+  const handleAtrasPress = () => {
+    if (offset === 0) return;
+    cargarMenu(offset - limit);
+  };
+
+  const handleDelantePress = () => {
+    if (offset + limit >= count) return;
+    cargarMenu(offset + limit);
+  };
+
+  const modificarCantidad = async (
     idPlato: number,
     idMenu: number,
     delta: number,
   ) => {
-    const key = `${idMenu}_${idPlato}`; // Clave única por menú y plato
+    const key = `${idMenu}_${idPlato}`;
+    const newValue = Math.min(10, Math.max(0, (cantidades[key] || 0) + delta));
     setCantidades((prev) => ({
       ...prev,
-      [key]: Math.max(0, (prev[key] || 0) + delta),
+      [key]: newValue,
     }));
+    console.log("idPlado: ", idPlato);
+    const response = await api.setCantidadPedido(
+      id_tarea_estudiante,
+      student.id,
+      fecha,
+      aula.id_visita,
+      idMenu,
+      idPlato,
+      newValue,
+    );
+    if (!response) {
+      console.error("Error al actualizar cantidad en el servidor");
+    }
   };
 
   const guardarPedido = async () => {
     setEnviando(true);
-    // Convertimos el objeto de cantidades en una lista para el servidor
-    const pedidos = Object.entries(cantidades)
-      .filter(([_, cant]) => cant > 0)
-      .map(([key, cant]) => {
-        const [idMenu, idPlato] = key.split("_");
-        return { id_menu: idMenu, id_plato: idPlato, cantidad: cant };
-      });
 
-    const res = await api.guardarVisitaAula(aula.id_visita, pedidos);
-    if (res) navigation.goBack();
+    const pedidos: any[] = [];
+
+    menus.forEach((menu: any) => {
+      menu.platos.forEach((plato: any) => {
+        const key = `${menu.id}_${plato.id}`;
+        const cantidad = cantidades[key] || 0;
+
+        if (cantidad > 0) {
+          pedidos.push({
+            id_menu: menu.id,
+            id_plato: plato.id,
+            cantidad: Number(cantidad),
+          });
+        }
+      });
+    });
+
+    try {
+      const res = await api.guardarVisitaAula(
+        id_tarea_estudiante,
+        student.id,
+        fecha,
+        aula.id_visita,
+      );
+
+      if (res) navigation.goBack({ realizada: true });
+    } catch (error) {
+      console.error("Error al guardar:", error);
+    }
+
     setEnviando(false);
   };
 
-  const renderPlato = ({ item }: { item: any }) => {
-    const key = `${item.id_menu}_${item.id_plato}`;
+  const renderItem = ({ item }: { item: any }) => {
+    const idMenu = item.id;
+    const idReferenciaPlato = item.platos[0]?.id || 0;
+    const key = `${idMenu}_${idReferenciaPlato}`;
+    const cantidad = cantidades[key] || 0;
+
     return (
       <View
         style={[
@@ -121,37 +239,62 @@ export default function ComandaAula({
             alignItems: "center",
             padding: 10,
             borderLeftColor: "#4C80D7",
+            marginBottom: 10,
           },
         ]}
       >
-        <Image
-          source={{ uri: arasaac.getPictogramaId(item.id_pictograma) }}
-          style={{ width: 70, height: 70, borderRadius: 10 }}
-        />
-        <View style={{ flex: 1, marginLeft: 15 }}>
-          <Text style={{ fontFamily: "escolar-bold", fontSize: scaleFont(18) }}>
-            {item.nombre.toUpperCase()}
-          </Text>
-          <Text style={{ color: "#666" }}>{item.plato_tipo}</Text>
+        <View style={tarjetaDescipcion_styles.superPuesto}>
+          <Image
+            source={{ uri: arasaac.getPictogramaId(item.id_pictograma) }}
+            style={tarjetaDescipcion_styles.imageTarjet}
+          />
+          {item.tachado === true && (
+            <Image
+              source={{ uri: arasaac.getPictograma("fallo") }}
+              style={tarjetaDescipcion_styles.imageOverlay}
+            />
+          )}
         </View>
+
+        <View style={{ flex: 1, marginLeft: 15 }}>
+          <Text
+            style={{
+              fontFamily: "escolar-bold",
+              fontSize: scaleFont(18),
+            }}
+          >
+            {item.descripcion}
+          </Text>
+        </View>
+
         <View style={{ flexDirection: "row", alignItems: "center" }}>
           <TouchableOpacity
-            onPress={() => modificarCantidad(item.id_plato, item.id_menu, -1)}
+            disabled={cantidad === 0}
+            onPress={() => modificarCantidad(idReferenciaPlato, idMenu, -1)}
           >
             <Ionicons name="remove-circle" size={45} color="#FF8C42" />
           </TouchableOpacity>
-          <Text
-            style={{
-              fontSize: scaleFont(22),
-              fontWeight: "bold",
-              minWidth: 35,
-              textAlign: "center",
-            }}
-          >
-            {cantidades[key] || 0}
-          </Text>
+
+          {student.accesibilidad.includes("pictogramas") ? (
+            <Image
+              source={{ uri: arasaac.getNumero(cantidad) }}
+              style={{ width: 80, height: 80, marginHorizontal: 10 }}
+            />
+          ) : (
+            <Text
+              style={{
+                fontSize: scaleFont(22),
+                fontWeight: "bold",
+                minWidth: 35,
+                textAlign: "center",
+              }}
+            >
+              {cantidad}
+            </Text>
+          )}
+
           <TouchableOpacity
-            onPress={() => modificarCantidad(item.id_plato, item.id_menu, 1)}
+            onPress={() => modificarCantidad(idReferenciaPlato, idMenu, 1)}
           >
             <Ionicons name="add-circle" size={45} color="#4CAF50" />
           </TouchableOpacity>
@@ -159,8 +302,9 @@ export default function ComandaAula({
       </View>
     );
   };
+
   return (
-    <SafeAreaProvider style={{ backgroundColor: "#F9F9F9" }}>
+    <SafeAreaProvider style={{ backgroundColor: "#F9F9F9", flex: 1 }}>
       <Header
         uri="volver"
         nameBottom="ATRÁS"
@@ -170,68 +314,48 @@ export default function ComandaAula({
         profesor={aula.nombre_profesor}
         uriApi={true}
         style={scaleFont(25)}
+        vistaSelector={{ vista, setVista }}
       />
-      <View
-        style={{
-          backgroundColor: "#FFF",
-          paddingVertical: 10,
-          borderBottomWidth: 1,
-          borderBottomColor: "#DDD",
-        }}
-      >
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={{ paddingHorizontal: 15 }}
-        >
-          {nombresMenus.map((m) => (
-            <TouchableOpacity
-              key={m}
-              onPress={() => setMenuActivo(m)}
-              style={{
-                paddingVertical: 10,
-                paddingHorizontal: 20,
-                backgroundColor: menuActivo === m ? "#4C80D7" : "#E0E0E0",
-                borderRadius: 25,
-                marginRight: 10,
-              }}
-            >
-              <Text
-                style={{
-                  color: menuActivo === m ? "#FFF" : "#333",
-                  fontWeight: "bold",
-                  fontSize: scaleFont(14),
-                }}
-              >
-                {m}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
+
+      <Buscador
+        nameBuscador={vista === "menu" ? "BUSCAR MENÚ" : "BUSCAR POSTRE"}
+        onPress={(searchText) => handleBuscarMenu(searchText, vista)}
+      />
+
+      {loading ? (
+        <ActivityIndicator size="large" color="#FF8C42" />
+      ) : (
+        <FlatList
+          data={menus}
+          keyExtractor={(item) => `${item.id}`}
+          renderItem={renderItem}
+          scrollEnabled={false}
+          ListEmptyComponent={
+            <Text style={{ textAlign: "center", marginTop: 20 }}>
+              No hay elementos para mostrar
+            </Text>
+          }
+        />
+      )}
+
+      <View style={{ alignItems: "center", marginVertical: 5 }}>
+        <Text style={{ fontSize: scaleFont(20), fontFamily: "escolar-bold" }}>
+          {currentPage}/{totalPages}
+        </Text>
       </View>
 
-      <View style={{ flex: 1, padding: 10 }}>
-        {loading ? (
-          <ActivityIndicator size="large" color="#FF8C42" />
-        ) : (
-          <FlatList
-            data={platosVisibles}
-            keyExtractor={(item) => `${item.id_menu}_${item.id_plato}`}
-            renderItem={renderPlato}
-            ListEmptyComponent={
-              <Text style={{ textAlign: "center", marginTop: 20 }}>
-                No hay platos en este menú
-              </Text>
-            }
-          />
-        )}
-      </View>
-      <View style={{ margin: 30 }}>
+      <View style={styles.navigationButtons}>
+        <Boton uri="atras" onPress={handleAtrasPress} dissable={offset === 0} />
         <Boton
           nameBottom="GUARDAR.COMANDA"
           uri="ok"
           onPress={guardarPedido}
           dissable={enviando}
+        />
+        <Boton
+          uri="delante"
+          onPress={handleDelantePress}
+          dissable={offset + limit >= count}
         />
       </View>
     </SafeAreaProvider>

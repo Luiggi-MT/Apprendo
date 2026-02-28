@@ -15,7 +15,7 @@ export default function TareaPeticion({ navigation }: { navigation: any }) {
       id: "1",
       uriPictograma: "pollo",
       nameBottom: "COMANDA.COMEDOR",
-      navigation: "ComandaComedor",
+      navigation: "ListaMenus",
     },
     {
       id: "2",

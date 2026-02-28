@@ -6,6 +6,5 @@ export interface Students {
     accesibilidad: string;
     preferenciasVisualizacion: string;
     asistenteVoz: string;
-    sexo: string;
     contraseña?: string;
 }

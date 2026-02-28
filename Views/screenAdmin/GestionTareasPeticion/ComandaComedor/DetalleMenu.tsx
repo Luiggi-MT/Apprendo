@@ -5,43 +5,9 @@ import { scaleFont, styles } from "../../../../styles/styles";
 import { ConnectApi } from "../../../../class/Connect.Api/ConnectApi";
 import { Menu } from "../../../../class/Interface/Menu";
 import { Arasaac } from "../../../../class/Arasaac/getPictograma";
-import {
-  Image,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-  ActivityIndicator,
-} from "react-native";
+import { Image, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Boton from "../../../../components/Boton";
-
-function Splash() {
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "#FFF",
-      }}
-    >
-      <ActivityIndicator size="large" color="#FF8C42" />
-      <Text
-        style={[
-          styles.text,
-          {
-            marginTop: 20,
-            fontSize: scaleFont(18),
-            fontWeight: "bold",
-            color: "#333",
-          },
-        ]}
-      >
-        CARGANDO MENÚ...
-      </Text>
-    </View>
-  );
-}
+import Splash from "../../../../components/Splash";
 
 export default function DetalleMenu({
   navigation,
@@ -61,10 +27,12 @@ export default function DetalleMenu({
   const [primerPlatoId, setPrimerPlatoId] = useState<number>(0);
   const [segundoPlato, setSegundoPlato] = useState<string>("");
   const [segundoPlatoId, setSegundoPlatoId] = useState<number>(0);
-  const [guarnicion, setGuarnicion] = useState<string>("");
-  const [guarnicionId, setGuarnicionId] = useState<number>(0);
   const [postre, setPostre] = useState<string>("");
   const [postreId, setPostreId] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [mensajeValue, setMensajeValue] = useState<string>("");
+  const [error, setError] = useState<boolean>(false);
+  const [borrar, setBorrar] = useState<boolean>(false);
 
   const { menu_id } = route.params;
   const api = new ConnectApi();
@@ -78,39 +46,100 @@ export default function DetalleMenu({
         if (tipoAsignado === "primerPlato") setPrimerPlatoId(id);
         if (tipoAsignado === "segundoPlato") setSegundoPlatoId(id);
         if (tipoAsignado === "postre") setPostreId(id);
-        if (tipoAsignado === "guarnicion") setGuarnicionId(id);
       },
     });
   };
 
   const handleModificarMenu = async () => {
     if (!menu) return;
+    const updatedMenu: Menu = {
+      id: menu.id,
+      id_pictograma: pictogramaId,
+      descripcion: descripcion,
+      tachado: isTachado,
+      categoria: menu.categoria,
+      platos: [
+        {
+          id_pictograma: primerPlatoId,
+          nombre: primerPlato,
+          categoria: "primero",
+        },
+        {
+          id_pictograma: segundoPlatoId,
+          nombre: segundoPlato,
+          categoria: "segundo",
+        },
+      ],
+    };
     api
-      .updateMenuById(
-        menu.id,
-        menu.fecha,
-        pictogramaId,
-        isTachado,
-        descripcion,
-        primerPlato,
-        primerPlatoId,
-        segundoPlato,
-        segundoPlatoId,
-        guarnicion,
-        guarnicionId,
-        postre,
-        postreId,
-      )
+      .updateMenuById(updatedMenu)
       .then((response) => {
+        setIsLoading(true);
+        setMensajeValue("MODIFICANDO LOS DATOS DEL MENÚ");
         if (response.ok) {
-          navigation.goBack();
+          setTimeout(() => {
+            setIsLoading(false);
+            navigation.goBack({
+              updateMenuId: menu_id,
+            });
+          }, 2000);
         } else {
-          alert("ERROR AL MODIFICAR EL MENÚ");
+          setIsLoading(false);
+          setError(true);
+          setMensajeValue("ERROR AL MODIFICAR EL MENÚ");
+          setTimeout(() => {
+            setError(false);
+            setMensajeValue("");
+          }, 2000);
         }
       })
       .catch(() => {
-        alert("ERROR AL MODIFICAR EL MENÚ");
+        setIsLoading(false);
+        setError(true);
+        setMensajeValue("ERROR AL MODIFICAR EL MENÚ");
+        setTimeout(() => {
+          setError(false);
+          setMensajeValue("");
+        }, 2000);
       });
+  };
+
+  const handleEliminarMenu = async () => {
+    if (!menu) return;
+
+    setIsLoading(true);
+    setMensajeValue("ELIMINANDO MENÚ...");
+    setError(false);
+
+    try {
+      const response = await api.deleteMenuById(menu.id);
+      if (response.ok) {
+        setMensajeValue("MENÚ ELIMINADO CON ÉXITO");
+
+        setTimeout(() => {
+          setIsLoading(false);
+          navigation.goBack({
+            deletedMenuId: menu_id,
+          });
+        }, 2000);
+      } else {
+        setIsLoading(false);
+        setError(true);
+        setMensajeValue(response.message || "ERROR AL ELIMINAR EL MENÚ");
+        setTimeout(() => {
+          setError(false);
+          setMensajeValue("");
+        }, 2000);
+      }
+    } catch (err) {
+      setIsLoading(false);
+      setError(true);
+      setMensajeValue("ERROR AL ELIMINAR EL MENÚ");
+      setTimeout(() => {
+        setError(false);
+        setMensajeValue("");
+      }, 2000);
+    }
   };
 
   const atras = () => navigation.goBack();
@@ -119,6 +148,7 @@ export default function DetalleMenu({
     api
       .getMenuById(menu_id)
       .then((data) => {
+        console.log("Data recibida:", JSON.stringify(data, null, 2));
         const m = data.menu;
         if (!m) {
           setMenu(null);
@@ -141,10 +171,6 @@ export default function DetalleMenu({
               setSegundoPlato(plato.nombre);
               setSegundoPlatoId(plato.id_pictograma);
               break;
-            case "guarnicion":
-              setGuarnicion(plato.nombre);
-              setGuarnicionId(plato.id_pictograma);
-              break;
             case "postre":
               setPostre(plato.nombre);
               setPostreId(plato.id_pictograma);
@@ -157,218 +183,184 @@ export default function DetalleMenu({
   }, [menu_id]);
 
   const renderContent = () => {
-    switch (view) {
-      case 0:
-        return (
-          <View>
-            <TouchableOpacity onPress={() => handleAñadirPress("menu")}>
-              <Text style={styles.text_legend}>SELECCIONAR FOTO:</Text>
-              <View style={{ alignItems: "center" }}>
-                {!isTachado ? (
-                  <Image
-                    style={[
-                      styles.imageBase,
-                      { borderWidth: 1, borderRadius: 5 },
-                    ]}
-                    source={{
-                      uri: arasaacService.getPictogramaId(pictogramaId),
-                    }}
-                  />
-                ) : (
-                  <View style={styles.superPuesto}>
+    if (menu.categoria === "menu") {
+      switch (view) {
+        case 0:
+          return (
+            <View>
+              <TouchableOpacity onPress={() => handleAñadirPress("menu")}>
+                <Text style={styles.text_legend}>SELECCIONAR FOTO:</Text>
+                <View style={{ alignItems: "center" }}>
+                  {!isTachado ? (
                     <Image
-                      source={{
-                        uri: arasaacService.getPictogramaId(pictogramaId),
-                      }}
                       style={[
                         styles.imageBase,
                         { borderWidth: 1, borderRadius: 5 },
                       ]}
+                      source={{
+                        uri: arasaacService.getPictogramaId(pictogramaId),
+                      }}
                     />
-                    <Image
-                      source={{ uri: arasaacService.getPictograma("fallo") }}
-                      style={styles.imageOverlay}
-                    />
-                  </View>
-                )}
-              </View>
-            </TouchableOpacity>
-            <View style={{ marginTop: 15 }}>
-              <Text style={styles.text_legend}>TACHAR:</Text>
-              <TouchableOpacity
-                style={{
-                  flexDirection: "row",
-                  alignItems: "center",
-                  marginTop: 10,
-                }}
-                onPress={() => setIsTachado(!isTachado)}
-              >
-                <View
-                  style={[
-                    styles.radioOuter,
-                    {
-                      borderColor: isTachado ? "#FF0000" : "#555",
-                      marginBottom: 0,
-                    },
-                  ]}
-                >
-                  {isTachado && <View style={styles.radioInner} />}
+                  ) : (
+                    <View style={styles.superPuesto}>
+                      <Image
+                        source={{
+                          uri: arasaacService.getPictogramaId(pictogramaId),
+                        }}
+                        style={[
+                          styles.imageBase,
+                          { borderWidth: 1, borderRadius: 5 },
+                        ]}
+                      />
+                      <Image
+                        source={{ uri: arasaacService.getPictograma("fallo") }}
+                        style={styles.imageOverlay}
+                      />
+                    </View>
+                  )}
                 </View>
-                <Text
-                  style={[
-                    styles.text,
-                    { marginLeft: 10, textAlignVertical: "center" },
-                  ]}
-                >
-                  {isTachado ? "SÍ, TACHADO" : "NO, NORMAL"}
-                </Text>
               </TouchableOpacity>
+              <View style={{ marginTop: 15 }}>
+                <Text style={styles.text_legend}>TACHAR:</Text>
+                <TouchableOpacity
+                  style={{
+                    flexDirection: "row",
+                    alignItems: "center",
+                    marginTop: 10,
+                  }}
+                  onPress={() => setIsTachado(!isTachado)}
+                >
+                  <View
+                    style={[
+                      styles.radioOuter,
+                      {
+                        borderColor: isTachado ? "#FF0000" : "#555",
+                        marginBottom: 0,
+                      },
+                    ]}
+                  >
+                    {isTachado && <View style={styles.radioInner} />}
+                  </View>
+                  <Text
+                    style={[
+                      styles.text,
+                      { marginLeft: 10, textAlignVertical: "center" },
+                    ]}
+                  >
+                    {isTachado ? "SÍ, TACHADO" : "NO, NORMAL"}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+              <View style={{ marginTop: 15 }}>
+                <Text style={styles.text_legend}>DESCRIPCIÓN:</Text>
+                <TextInput
+                  style={[
+                    styles.buscador,
+                    styles.shadow,
+                    { textAlign: "left", paddingHorizontal: 15, height: 50 },
+                  ]}
+                  placeholder="EJEMPLO CON CARNE..."
+                  onChangeText={setDescripcion}
+                  value={descripcion}
+                />
+              </View>
             </View>
-            <View style={{ marginTop: 15 }}>
-              <Text style={styles.text_legend}>DESCRIPCIÓN:</Text>
+          );
+        case 1:
+          return (
+            <View>
+              <Text style={styles.text_legend}>PRIMER PLATO:</Text>
               <TextInput
                 style={[
                   styles.buscador,
                   styles.shadow,
                   { textAlign: "left", paddingHorizontal: 15, height: 50 },
                 ]}
-                placeholder="EJEMPLO CON CARNE..."
-                onChangeText={setDescripcion}
-                value={descripcion}
+                placeholder="EJEMPLO: POLLO CON ARROZ..."
+                onChangeText={setPrimerPlato}
+                value={primerPlato}
+              />
+              <TouchableOpacity
+                style={{ marginTop: 15 }}
+                onPress={() => handleAñadirPress("primerPlato")}
+              >
+                <Text style={styles.text_legend}>SELECCIONAR PICTOGRÁMA:</Text>
+                <View style={{ alignItems: "center" }}>
+                  <Image
+                    source={{
+                      uri: arasaacService.getPictogramaId(primerPlatoId),
+                    }}
+                    style={[
+                      styles.imageBase,
+                      { borderWidth: 1, borderRadius: 5 },
+                    ]}
+                  />
+                </View>
+              </TouchableOpacity>
+            </View>
+          );
+        case 2:
+          return (
+            <View>
+              <Text style={styles.text_legend}>SEGUNDO PLATO:</Text>
+              <TextInput
+                style={[
+                  styles.buscador,
+                  styles.shadow,
+                  { textAlign: "left", paddingHorizontal: 15, height: 50 },
+                ]}
+                placeholder="EJEMPLO: PESCADO CON PATATAS..."
+                onChangeText={setSegundoPlato}
+                value={segundoPlato}
+              />
+              <TouchableOpacity
+                style={{ marginTop: 15 }}
+                onPress={() => handleAñadirPress("segundoPlato")}
+              >
+                <Text style={styles.text_legend}>SELECCIONAR PICTOGRÁMA:</Text>
+                <View style={{ alignItems: "center" }}>
+                  <Image
+                    source={{
+                      uri: arasaacService.getPictogramaId(segundoPlatoId),
+                    }}
+                    style={[
+                      styles.imageBase,
+                      { borderWidth: 1, borderRadius: 5 },
+                    ]}
+                  />
+                </View>
+              </TouchableOpacity>
+            </View>
+          );
+      }
+    } else {
+      return (
+        <View>
+          <Text style={styles.text_legend}>POSTRE:</Text>
+          <TextInput
+            style={[
+              styles.buscador,
+              styles.shadow,
+              { textAlign: "left", paddingHorizontal: 15, height: 50 },
+            ]}
+            placeholder="EJEMPLO: YOGURT..."
+            onChangeText={setPostre}
+            value={postre}
+          />
+          <TouchableOpacity
+            style={{ marginTop: 15 }}
+            onPress={() => handleAñadirPress("postre")}
+          >
+            <Text style={styles.text_legend}>SELECCIONAR PICTOGRÁMA:</Text>
+            <View style={{ alignItems: "center" }}>
+              <Image
+                source={{ uri: arasaacService.getPictogramaId(postreId) }}
+                style={[styles.imageBase, { borderWidth: 1, borderRadius: 5 }]}
               />
             </View>
-          </View>
-        );
-      case 1:
-        return (
-          <View>
-            <Text style={styles.text_legend}>PRIMER PLATO:</Text>
-            <TextInput
-              style={[
-                styles.buscador,
-                styles.shadow,
-                { textAlign: "left", paddingHorizontal: 15, height: 50 },
-              ]}
-              placeholder="EJEMPLO: POLLO CON ARROZ..."
-              onChangeText={setPrimerPlato}
-              value={primerPlato}
-            />
-            <TouchableOpacity
-              style={{ marginTop: 15 }}
-              onPress={() => handleAñadirPress("primerPlato")}
-            >
-              <Text style={styles.text_legend}>SELECCIONAR PICTOGRÁMA:</Text>
-              <View style={{ alignItems: "center" }}>
-                <Image
-                  source={{
-                    uri: arasaacService.getPictogramaId(primerPlatoId),
-                  }}
-                  style={[
-                    styles.imageBase,
-                    { borderWidth: 1, borderRadius: 5 },
-                  ]}
-                />
-              </View>
-            </TouchableOpacity>
-          </View>
-        );
-      case 2:
-        return (
-          <View>
-            <Text style={styles.text_legend}>SEGUNDO PLATO:</Text>
-            <TextInput
-              style={[
-                styles.buscador,
-                styles.shadow,
-                { textAlign: "left", paddingHorizontal: 15, height: 50 },
-              ]}
-              placeholder="EJEMPLO: PESCADO CON PATATAS..."
-              onChangeText={setSegundoPlato}
-              value={segundoPlato}
-            />
-            <TouchableOpacity
-              style={{ marginTop: 15 }}
-              onPress={() => handleAñadirPress("segundoPlato")}
-            >
-              <Text style={styles.text_legend}>SELECCIONAR PICTOGRÁMA:</Text>
-              <View style={{ alignItems: "center" }}>
-                <Image
-                  source={{
-                    uri: arasaacService.getPictogramaId(segundoPlatoId),
-                  }}
-                  style={[
-                    styles.imageBase,
-                    { borderWidth: 1, borderRadius: 5 },
-                  ]}
-                />
-              </View>
-            </TouchableOpacity>
-          </View>
-        );
-      case 3:
-        return (
-          <View>
-            <Text style={styles.text_legend}>GUARNICIÓN:</Text>
-            <TextInput
-              style={[
-                styles.buscador,
-                styles.shadow,
-                { textAlign: "left", paddingHorizontal: 15, height: 50 },
-              ]}
-              placeholder="EJEMPLO: ENSALADA..."
-              onChangeText={setGuarnicion}
-              value={guarnicion}
-            />
-            <TouchableOpacity
-              style={{ marginTop: 15 }}
-              onPress={() => handleAñadirPress("guarnicion")}
-            >
-              <Text style={styles.text_legend}>SELECCIONAR PICTOGRÁMA:</Text>
-              <View style={{ alignItems: "center" }}>
-                <Image
-                  source={{ uri: arasaacService.getPictogramaId(guarnicionId) }}
-                  style={[
-                    styles.imageBase,
-                    { borderWidth: 1, borderRadius: 5 },
-                  ]}
-                />
-              </View>
-            </TouchableOpacity>
-          </View>
-        );
-      case 4:
-        return (
-          <View>
-            <Text style={styles.text_legend}>POSTRE:</Text>
-            <TextInput
-              style={[
-                styles.buscador,
-                styles.shadow,
-                { textAlign: "left", paddingHorizontal: 15, height: 50 },
-              ]}
-              placeholder="EJEMPLO: YOGURT..."
-              onChangeText={setPostre}
-              value={postre}
-            />
-            <TouchableOpacity
-              style={{ marginTop: 15 }}
-              onPress={() => handleAñadirPress("postre")}
-            >
-              <Text style={styles.text_legend}>SELECCIONAR PICTOGRÁMA:</Text>
-              <View style={{ alignItems: "center" }}>
-                <Image
-                  source={{ uri: arasaacService.getPictogramaId(postreId) }}
-                  style={[
-                    styles.imageBase,
-                    { borderWidth: 1, borderRadius: 5 },
-                  ]}
-                />
-              </View>
-            </TouchableOpacity>
-          </View>
-        );
-      default:
-        return null;
+          </TouchableOpacity>
+        </View>
+      );
     }
   };
 
@@ -383,7 +375,7 @@ export default function DetalleMenu({
           uriPictograma="pollo"
           style={scaleFont(30)}
         />
-        <Splash />
+        <Splash name="CARGANDO MENÚS" />
       </SafeAreaProvider>
     );
   }
@@ -421,29 +413,96 @@ export default function DetalleMenu({
         uriPictograma="pollo"
         style={scaleFont(30)}
       />
-      <View style={[styles.content, styles.shadow]}>
-        <View>{renderContent()}</View>
-      </View>
-      <View style={styles.navigationButtons}>
-        <Boton
-          uri="atras"
-          onPress={() => view > 0 && setView(view - 1)}
-          dissable={view === 0}
-        />
-        {view !== 4 ? (
-          <Boton
-            uri="delante"
-            onPress={() => view < 4 && setView(view + 1)}
-            dissable={view === 4}
-          />
-        ) : (
-          <Boton
-            uri="ok"
-            nameBottom="MODIFICAR"
-            onPress={handleModificarMenu}
-          />
-        )}
-      </View>
+      {isLoading ? (
+        <Splash name={mensajeValue} />
+      ) : (
+        <>
+          <View style={[styles.content, styles.shadow]}>
+            <View>{renderContent()}</View>
+          </View>
+          <View style={styles.navigationButtons}>
+            {menu.categoria == "menu" && (
+              <>
+                <Boton
+                  uri="atras"
+                  onPress={() => view > 0 && setView(view - 1)}
+                  dissable={view === 0}
+                />
+
+                <Boton
+                  uri="delante"
+                  onPress={() => view < 2 && setView(view + 1)}
+                  dissable={view === 2}
+                />
+              </>
+            )}
+          </View>
+
+          {menu.categoria === "postre" ? (
+            <>
+              {error && (
+                <Text style={[styles.error, { fontSize: scaleFont(20) }]}>
+                  {mensajeValue}
+                </Text>
+              )}
+              <View style={styles.navigationButtons}>
+                <Boton
+                  uri="borrar"
+                  nameBottom="ELIMINAR.MENÚ"
+                  onPress={() => setBorrar(true)}
+                />
+                <Boton
+                  uri="ok"
+                  nameBottom="MODIFICAR.MENÚ"
+                  onPress={handleModificarMenu}
+                />
+              </View>
+            </>
+          ) : (
+            view === 2 && (
+              <>
+                {error && (
+                  <Text style={[styles.error, { fontSize: scaleFont(20) }]}>
+                    {mensajeValue}
+                  </Text>
+                )}
+                {borrar ? (
+                  <View>
+                    <Text style={[styles.error, { fontSize: scaleFont(20) }]}>
+                      QUIERES BORRAR EL MENÚ
+                    </Text>
+                    <View style={styles.navigationButtons}>
+                      <Boton
+                        uri="x"
+                        nameBottom="NO ELIMINAR"
+                        onPress={() => setBorrar(false)}
+                      />
+                      <Boton
+                        uri="ok"
+                        nameBottom="ELIMINAR"
+                        onPress={handleEliminarMenu}
+                      />
+                    </View>
+                  </View>
+                ) : (
+                  <View style={styles.navigationButtons}>
+                    <Boton
+                      uri="borrar"
+                      nameBottom="ELIMINAR.MENÚ"
+                      onPress={() => setBorrar(true)}
+                    />
+                    <Boton
+                      uri="ok"
+                      nameBottom="MODIFICAR.MENÚ"
+                      onPress={handleModificarMenu}
+                    />
+                  </View>
+                )}
+              </>
+            )
+          )}
+        </>
+      )}
     </SafeAreaProvider>
   );
 }

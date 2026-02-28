@@ -14,8 +14,10 @@ import { styles, scaleFont } from "../../styles/styles";
 import { ConnectApi } from "../../class/Connect.Api/ConnectApi";
 import { Speak } from "../../class/Speak/Speak";
 import { UserContext } from "../../class/context/UserContext";
-import WakeWord from "../../class/WakeWord/WakeWord";
+
 import { ImagePassword } from "../../class/Interface/ImagePassword";
+import { useVoice } from "../../class/context/VoiceContext";
+import { useFocusEffect } from "@react-navigation/native";
 
 export default function LoginAlumnoImagenes({ navigation, route }: any) {
   const { student } = route.params;
@@ -32,8 +34,10 @@ export default function LoginAlumnoImagenes({ navigation, route }: any) {
   const [isListening, setIsListening] = useState(false);
 
   const initializedRef = useRef(false);
-  const isProcessing = useRef(false); // 🔴 CAMBIO: lock real
+  const isProcessing = useRef(false);
   const selectedRef = useRef<ImagePassword[]>([]);
+
+  const voice = useVoice();
 
   // ================= ASISTENTE =================
 
@@ -47,17 +51,12 @@ export default function LoginAlumnoImagenes({ navigation, route }: any) {
     setIsListening(true);
 
     try {
-      // 🔴 CAMBIO: hablar y ESPERAR
       await speak.hablar("Te escucho");
 
-      console.log("🎯 Esperando comando...");
-
-      // 🔴 CAMBIO CLAVE: el comando lo escucha WakeWord
-      const comando = (await WakeWord.listenCommand()).toLowerCase();
-
-      console.log("✅ Comando:", comando);
+      const comando = (await voice.listenCommand()).toLowerCase();
 
       if (comando.includes("confirmar")) {
+        await voice.pauseListening();
         await handleConfirmarPress();
       } else if (comando.includes("borrar") || comando.includes("eliminar")) {
         handleBorrarPress();
@@ -71,20 +70,16 @@ export default function LoginAlumnoImagenes({ navigation, route }: any) {
         );
       }
     } catch (error) {
-      console.log("❌ Error comando:", error);
       await speak.hablar("No te he entendido");
     } finally {
       setIsListening(false);
       isProcessing.current = false;
 
-      // 🔴 CAMBIO: volver a wake word
       setTimeout(() => {
-        WakeWord.startWake(activarAsistente);
+        voice.startWake(activarAsistente);
       }, 1000);
     }
   }, []);
-
-  // ================= ACCIONES =================
 
   const atras = () => {
     speak.detener();
@@ -112,7 +107,6 @@ export default function LoginAlumnoImagenes({ navigation, route }: any) {
   const handleBorrarPress = () => borrar();
 
   const handleConfirmarPress = useCallback(async () => {
-    console.log("Selected en handleConfirmarPress: ", selected);
     if (!selectedRef.current.length) {
       setError("SELECCIONA LAS IMÁGENES");
       setErrorValue(true);
@@ -136,7 +130,6 @@ export default function LoginAlumnoImagenes({ navigation, route }: any) {
       }
 
       await setUser(student);
-
       navigation.navigate(
         student.preferenciasVisualizacion === "diarias"
           ? "DiariasScreem"
@@ -148,31 +141,33 @@ export default function LoginAlumnoImagenes({ navigation, route }: any) {
     }
   }, [student, api, speak, setUser, navigation]);
 
-  // ================= INIT =================
+  useFocusEffect(
+    useCallback(() => {
+      const init = async () => {
+        const res = await api.getImagePassword(student.id);
+        if (res.ok) setPassword(res.message);
 
-  useEffect(() => {
-    const init = async () => {
-      const res = await api.getImagePassword(student.id);
-      if (res.ok) setPassword(res.message);
+        if (student.asistenteVoz !== "none" && !initializedRef.current) {
+          initializedRef.current = true;
+          await speak.hablar(`Hola ${student.username}.`);
+          if (student.asistenteVoz === "bidireccional") {
+            await speak.hablar("Me llamo Sofía. Soy tu asistente y te ayudaré");
+            await speak.hablar(
+              "Puedes llamarme por mi nombre y despues decir.",
+            );
+            await speak.hablar("Atrás para ir a la pantalla de atrás.");
+            await speak.hablar("borrar si te has equivocado con tu contraseña");
+            await speak.hablar("o confirmar para iniciar sesión");
+            voice.startWake(() => {
+              activarAsistente();
+            });
+          }
+        }
+      };
 
-      if (student.asistenteVoz !== "none" && !initializedRef.current) {
-        initializedRef.current = true;
-        await speak.hablar(
-          `Hola ${student.username}. Di Sofía para activar el asistente`,
-        );
-        WakeWord.startWake(() => {
-          console.log("🔔 WakeWord detectado");
-          activarAsistente();
-        });
-      }
-    };
-
-    init();
-
-    return () => {
-      speak.detener();
-    };
-  }, []);
+      init();
+    }, []),
+  );
 
   useEffect(() => {
     selectedRef.current = selected;
@@ -423,14 +418,7 @@ export default function LoginAlumnoImagenes({ navigation, route }: any) {
 
         <View style={[styles.navigationButtons, { paddingHorizontal: 0 }]}>
           <Boton uri="borrar" nameBottom="BORRAR" onPress={handleBorrarPress} />
-          {student.asistenteVoz === "bidireccional" && (
-            <Boton
-              component={true}
-              uri={isListening ? "microfono-off.png" : "microfono.png"}
-              nameBottom={isListening ? "ESCUCHANDO..." : "ASISTENTE"}
-              onPress={activarAsistente}
-            />
-          )}
+
           <Boton
             uri="ok"
             nameBottom="CONFIRMAR"

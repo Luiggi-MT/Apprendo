@@ -23,6 +23,7 @@ import { Profesor } from "../Interface/Profesor";
 import { TareasApi } from "./Tareas";
 import { ApiResponseTareas } from "../Interface/ApiResponseTareas";
 import { Comanda } from "./Comanda";
+import {Menu as MenuInterface} from "../Interface/Menu";
 
 
 export class ConnectApi {
@@ -156,22 +157,28 @@ export class ConnectApi {
     }
 
     // Menu
-    public async getMenu(offset: number = this.api.getInitial_offset(), limit: number = this.api.getLimit(), fecha: string): Promise<ApiResponseMenu>{
-        return this.menu.getMenu(offset, limit, fecha);
+    public async getMenu(offset: number = this.api.getInitial_offset(), limit: number = this.api.getLimit(), categoria: "menu" | "postre" = "menu"): Promise<ApiResponseMenu>{
+        return this.menu.getMenu(offset, limit, categoria);
     }
 
-    public async createMenu(fecha: string, pictogramaMenuId: number, tachado: boolean, descripcion: string, primerPlato: string, primerPlatoId: number, segundoPlato: string, segundoPlatoId: number, guarnicion: string, guarnicionId: number, postre: string, postreId: number): Promise<ApiResponse>{
-        return this.menu.createMenu(fecha, pictogramaMenuId, tachado, descripcion, primerPlato, primerPlatoId, segundoPlato, segundoPlatoId, guarnicion, guarnicionId, postre, postreId);
+    public async createMenu(menu: MenuInterface): Promise<ApiResponse>{
+        return this.menu.createMenu(menu);
     }
 
     public async getMenuById(menu_id: number): Promise<ApiResponseMenu>{
         return this.menu.getMenuById(menu_id);
     }
 
-    public async updateMenuById(menu_id: number, fecha: string, pictogramaMenuId: number, tachado: boolean, descripcion: string, primerPlato: string, primerPlatoId: number, segundoPlato: string, segundoPlatoId: number, guarnicion: string, guarnicionId: number, postre: string, postreId: number): Promise<ApiResponse>{
-        return this.menu.updateMenuById( menu_id, fecha, pictogramaMenuId, tachado, descripcion, primerPlato, primerPlatoId, segundoPlato, segundoPlatoId, guarnicion, guarnicionId, postre, postreId);
+    public async updateMenuById(menu: MenuInterface): Promise<ApiResponse>{
+        return this.menu.updateMenuById(menu);
     }
 
+    public async getMenuByName(name: string, offset: number = this.api.getInitial_offset(), limit: number = this.api.getLimit(), categoria: "menu" | "postre" = "menu"): Promise<ApiResponseMenu>{
+        return this.menu.getMenuByName(name, offset, limit, categoria);
+    }
+    public async deleteMenuById(menu_id: number): Promise<ApiResponse>{
+        return this.menu.deleteMenuById(menu_id);
+    }
     //Aula
     public async getAulas(offset: number = this.api.getInitial_offset(), limit: number = this.api.getLimit()): Promise<ApiResponseAulas> {
         return this.aula.getAulas(offset,limit);
@@ -210,8 +217,8 @@ export class ConnectApi {
         return this.tarea.getTareaComanda();
     }
 
-    public async createTareaComanda(uri: number, titulo: string, id_profesor: number): Promise<boolean>{
-        return this.tarea.createTareaComanda(uri, titulo, id_profesor);
+    public async createTareaComanda(): Promise<boolean>{
+        return this.tarea.createTareaComanda();
     }
 
     public async deleteTareaComanda(): Promise<boolean> {
@@ -228,34 +235,40 @@ export class ConnectApi {
         return this.tarea.getResumenMensual(estudianteId, mes);
     }
 
-    public async finalizarTarea(id: number): Promise<boolean>{
-        return this.tarea.finalizarTarea(id);
+    public async finalizarTarea(tarea_id: number, estudiante_id: number, fecha: string): Promise<boolean>{
+        return this.tarea.finalizarTarea(tarea_id, estudiante_id, fecha);
     }
 
     //Comanda
-    public async getDetalleComanda(id_tarea_estudiante: number): Promise<{ aulas: any[], menu_del_dia: any[] } | null> {
-        return this.comanda.getDetalleComanda(id_tarea_estudiante);
+    public async getDetalleComanda(id_tarea_estudiante: number, estudiante_id: number, fecha: string): Promise<{ aulas: any[], menu_del_dia: any[] } | null> {
+        return this.comanda.getDetalleComanda(id_tarea_estudiante, estudiante_id, fecha);
     }
-
-    public async getMenuPorFecha(fecha: string, limit: number, offset: number, id_visita: number = 0
-    ): Promise<{ platos: any[] }> {
-        return this.comanda.getMenuPorFecha(fecha, limit, offset, id_visita);
-    }
-
     
-    public async guardarVisitaAula(id_visita: number, pedidos: any[]): Promise<boolean> {
-        return this.comanda.guardarVisitaAula(id_visita, pedidos);
+    public async guardarVisitaAula(tarea_id: number, estudiante_id: number, fecha: string, aula_id: number): Promise<boolean> {
+        return this.comanda.guardarVisitaAula(tarea_id, estudiante_id, fecha, aula_id);
     }
 
-    public async getAulasComandaPorFecha(fecha: string, offset: number, limit: number): Promise<any[]> {
+    public async getAulasComandaPorFecha(fecha: string, offset: number, limit: number): Promise<any> {
         return this.comanda.getAulasComandaPorFecha(fecha, offset, limit);
     }
 
     public async getComandaDetalladaPorFecha(fecha: string, idAula: number): Promise<any[]> {
         return this.comanda.getComandaDetalladaPorFecha(fecha, idAula); 
     }
-    public async downloadComandaPDF(fecha:string): Promise<string | null>{
+    public async downloadComandaPDF(fecha:string){
         return this.comanda.downloadComandaPDF(fecha);
+    }
+
+    public async getMenusConCantidades(limit: number, offset: number, tareaId: number, estudianteId: number, fecha: string, aulaId: number, categoria: "menu" | "postre" = "menu"){
+        return this.comanda.getMenusConCantidades(limit, offset, tareaId, estudianteId, fecha, aulaId, categoria);
+    }
+
+    public async getMenusConCantidadesByName(limit: number, offset: number, tareaId: number, estudianteId: number, fecha: string, aulaId: number, search: string, categoria: "menu" | "postre" = "menu") {
+        return this.comanda.getMenusConCantidadesByName(limit, offset, tareaId, estudianteId, fecha, aulaId, search, categoria);  
+    }
+
+    public async setCantidadPedido(tareaId: number, estudianteId: number, fecha: string, aulaId: number, idMenu: number, idPlato: number, cantidad: number): Promise<boolean> {
+        return this.comanda.setCantidadPedido(tareaId, estudianteId, fecha, aulaId, idMenu, idPlato, cantidad); 
     }
     
 }

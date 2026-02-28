@@ -103,6 +103,16 @@ export default function GestionEstudiantes({
     });
   }, []);
 
+  useEffect(() => {
+    const unsubscribe = navigation.addListener("focus", () => {
+      api.getStudents(0, limit).then((data) => {
+        setStudents(data.students || []);
+        setOffset(data.offset);
+        setTotal(data.count);
+      });
+    });
+    return unsubscribe;
+  }, [navigation]);
   return (
     <SafeAreaProvider>
       <Header

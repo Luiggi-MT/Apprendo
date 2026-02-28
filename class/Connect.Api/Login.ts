@@ -40,7 +40,34 @@ export class Login extends Api {
             console.error("Error crítico en el proceso de vinculación de notificaciones:", error);
         }
     }
+    private async vincularNotificacionesProfesor(idProfesor: number): Promise<void> {
+        try {
+            
+            const token = await this.registrarDispositivo(idProfesor);
+            
+            if (!token) {
+                console.warn("No se pudo obtener el Expo Push Token para el profesor.");
+                return;
+            }
 
+            const response = await fetch(`${Api.apiUrl}/guardar-token-profesor`, {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    'id_profesor': idProfesor,
+                    'token': token
+                })
+            });
+
+            if (response.ok) {
+                console.log("Token de notificaciones del profesor actualizado en el servidor.");
+            } else {
+                console.error("Error al guardar el token del profesor en el backend.");
+            }
+        } catch (error) {
+            console.error("Error crítico en el proceso de vinculación de notificaciones para el profesor:", error);
+        }
+    }
     private async getAuthHeader() {
         const token = await Storage.getItem(Login.TOKEN_KEY);
         return token ? { 'Authorization': `Bearer ${token}` } : {};
@@ -91,6 +118,11 @@ export class Login extends Api {
                 
                 await this.saveSessionInfo(data.access_token, data.expires_in);
                 await Storage.setItem(Login.USER_TYPE_KEY, data.tipo);
+
+                // Vincular notificaciones para el profesor
+                if (data.id) {
+                    await this.vincularNotificacionesProfesor(data.id);
+                }
             }
 
             return { ...data, ok: true };
@@ -101,12 +133,7 @@ export class Login extends Api {
         }
     }
 
-    public async loginStudent(
-        id: number,
-        tipoContraseña: string,
-        password?: string,
-        passwordImage?: ImagePassword[]
-    ): Promise<LoginResponseStudnet> {
+    public async loginStudent(id: number, tipoContraseña: string, password?: string, passwordImage?: ImagePassword[]): Promise<LoginResponseStudnet> {
         try {
             const response = await fetch(`${Api.apiUrl}/login_student`, {
                 method: 'POST',

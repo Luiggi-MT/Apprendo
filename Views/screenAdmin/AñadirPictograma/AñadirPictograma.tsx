@@ -75,37 +75,57 @@ export default function AñadirPictograma({
       />
 
       <View style={[styles.content, styles.shadow]}>
-        <FlatList
-          key={2}
-          data={pictogramasPaginados}
-          numColumns={2}
-          keyExtractor={(item) => item._id.toString()}
-          scrollEnabled={false}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={{
-                flex: 1,
-                alignItems: "center",
-                margin: 10,
-                padding: 5,
-                borderWidth: 1,
-                borderColor: "#ddd",
-                borderRadius: 10,
-              }}
-              onPress={() => handleSeleccionarPress(item)}
-            >
-              <Image
-                source={{ uri: arasaacService.getPictogramaId(item._id) }}
-                style={{ width: 120, height: 120 }}
-              />
-              <Text
-                style={[styles.text_legend, { fontSize: 16, marginTop: 5 }]}
+        {todosLosPictogramas.length === 0 ? (
+          <>
+            <View style={{ justifyContent: "center", alignItems: "center" }}>
+              <Text style={styles.text_legend}>NO HAY PICTOGRAMA</Text>
+              <View style={styles.superPuesto}>
+                <Image
+                  source={{
+                    uri: arasaacService.getPictograma("pictograma"),
+                  }}
+                  style={styles.imageBase}
+                />
+                <Image
+                  source={{ uri: arasaacService.getPictograma("fallo") }}
+                  style={styles.imageOverlay}
+                />
+              </View>
+            </View>
+          </>
+        ) : (
+          <FlatList
+            key={2}
+            data={pictogramasPaginados}
+            numColumns={2}
+            keyExtractor={(item) => item._id.toString()}
+            scrollEnabled={false}
+            renderItem={({ item }) => (
+              <TouchableOpacity
+                style={{
+                  flex: 1,
+                  alignItems: "center",
+                  margin: 10,
+                  padding: 5,
+                  borderWidth: 1,
+                  borderColor: "#ddd",
+                  borderRadius: 10,
+                }}
+                onPress={() => handleSeleccionarPress(item)}
               >
-                {item.keywords[0]?.keyword.toUpperCase()}
-              </Text>
-            </TouchableOpacity>
-          )}
-        />
+                <Image
+                  source={{ uri: arasaacService.getPictogramaId(item._id) }}
+                  style={{ width: 120, height: 120 }}
+                />
+                <Text
+                  style={[styles.text_legend, { fontSize: 16, marginTop: 5 }]}
+                >
+                  {item.keywords[0]?.keyword.toUpperCase()}
+                </Text>
+              </TouchableOpacity>
+            )}
+          />
+        )}
       </View>
 
       {todosLosPictogramas.length > 0 && (

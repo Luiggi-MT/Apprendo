@@ -47,6 +47,7 @@ export class Arasaac {
         ["siete", 35685], 
         ["ocho", 35687], 
         ["nueve", 35689], 
+        ["diez", 7025],
 
         // X en color rojo para cuando hay un error
         ["fallo", 5526],
@@ -74,6 +75,12 @@ export class Arasaac {
         //Arasaac Logo
         ["arasaacLogo", 35071],
 
+        ["pictograma", 15018], 
+
+        //Comida
+        ["comida", 4610],
+        ["postre", 7216],
+
 
     ]);
     private apiUrl: string = `https://api.arasaac.org/v1/pictograms`;
@@ -99,5 +106,13 @@ export class Arasaac {
     }
     public getPictogramaId(id: number): string{
         return `${this.apiUrl}/${id}`;
+    }
+
+    public getNumero(num: number):  string{
+        const numeros = ["cero", "uno", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve", "diez"];
+        if(num >= 0 && num <= 10){
+            return this.getPictograma(numeros[num]);
+        }
+        return "";
     }
 }

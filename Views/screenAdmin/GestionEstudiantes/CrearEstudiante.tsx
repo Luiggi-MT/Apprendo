@@ -35,14 +35,12 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
   const [openContraseña, setOpenContraseña] = useState(false);
   const [openAccesibilidad, setOpenAccesibilidad] = useState(false);
   const [openVisualizacion, setOpenVisualizacion] = useState(false);
-  const [openSexo, setOpenSexo] = useState(false);
   const [openAsistenteVoz, setOpenAsistenteVoz] = useState(false);
 
   const [contraseñaValue, setContraseñaValue] =
     useState<string>("alfanumerica");
   const [accesibilidadValue, setAccesibilidadValue] = useState<string[]>([]);
   const [visualizacionValue, setVisualizacionValue] = useState("diarias");
-  const [sexoValue, setSexoValue] = useState("masculino");
 
   const [asistenteVozValue, setAsistenteVozValue] = useState<string>("none");
 
@@ -67,12 +65,6 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
   const [visualizacionItems, setVisualizacionItems] = useState([
     { label: "DIARIAS", value: "diarias" },
     { label: "SEMANÁLES", value: "semanales" },
-  ]);
-
-  const [sexoItems, setSexoItems] = useState([
-    { label: "MASCULINO", value: "masculino" },
-    { label: "FEMENINO", value: "femenino" },
-    { label: "OTRO", value: "otro" },
   ]);
 
   const api = new ConnectApi();
@@ -147,7 +139,6 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
       username: text,
       foto: selectedImage || "porDefecto.png",
       tipoContraseña: contraseñaValue,
-      sexo: sexoValue,
       accesibilidad: accesibilidadValue.join(","),
       preferenciasVisualizacion: visualizacionValue,
       asistenteVoz: asistenteVozValue,
@@ -164,7 +155,9 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
     if (response.ok) {
       setTimeout(() => {
         setIsCreate(false);
-        navigation.replace("GestionEstudiantes");
+        navigation.goBack({
+          actualizar: true,
+        });
       }, 2000);
     } else {
       setIsCreate(false);
@@ -234,19 +227,7 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
             onChangeText={handleTextChange}
             value={text}
           />
-          <Text style={styles.text_legend}>SEXO:</Text>
-          <View style={{ zIndex: 1000 }}>
-            <DropDownPicker
-              open={openSexo}
-              value={sexoValue}
-              items={sexoItems}
-              setOpen={setOpenSexo}
-              setValue={setSexoValue}
-              setItems={setSexoItems}
-              style={[styles.shadow, styles.buscador, { width: "50%" }]}
-              textStyle={styles.dropdownTextStyle}
-            />
-          </View>
+
           <Text style={styles.text_legend}>TIPO DE CONTRASEÑA:</Text>
           <View style={{ zIndex: 900 }}>
             <DropDownPicker

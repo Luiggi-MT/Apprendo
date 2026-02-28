@@ -38,11 +38,19 @@ export default function VerComanda({
         newOffset,
         itemsPerPage,
       );
-      if (Array.isArray(data)) {
-        setAulas(data);
+
+      if (data && Array.isArray(data.aulas)) {
+        setAulas(data.aulas);
+        // Actualizamos total si el backend lo devuelve, si no puedes poner un número fijo
+        setTotal(data.total || 0);
+      } else {
+        setAulas([]);
+        setTotal(0);
       }
     } catch (error) {
       console.error("Error al cargar aulas:", error);
+      setAulas([]);
+      setTotal(0);
     } finally {
       setLoading(false);
     }
@@ -74,14 +82,8 @@ export default function VerComanda({
 
   const handleDescargar = async () => {
     setLoading(true);
-    const uri = await api.downloadComandaPDF(fecha);
+    await api.downloadComandaPDF(fecha);
     setLoading(false);
-
-    if (uri) {
-      await Sharing.shareAsync(uri);
-    } else {
-      alert("No se ha podido generar el PDF de la comanda");
-    }
   };
 
   const atras = () => {

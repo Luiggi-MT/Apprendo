@@ -1,21 +1,22 @@
 import { Api } from "./Api";
 import * as FileSystem from 'expo-file-system/legacy';
+import * as Sharing from "expo-sharing";
 import { Platform } from 'react-native';
+import {Menu as MenuInterface} from "../Interface/Menu";
 
-// Para eliminar 
-import * as MediaLibrary from 'expo-media-library'; // Solo si quieres guardar en galería
-import AsyncStorage from '@react-native-async-storage/async-storage'; // Para token si es necesario
 
 export class Comanda extends Api {
     
-    public async getDetalleComanda(id_tarea_estudiante: number): Promise<{ aulas: any[], menu_del_dia: any[] } | null> {
+    public async getDetalleComanda(id_tarea_estudiante: number, estudiante_id: number, fecha: string): Promise<{ aulas: any[], menu_del_dia: any[] } | null> {
         try {
-            const response = await fetch(`${Api.apiUrl}/comanda/${id_tarea_estudiante}`, {
+            
+            const response = await fetch(`${Api.apiUrl}/comanda/${id_tarea_estudiante}?estudiante_id=${estudiante_id}&fecha=${fecha}`, {
                 method: 'GET',
                 headers: {
                     'Content-Type': 'application/json',
                     // Si usas JWT, añade aquí el Authorization: `Bearer ${token}`
-                }
+                }, 
+                
             });
 
             if (!response.ok) {
@@ -30,17 +31,74 @@ export class Comanda extends Api {
         }
     }
 
-    
-    public async guardarVisitaAula(id_visita: number, pedidos: { id_plato: number, cantidad: number }[]): Promise<boolean> {
+    public async getMenusConCantidades(limit: number, offset: number, tareaId: number, estudianteId: number, fecha: string, aulaId: number, categoria: "menu" | "postre" = "menu") {
+        try {
+            const response = await fetch(`${Api.apiUrl}/comanda/menus?limit=${limit}&offset=${offset}&tarea_id=${tareaId}&estudiante_id=${estudianteId}&fecha=${fecha}&aula_id=${aulaId}&categoria=${categoria}`);
+
+            if (!response.ok) {
+                throw new Error("Error al obtener menús");
+            }
+
+            return await response.json();
+
+        } catch (error) {
+            console.error("Error getMenusConCantidades:", error);
+            return null;
+        }
+    }
+
+    public async getMenusConCantidadesByName(limit: number, offset: number, tareaId: number, estudianteId: number, fecha: string, aulaId: number, search: string, categoria: "menu" | "postre" = "menu") {
+        try {
+            const response = await fetch(`${Api.apiUrl}/comanda/menus/${encodeURIComponent(search)}?limit=${limit}&offset=${offset}&tarea_id=${tareaId}&estudiante_id=${estudianteId}&fecha=${fecha}&aula_id=${aulaId}&categoria=${categoria}`);
+
+            if (!response.ok) {
+                throw new Error("Error al obtener menús por nombre");
+            }
+
+            return await response.json();
+
+        } catch (error) {
+            console.error("Error getMenusConCantidadesByName:", error);
+            return null;
+        }
+    }
+
+    public async setCantidadPedido(tareaId: number, estudianteId: number, fecha: string, aulaId: number, idMenu: number, idPlato: number, cantidad: number): Promise<boolean> {
+        try {
+            const response = await fetch(`${Api.apiUrl}/comanda/pedido`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    tarea_id: tareaId,
+                    estudiante_id: estudianteId,
+                    fecha,
+                    aula_id: aulaId,
+                    id_menu: idMenu,
+                    id_plato: idPlato,
+                    cantidad
+                }),
+            });
+
+            return response.ok;
+        } catch (error) {
+            console.error("Error al actualizar cantidad del pedido:", error);
+            return false;
+        }
+    }
+    public async guardarVisitaAula(tarea_id: number, estudiante_id: number, fecha: string, aula_id: number): Promise<boolean> {
         try {
             const response = await fetch(`${Api.apiUrl}/comanda/guardar-visita`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    id_visita: id_visita,
-                    pedidos: pedidos
-                })
-            });
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                    tarea_id,
+                                    estudiante_id,
+                                    fecha,
+                                    aula_id,
+                                }),
+        });
 
             return response.ok;
         } catch (error) {
@@ -49,16 +107,12 @@ export class Comanda extends Api {
         }
     }
 
+
   
-    public async getMenuPorFecha(
-        fecha: string, 
-        limit: number, 
-        offset: number, 
-        id_visita: number = 0 
-    ): Promise<{ platos: any[] }> {
+    public async getMenu(limit: number,  offset: number, id_visita: number = 0): Promise<{ platos: any[] }> {
         try {
-            // Incluimos el id_visita en la URL como Query Param
-            const url = `${Api.apiUrl}/menu-dia?fecha=${fecha}&limit=${limit}&offset=${offset}&id_visita=${id_visita}`;
+            
+            const url = `${Api.apiUrl}/menu-dia?limit=${limit}&offset=${offset}&id_visita=${id_visita}`;
 
             const response = await fetch(url, {
                 method: 'GET',
@@ -104,52 +158,62 @@ export class Comanda extends Api {
     }
 
 
- public async getComandaDetalladaPorFecha(fecha: string, idAula: number): Promise<any[]> {
-  try {
-    // Realizamos la petición al nuevo endpoint del backend
-    const response = await fetch(`${Api.apiUrl}/comanda/detallada?fecha=${fecha}&id_aula=${idAula}`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    public async getComandaDetalladaPorFecha(fecha: string, idAula: number): Promise<any> {
+        try {
+            // Realizamos la petición al nuevo endpoint del backend
+            const response = await fetch(`${Api.apiUrl}/comanda/detallada?fecha=${fecha}&id_aula=${idAula}`, {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
 
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.error || "Error al obtener la comanda detallada");
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || "Error al obtener la comanda detallada");
+            }
+
+            const data = await response.json();
+            return data; // Retorna la lista de diccionarios con nombre_aula, plato, id_pictograma, etc.
+        } catch (error) {
+            console.error("Error en ConnectApi.getComandaDetallada:", error);
+            return [];
+        }
     }
+    
 
-    const data = await response.json();
-    return data; // Retorna la lista de diccionarios con nombre_aula, plato, id_pictograma, etc.
+    public async  downloadComandaPDF(fecha: string): Promise<void> {
+  try {
+    const url = `${Api.apiUrl}/comanda/descargar-pdf?fecha=${fecha}`;
+
+    if (Platform.OS === "android" || Platform.OS === "ios") {
+      const fileUri = `${FileSystem.documentDirectory}comanda_${fecha}.pdf`;
+
+      const downloadRes = await FileSystem.downloadAsync(url, fileUri);
+
+      if (downloadRes.status !== 200) {
+        console.error("Error al descargar PDF:", downloadRes.status);
+        return;
+      }
+
+      
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(downloadRes.uri);
+      } else {
+        alert(`PDF descargado en: ${downloadRes.uri}`);
+      }
+    } else if (Platform.OS === "web") {
+      // Crear enlace invisible para descargar en web
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `comanda_${fecha}.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
   } catch (error) {
-    console.error("Error en ConnectApi.getComandaDetallada:", error);
-    return [];
+    console.error("Error descargando PDF", error);
   }
 }
-    public async downloadComandaPDF(fecha: string): Promise<string | null> {
-    try {
-        const url = `${Api.apiUrl}/comanda/descargar-pdf?fecha=${fecha}`;
 
-        // 📌 SOLO móvil
-        if (Platform.OS === 'android' || Platform.OS === 'ios') {
-            const fileUri = `${FileSystem.documentDirectory}comanda_${fecha}.pdf`;
-
-            const downloadRes = await FileSystem.downloadAsync(url, fileUri);
-
-            if (downloadRes.status !== 200) return null;
-            return downloadRes.uri;
-        }
-
-        // 🌐 WEB → devolver la URL directamente
-        if (Platform.OS === 'web') {
-            return url;
-        }
-
-        return null;
-
-    } catch (error) {
-        console.error("Error descargando PDF", error);
-        return null;
-    }
-}
 }

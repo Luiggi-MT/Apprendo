@@ -1,11 +1,12 @@
 import { ApiResponse } from "../Interface/ApiResponse";
 import { ApiResponseMenu } from "../Interface/ApiResponseMenu";
 import { Api } from "./Api";
+import { Menu as MenuInterface } from "../Interface/Menu";
 
 export class Menu extends Api{
-    public async getMenu(offset: number = Api.INITIAL_OFFSET, limit: number = Api.LIMIT, fecha: string): Promise<ApiResponseMenu>{
+    public async getMenu(offset: number = Api.INITIAL_OFFSET, limit: number = Api.LIMIT, categoria: "menu" | "postre" = "menu"): Promise<ApiResponseMenu>{
         try{
-            const response = await fetch(`${Api.apiUrl}/menu?offset=${offset}&limit=${limit}&fecha=${fecha}`);
+            const response = await fetch(`${Api.apiUrl}/menu?offset=${offset}&limit=${limit}&categoria=${categoria}`);
             if (!response.ok){
                 throw new Error("Network response was not ok");
             }
@@ -15,7 +16,7 @@ export class Menu extends Api{
             return{ok: false, menus: [], offset: 0, count: 0};
         }
     }
-    public async createMenu(fecha: string, pictogramaMenuId: number, tachado: boolean, descripcion: string, primerPlato: string, primerPlatoId: number, segundoPlato: string, segundoPlatoId: number, guarnicion: string, guarnicionId: number, postre: string, postreId: number): Promise<ApiResponse>{
+    public async createMenu(menu: MenuInterface): Promise<ApiResponse>{
         try{
             const response = await fetch(`${Api.apiUrl}/menu`, {
                 method: "POST",
@@ -23,18 +24,7 @@ export class Menu extends Api{
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    fecha,
-                    pictogramaMenuId,
-                    tachado,
-                    descripcion,
-                    primerPlato,
-                    primerPlatoId,
-                    segundoPlato,
-                    segundoPlatoId,
-                    guarnicion,
-                    guarnicionId,
-                    postre,
-                    postreId
+                    "menu": menu,
                 })
             });
             if (!response.ok){
@@ -71,28 +61,18 @@ export class Menu extends Api{
         }
     }
 
-    public async updateMenuById(menu_id: number, fecha: string, pictogramaMenuId: number, tachado: boolean, descripcion: string, primerPlato: string, primerPlatoId: number, segundoPlato: string, segundoPlatoId: number, guarnicion: string, guarnicionId: number, postre: string, postreId: number): Promise<ApiResponse>{
+    public async updateMenuById(menu: MenuInterface): Promise<ApiResponse>{
         try{
-            const response = await fetch(`${Api.apiUrl}/menu/${menu_id}`, {
+            const response = await fetch(`${Api.apiUrl}/menu/${menu.id}`, {
                 method: "PUT",
                 headers: {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    fecha,
-                    pictogramaMenuId,
-                    tachado,
-                    descripcion,
-                    primerPlato,
-                    primerPlatoId,
-                    segundoPlato,
-                    segundoPlatoId,
-                    guarnicion,
-                    guarnicionId,
-                    postre,
-                    postreId
+                    "menu": menu,
                 })
             });
+            
             if (!response.ok){
                 throw new Error("Network response was not ok");
             }
@@ -103,6 +83,38 @@ export class Menu extends Api{
             };
         }catch{
             return {ok:false, message: "Error al actualizar el menú"};
+        }
+    }
+    public async getMenuByName(name: string, offset: number = Api.INITIAL_OFFSET, limit: number = Api.LIMIT, categoria: "menu" | "postre" = "menu"): Promise<ApiResponseMenu | null>{
+        try{
+            const response = await fetch(`${Api.apiUrl}/menu/${name}?offset=${offset}&limit=${limit}&categoria=${categoria}`);
+            if(!response.ok){
+                throw new Error("Network response was not ok");
+            }
+            const data: ApiResponseMenu = await response.json(); 
+            return data;
+        }catch{
+            return null;
+        }
+    }
+    public async deleteMenuById(menu_id: number): Promise<ApiResponse>{
+        try{
+            const response = await fetch(`${Api.apiUrl}/menu/${menu_id}`,{
+                method: "DELETE", 
+                headers: {
+                    "Content-Type" : "application/json",
+                }
+            });
+            if(!response.ok){
+                throw new Error("Network response was not ok"); 
+            }
+            const data = await response.json(); 
+            return{
+                ok: true, 
+                message: data,
+            }
+        }catch{
+            return {ok:false, message: "Error al eliminar el menú"};
         }
     }
 }

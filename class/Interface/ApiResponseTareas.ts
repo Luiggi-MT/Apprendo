@@ -1,8 +1,9 @@
-import { Tarea } from "./Tarea";
+import { Tarea, TareaEstudiante } from "./Tarea";
 
 export interface ApiResponseTareas{
     ok: boolean;
-    tareas: Tarea[];
+    tareas?: Tarea[];
+    tareasEstudiante?: TareaEstudiante[];
     offset: number;
     count: number;
 }

@@ -21,7 +21,7 @@ export default function Buscador({
       <TextInput
         style={[styles.buscador, styles.shadow]}
         onChangeText={handleTextChange}
-        value={text}
+        value={text.toUpperCase()}
         placeholder={nameBuscador}
       />
       <Image

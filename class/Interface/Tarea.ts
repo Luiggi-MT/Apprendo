@@ -1,9 +1,17 @@
 export interface Tarea {
-    id: number; 
-    titulo: string; 
-    uri: number; 
-    fecha_inicio: string; 
-    fecha_fin: string; 
-    esta_pendiente: boolean; 
-    id_tarea_estudiante?: number;
+    id?: number; 
+    id_pictograma: number; 
+    nombre: string; 
+    categoria: string;
+}
+
+export interface TareaEstudiante {
+    tarea_id?: number; 
+    estudiante_id?: number; 
+    fecha?: number; 
+    completado?: number;
+    categoria?: string; 
+    id?: number; 
+    nombre?: string; 
+    id_pictograma?: number;
 }

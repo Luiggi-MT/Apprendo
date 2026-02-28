@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { createContext, useCallback, useEffect, useState } from "react";
 import { View } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -73,6 +73,8 @@ import AñadirPictograma from "./Views/screenAdmin/AñadirPictograma/AñadirPict
 
 import ComandaTarea from "./Views/homeAlumnos/ComandaTarea/ComandaTarea";
 import ComandaAula from "./Views/homeAlumnos/ComandaTarea/ComandaAula";
+import { VoiceProvider } from "./class/context/VoiceContext";
+
 
 
 const Stack = createNativeStackNavigator();
@@ -131,6 +133,11 @@ export default function App() {
     foto: null,
     username: null,
   });
+
+
+  //Creamos un VoiceContext
+  const voiceContext = createContext();
+
 
   // Cargar las tipografias 
   const [fontsLoaded] = useFonts({
@@ -201,6 +208,7 @@ export default function App() {
       </View>
 
   return (
+    <VoiceProvider>
     <View style={{flex: 1}} onLayout={onLayoutRootView}>
     <PaperProvider>
     <UserContext.Provider value={{user, setUser}}>
@@ -262,5 +270,6 @@ export default function App() {
     </UserContext.Provider>
     </PaperProvider>
     </View>
+    </VoiceProvider>
   );
 }

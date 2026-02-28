@@ -1,5 +1,12 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, {
+  useContext,
+  useEffect,
+  useState,
+  useCallback,
+  useRef,
+} from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { useFocusEffect } from "@react-navigation/native";
 import Header from "../../components/Header";
 import { ConnectApi } from "../../class/Connect.Api/ConnectApi";
 import { UserContext } from "../../class/context/UserContext";
@@ -16,7 +23,8 @@ import {
 import { Arasaac } from "../../class/Arasaac/getPictograma";
 import { Students } from "../../class/Interface/Students";
 import { Speak } from "../../class/Speak/Speak";
-import { Tarea } from "../../class/Interface/Tarea";
+import { TareaEstudiante } from "../../class/Interface/Tarea";
+import { useVoice } from "../../class/context/VoiceContext";
 
 export default function DiariasScreen({
   navigation,
@@ -25,9 +33,11 @@ export default function DiariasScreen({
   navigation: any;
   route?: any;
 }) {
-  const [tareas, setTareas] = useState<Tarea[]>([]);
+  const [tareas, setTareas] = useState<TareaEstudiante[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-
+  const [offset, setOffset] = useState<number>(0);
+  const [limit, setLimit] = useState<number>(3);
+  const [isListening, setIsListening] = useState(false);
   const { user } = useContext(UserContext);
   const student = user as Students;
 
@@ -38,11 +48,13 @@ export default function DiariasScreen({
 
   const api = new ConnectApi();
   const arasaacService = new Arasaac();
-  const speak = new Speak();
+  const speak = Speak.getInstance();
+  const isProcessing = useRef(false);
+  const voice = useVoice();
 
   const perfil = () => navigation.navigate("PerfilScreen");
   const atras = () => {
-    speak.detenerAsistente();
+    speak.detener();
     navigation.goBack();
   };
 
@@ -51,11 +63,12 @@ export default function DiariasScreen({
     try {
       const response = await api.getTareaEstudiante(
         student.id,
-        0,
-        10,
+        offset,
+        limit,
         fechaSeleccionada,
       );
-      setTareas(response.tareas || []);
+      console.log(JSON.stringify(response, null, 2));
+      setTareas(response.tareasEstudiante || []);
     } catch (error) {
       console.error("Error al obtener tareas:", error);
     } finally {
@@ -68,28 +81,114 @@ export default function DiariasScreen({
   }, [fechaSeleccionada]);
 
   useEffect(() => {
-    if (!loading && student.asistenteVoz !== "none") {
-      if (tareas.length === 0) {
-        speak.hablar(`¡Genial! No tienes tareas pendientes para hoy.`);
+    const unsubscribe = navigation.addListener("focus", () => {
+      cargarTareas();
+    });
+
+    return unsubscribe;
+  }, [navigation]);
+
+  // ================= ASISTENTE DE VOZ =================
+
+  const activarAsistente = useCallback(async () => {
+    if (isProcessing.current) {
+      console.log("⚠️ Asistente ocupado");
+      return;
+    }
+    isProcessing.current = true;
+    setIsListening(true);
+
+    try {
+      await speak.hablar("Te escucho");
+
+      const comando = (await voice.listenCommand()).toLocaleLowerCase();
+
+      if (comando.includes("atrás") || comando.includes("atras")) {
+        await speak.hablar("Volviendo atrás");
+        navigation.goBack();
+      } else if (comando.includes("no") || comando.includes("cancelar")) {
+        await speak.hablar("De acuerdo");
       } else {
-        const pendientes = tareas.filter((t) => t.esta_pendiente).length;
-        if (pendientes > 0) {
-          speak.hablar(`Tienes ${pendientes} tareas pendientes.`);
+        // Buscar tarea que coincida con el comando
+        const tareaEncontrada = tareas.find((t) =>
+          t.nombre.toLowerCase().includes(comando),
+        );
+
+        if (tareaEncontrada) {
+          manejarPresionarTarea(tareaEncontrada);
         } else {
-          speak.hablar(`¡Muy bien! Has terminado todas tus tareas.`);
+          await speak.hablar("No he entendido el comando, intenta de nuevo");
         }
       }
-    }
-  }, [tareas, loading]);
+    } catch (error) {
+      console.log("Error asistente:", error);
+      await speak.hablar("No te he entendido");
+    } finally {
+      setIsListening(false);
+      isProcessing.current = false;
 
-  const manejarPresionarTarea = (tarea: Tarea) => {
+      // Solo reinicia si seguimos en la pantalla de tareas
+      setTimeout(() => {
+        if (student.asistenteVoz === "bidireccional") {
+          voice.startWake(activarAsistente);
+        }
+      }, 1000);
+    }
+  }, [tareas, navigation, student.asistenteVoz]);
+
+  // UseEffect para inicializar y limpiar el asistente
+  useFocusEffect(
+    useCallback(() => {
+      const init = async () => {
+        // Detener cualquier escucha previa y limpiar callbacks viejos
+        await voice.stopWake();
+
+        // Esperar un bit antes de reactivar
+        await new Promise((resolve) => setTimeout(resolve, 300));
+
+        if (!loading && student.asistenteVoz !== "none") {
+          if (tareas.length === 0) {
+            speak.hablar(`¡Genial! No tienes tareas pendientes para hoy.`);
+          } else {
+            const pendientes = tareas.filter((t) => t.completado === 0).length;
+            if (pendientes > 0) {
+              if (pendientes === 1)
+                speak.hablar(`Tienes ${pendientes} tarea pendiente.`);
+              else speak.hablar(`Tienes ${pendientes} tareas pendientes.`);
+            } else {
+              speak.hablar(`¡Muy bien! Has terminado todas tus tareas.`);
+            }
+          }
+
+          if (student.asistenteVoz === "bidireccional") {
+            const pendientes = tareas.filter((t) => t.completado === 0).length;
+            if (pendientes > 0) {
+              await speak.hablar(
+                'Di el nombre de una tarea para hacerla o "atrás" para volver al menú principal',
+              );
+            } else {
+              await speak.hablar('Di "atrás" para volver al menú principal');
+            }
+
+            // Registrar el callback AQUÍ en esta pantalla
+            voice.startWake(activarAsistente);
+          }
+        }
+      };
+
+      init();
+    }, []),
+  );
+
+  const manejarPresionarTarea = (tarea: TareaEstudiante) => {
     if (student.asistenteVoz !== "none") {
-      speak.hablar(`Vamos a hacer: ${tarea.titulo}`);
+      speak.hablar(`Vamos a hacer: ${tarea.nombre}`);
     }
 
-    if (tarea.titulo.toUpperCase() === "COMANDA") {
+    if (tarea.categoria.toUpperCase() === "COMANDA") {
       navigation.navigate("ComandaTarea", {
-        id_tarea_estudiante: tarea.id_tarea_estudiante,
+        id_tarea_estudiante: tarea.id,
+        fechaSeleccionada: fechaSeleccionada,
       });
     }
   };
@@ -106,116 +205,109 @@ export default function DiariasScreen({
         style={scaleFont(28)}
       />
 
-      <ScrollView
-        contentContainerStyle={{ flexGrow: 1, paddingBottom: 20 }}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={{ padding: 15 }}>
-          {loading ? (
-            <View style={{ marginTop: 50 }}>
-              <ActivityIndicator size="large" color="#FF8C42" />
-            </View>
-          ) : tareas.length === 0 ? (
-            <View style={{ alignItems: "center", marginTop: 40 }}>
-              <Text style={localStyles.textoExito}>
-                ¡TODO TERMINADO POR HOY!
-              </Text>
-              <Image
-                source={{ uri: arasaacService.getPictograma("ok") }}
-                style={{ width: 220, height: 220 }}
-                resizeMode="contain"
-              />
-            </View>
-          ) : (
-            <View>
-              {tareas.map((tarea) => (
-                <TouchableOpacity
-                  key={tarea.id_tarea_estudiante}
-                  activeOpacity={0.9}
-                  onPress={() => manejarPresionarTarea(tarea)}
-                  style={[
-                    styles.shadow,
-                    localStyles.cardTarea,
-                    {
-                      borderColor: tarea.esta_pendiente ? "#FF8C42" : "#4CAF50",
-                      opacity: tarea.esta_pendiente ? 1 : 0.8,
-                    },
-                  ]}
-                >
-                  <View style={localStyles.contenedorImagen}>
-                    <Image
-                      source={{
-                        uri: arasaacService.getPictogramaId(tarea.uri),
-                      }}
-                      style={localStyles.imagenTarea}
-                    />
-                  </View>
+      <View style={{ padding: 15 }}>
+        {loading === true ? (
+          <View style={{ marginTop: 50 }}>
+            <ActivityIndicator size="large" color="#FF8C42" />
+          </View>
+        ) : tareas.length === 0 ? (
+          <View style={{ alignItems: "center", marginTop: 40 }}>
+            <Text style={localStyles.textoExito}>¡TODO TERMINADO POR HOY!</Text>
+            <Image
+              source={{ uri: arasaacService.getPictograma("ok") }}
+              style={{ width: 220, height: 220 }}
+              resizeMode="contain"
+            />
+          </View>
+        ) : (
+          <View>
+            {tareas.map((tarea) => (
+              <TouchableOpacity
+                key={tarea.id}
+                activeOpacity={0.9}
+                onPress={() => manejarPresionarTarea(tarea)}
+                style={[
+                  styles.shadow,
+                  localStyles.cardTarea,
+                  {
+                    borderColor: !tarea.completado ? "#FF8C42" : "#4CAF50",
+                    opacity: !tarea.completado ? 1 : 0.8,
+                  },
+                ]}
+              >
+                <View style={localStyles.contenedorImagen}>
+                  <Image
+                    source={{
+                      uri: arasaacService.getPictogramaId(tarea.id_pictograma),
+                    }}
+                    style={localStyles.imagenTarea}
+                  />
+                </View>
 
-                  <View style={{ flex: 1, marginLeft: 15 }}>
+                <View style={{ flex: 1, marginLeft: 15 }}>
+                  <Text
+                    style={[
+                      localStyles.tituloTarea,
+                      {
+                        color: !tarea.completado ? "#333" : "#777",
+                        textDecorationLine: !tarea.completado
+                          ? "none"
+                          : "line-through",
+                      },
+                    ]}
+                  >
+                    {tarea.nombre.toUpperCase()}
+                  </Text>
+
+                  <View style={localStyles.contenedorEstado}>
+                    <View
+                      style={[
+                        localStyles.puntoEstado,
+                        {
+                          backgroundColor: !tarea.completado
+                            ? "#FF8C42"
+                            : "#4CAF50",
+                        },
+                      ]}
+                    />
                     <Text
                       style={[
-                        localStyles.tituloTarea,
+                        localStyles.textoEstado,
                         {
-                          color: tarea.esta_pendiente ? "#333" : "#777",
-                          textDecorationLine: tarea.esta_pendiente
-                            ? "none"
-                            : "line-through",
+                          color: !tarea.completado ? "#FF8C42" : "#4CAF50",
                         },
                       ]}
                     >
-                      {tarea.titulo.toUpperCase()}
+                      {!tarea.completado ? "PENDIENTE" : "COMPLETADO"}
                     </Text>
-
-                    <View style={localStyles.contenedorEstado}>
-                      <View
-                        style={[
-                          localStyles.puntoEstado,
-                          {
-                            backgroundColor: tarea.esta_pendiente
-                              ? "#FF8C42"
-                              : "#4CAF50",
-                          },
-                        ]}
-                      />
-                      <Text
-                        style={[
-                          localStyles.textoEstado,
-                          {
-                            color: tarea.esta_pendiente ? "#FF8C42" : "#4CAF50",
-                          },
-                        ]}
-                      >
-                        {tarea.esta_pendiente ? "PENDIENTE" : "COMPLETADO"}
-                      </Text>
-                    </View>
                   </View>
+                </View>
 
-                  <View style={{ marginRight: 5 }}>
+                <View style={{ marginRight: 5 }}>
+                  <Image
+                    source={{
+                      uri: arasaacService.getPictograma(
+                        !tarea.completado ? "adelante" : "ok",
+                      ),
+                    }}
+                    style={{ width: 40, height: 40, opacity: 0.8 }}
+                  />
+                </View>
+
+                {tarea.completado === 1 && (
+                  <View style={localStyles.overlayCentrado}>
                     <Image
-                      source={{
-                        uri: arasaacService.getPictograma(
-                          tarea.esta_pendiente ? "adelante" : "ok",
-                        ),
-                      }}
-                      style={{ width: 40, height: 40, opacity: 0.8 }}
+                      source={{ uri: arasaacService.getPictograma("x") }}
+                      style={localStyles.imagenXGrande}
+                      resizeMode="contain"
                     />
                   </View>
-
-                  {!tarea.esta_pendiente && (
-                    <View style={localStyles.overlayCentrado}>
-                      <Image
-                        source={{ uri: arasaacService.getPictograma("x") }}
-                        style={localStyles.imagenXGrande}
-                        resizeMode="contain"
-                      />
-                    </View>
-                  )}
-                </TouchableOpacity>
-              ))}
-            </View>
-          )}
-        </View>
-      </ScrollView>
+                )}
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+      </View>
     </SafeAreaProvider>
   );
 }

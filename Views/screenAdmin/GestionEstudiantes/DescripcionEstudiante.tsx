@@ -12,6 +12,7 @@ import { ActivityIndicator } from "react-native-paper";
 import { Students } from "../../../class/Interface/Students";
 import { ImagePassword } from "../../../class/Interface/ImagePassword";
 import { tarjetaDescipcion_styles } from "../../../styles/tarjetaDescripcion_styles";
+import { Arasaac } from "../../../class/Arasaac/getPictograma";
 
 export default function DescripcionEstudiante({
   navigation,
@@ -38,6 +39,7 @@ export default function DescripcionEstudiante({
   const [openContraseña, setOpenContraseña] = useState(false);
   const [openAccesibilidad, setOpenAccesibilidad] = useState(false);
   const [openVisualizacion, setOpenVisualizacion] = useState(false);
+  const [secureText, setSecureText] = useState(true);
 
   const [contraseñaValue, setContraseñaValue] = useState(
     student.tipoContraseña,
@@ -48,10 +50,8 @@ export default function DescripcionEstudiante({
   const [visualizacionValue, setVisualizacionValue] = useState(
     student.preferenciasVisualizacion,
   );
-  const [sexoValue, setSexoValue] = useState(student.sexo);
 
   const [openAsistenteVoz, setOpenAsistenteVoz] = useState(false);
-  const [openSexo, setOpenSexo] = useState(false);
 
   const [asistenteVozValue, setAsistenteVozValue] = useState(
     student.asistenteVoz,
@@ -72,17 +72,11 @@ export default function DescripcionEstudiante({
     { label: "VIDEO", value: "video" },
     { label: "IMÁGENES", value: "imagenes" },
     { label: "PICTOGRAMAS", value: "pictogramas" },
-    { label: "AUDIO", value: "auido" },
+    { label: "AUDIO", value: "audio" },
   ]);
   const [visualizacionItems, setVisualizacionItems] = useState([
     { label: "DIARIAS", value: "diarias" },
     { label: "SEMANÁLES", value: "semanales" },
-  ]);
-
-  const [sexoItems, setSexoItems] = useState([
-    { label: "MASCULINO", value: "masculino" },
-    { label: "FEMENINO", value: "femenino" },
-    { label: "OTRO", value: "otro" },
   ]);
 
   const [passwordImages, setPasswordImages] = useState<ImagePassword[]>([]);
@@ -91,6 +85,7 @@ export default function DescripcionEstudiante({
   );
 
   const api = new ConnectApi();
+  const arasaacService = new Arasaac();
 
   const atras = () => {
     navigation.goBack();
@@ -146,7 +141,9 @@ export default function DescripcionEstudiante({
     } else {
       setTimeout(() => {
         setWaitting(false);
-        navigation.replace("GestionEstudiantes");
+        navigation.goBack({
+          borrar: true,
+        });
       }, 2000);
     }
   };
@@ -154,17 +151,43 @@ export default function DescripcionEstudiante({
   const handleActualizarPress = async () => {
     setWaitting(true);
     setMessageWaiteng(`MODIFICANDO LOS DATOS DE ${student.username}...`);
-    const updateStudent: Students = {
+
+    const updateStudent: any = {
       id: student.id,
-      username: text,
-      contraseña: password,
-      foto: selectedImage,
-      sexo: sexoValue,
-      tipoContraseña: contraseñaValue,
-      accesibilidad: accesibilidadValue.toString(),
-      preferenciasVisualizacion: visualizacionValue,
-      asistenteVoz: asistenteVozValue,
     };
+
+    if (text && text !== student.username) {
+      updateStudent.username = text;
+    }
+    if (password) {
+      updateStudent.contraseña = password;
+    }
+    if (selectedImage && selectedImage !== student.foto) {
+      updateStudent.foto = selectedImage;
+    }
+
+    if (contraseñaValue !== student.tipoContraseña) {
+      updateStudent.tipoContraseña = contraseñaValue;
+    }
+    if (accesibilidadValue.toString() !== student.accesibilidad) {
+      updateStudent.accesibilidad = accesibilidadValue;
+    }
+    if (visualizacionValue !== student.preferenciasVisualizacion) {
+      updateStudent.preferenciasVisualizacion = visualizacionValue;
+    }
+    if (asistenteVozValue !== student.asistenteVoz) {
+      updateStudent.asistenteVoz = asistenteVozValue;
+    }
+
+    // Si no hay cambios, no hacer nada
+    if (Object.keys(updateStudent).length === 1) {
+      // Solo tiene 'id'
+      setWaitting(false);
+      setMessageError(true);
+      setMessageErrorString("No hay cambios que actualizar");
+      return;
+    }
+
     const response = await api.updateStudent(
       updateStudent,
       passwordImages,
@@ -177,7 +200,9 @@ export default function DescripcionEstudiante({
     } else {
       setTimeout(() => {
         setWaitting(false);
-        navigation.replace("GestionEstudiantes");
+        navigation.goBack({
+          actualizar: true,
+        });
       }, 2000);
     }
   };
@@ -196,6 +221,10 @@ export default function DescripcionEstudiante({
     });
   };
 
+  useEffect(() => {
+    console.log("Student data:", JSON.stringify(student, null, 2));
+    console.log("Accesibilidad Value:", accesibilidadValue);
+  }, [student, accesibilidadValue]);
   return (
     <SafeAreaProvider>
       <Header
@@ -261,35 +290,66 @@ export default function DescripcionEstudiante({
               textStyle={styles.dropdownTextStyle}
             />
           </View>
-          <Text style={styles.text_legend}>SEXO:</Text>
-          <View style={{ zIndex: 900 }}>
-            <DropDownPicker
-              open={openSexo}
-              value={sexoValue}
-              items={sexoItems}
-              setOpen={setOpenSexo}
-              setValue={setSexoValue}
-              setItems={setSexoItems}
-              style={[styles.shadow, styles.buscador, { width: "50%" }]}
-              textStyle={styles.dropdownTextStyle}
-            />
-          </View>
+
           <Text style={styles.text_legend}>NUEVA CONTRASEÑA:</Text>
           {contraseñaValue === "alfanumerica" ? (
-            <TextInput
-              style={[styles.buscador, styles.shadow]}
-              onChangeText={handlePasswordChange}
-              value={password}
-              secureTextEntry={true}
-            />
+            <View
+              style={[
+                styles.buscador,
+                styles.shadow,
+                {
+                  flexDirection: "row",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  paddingRight: 15,
+                },
+              ]}
+            >
+              <TextInput
+                style={{ flex: 1, height: "100%" }}
+                onChangeText={handlePasswordChange}
+                value={password}
+                secureTextEntry={secureText}
+              />
+              <TouchableOpacity onPress={() => setSecureText(!secureText)}>
+                {secureText && (
+                  <Image
+                    source={{ uri: api.getComponent("ojo.png") }}
+                    style={styles.image}
+                  />
+                )}
+                {!secureText && (
+                  <Image
+                    source={{ uri: arasaacService.getPictograma("ojo") }}
+                    style={styles.image}
+                  />
+                )}
+              </TouchableOpacity>
+            </View>
           ) : contraseñaValue === "pin" ? (
-            <TextInput
-              style={[styles.buscador, styles.shadow]}
-              onChangeText={handlePasswordChange}
-              value={password}
-              keyboardType="number-pad"
-              secureTextEntry={true}
-            />
+            <View>
+              <TextInput
+                style={[styles.buscador, styles.shadow]}
+                onChangeText={handlePasswordChange}
+                value={password}
+                keyboardType="number-pad"
+                secureTextEntry={secureText}
+              />
+              <TouchableOpacity onPress={() => setSecureText(!secureText)}>
+                {secureText && (
+                  <Image
+                    source={{ uri: api.getComponent("ojo.png") }}
+                    style={styles.image}
+                  />
+                )}
+                {!secureText && (
+                  <Image
+                    source={{ uri: arasaacService.getPictograma("ojo") }}
+                    style={styles.image}
+                  />
+                )}
+              </TouchableOpacity>
+            </View>
           ) : (
             <Boton
               uri="olvideContraseña"

@@ -5,11 +5,12 @@ export interface Plato{
         
 }
 export interface Menu{
-    id: number; 
+    id?: number; 
     id_pictograma: number; 
-    nombre: string; 
     descripcion: string;
     tachado: boolean;
-    fecha?: string;
     platos?: Plato[];
+    categoria: "menu" | "postre";
+    limit?: number;
+    offset?: number;
 }

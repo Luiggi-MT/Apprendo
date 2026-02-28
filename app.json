@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "Proyecta",
-    "slug": "proyecta",
+    "name": "Apprendo",
+    "slug": "apprendo",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -14,7 +14,7 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.luiggimt.proyecta",
+      "bundleIdentifier": "com.luiggimt.apprendo",
       "buildNumber": "1",
       "infoPlist": {
         "NSCameraUsageDescription": "La cámara se usa para seleccionar imágenes de perfil",

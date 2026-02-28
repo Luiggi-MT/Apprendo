@@ -28,17 +28,13 @@ export class TareasApi extends Api{
         }
     }
 
-    public async createTareaComanda(uri: number, titulo: string, id_profesor: number): Promise<boolean>{
+    public async createTareaComanda(): Promise<boolean>{
         try{
 
             const response = await fetch(`${Api.apiUrl}/tareas-comanda`, {
                 method: "POST", 
                 headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({
-                    'uri' :  uri, 
-                    'titulo' : titulo, 
-                    'id-profesor' : id_profesor, 
-                })
+               
             }); 
             
             if(!response.ok){
@@ -129,20 +125,29 @@ export class TareasApi extends Api{
         }
     }
 
-    public async finalizarTarea(id: number): Promise<boolean>{
-        try{
-            const response = await fetch(`${Api.apiUrl}/finalizar-tarea/${id}`, {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+    public async finalizarTarea(tarea_id: number, estudiante_id: number, fecha: string): Promise<boolean> {
+        try {
+            const response = await fetch(`${Api.apiUrl}/finalizar-tarea`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({
+                        tarea_id,
+                        estudiante_id,
+                        fecha,
+                    }),
             });
+
             if (!response.ok) {
-                throw new Error("Error al obtener el resumen mensual");
+                const errorData = await response.json();
+                console.error("Error al finalizar la tarea:", errorData);
+                return false;
             }
-            return true; 
-        }catch (error){
-            console.error("Error al finalizar la tareae: ", error); 
+
+            return true;
+        } catch (error) {
+            console.error("Error al finalizar la tarea:", error);
             return false;
         }
     }

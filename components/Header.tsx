@@ -1,9 +1,10 @@
 import React from "react";
-import { View, Image, Text } from "react-native";
+import { View, Image, Text, TouchableOpacity } from "react-native";
 import Boton from "./Boton";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { styles } from "../styles/styles";
 import { Arasaac } from "../class/Arasaac/getPictograma";
+import * as Device from "expo-device";
 
 export default function Header({
   uri,
@@ -16,6 +17,7 @@ export default function Header({
   profesor,
   uriApi = false,
   uriFoto,
+  vistaSelector = null,
 }: {
   uri: string;
   uriPictograma?: string;
@@ -27,12 +29,19 @@ export default function Header({
   profesor?: string;
   uriApi?: boolean;
   uriFoto?: string;
+  vistaSelector?: {
+    vista: "menu" | "postre";
+    setVista: (v: "menu" | "postre") => void;
+  };
 }) {
   const ArasaacService = new Arasaac();
   const headerText: string[] = nameHeader.split(".");
+  const isPhone = Device.deviceType === Device.DeviceType.PHONE;
+  const hideHeaderMeta = isPhone && !!vistaSelector;
 
   return (
     <SafeAreaView style={styles.header}>
+      {/* Botón de volver */}
       <View style={styles.bottomContainerHeder}>
         <Boton
           uri={uri}
@@ -43,24 +52,84 @@ export default function Header({
         />
       </View>
 
-      <View style={styles.titleHeaderContainer}>
-        {headerText.map((text) => (
-          <Text
-            key={text}
-            style={[styles.titleHeaderText, styles.shadow, { fontSize: style }]}
-          >
-            {text}
-          </Text>
-        ))}
-      </View>
-      {uriPictograma && (
+      {/* Título */}
+      {!hideHeaderMeta && (
+        <View style={styles.titleHeaderContainer}>
+          {headerText.map((text) => (
+            <Text
+              key={text}
+              style={[
+                styles.titleHeaderText,
+                styles.shadow,
+                { fontSize: style },
+              ]}
+            >
+              {text}
+            </Text>
+          ))}
+        </View>
+      )}
+
+      {/* Selector MENÚ / POSTRES centrado abajo */}
+      {isPhone && vistaSelector && (
+        <View style={[styles.vistaSelectorContainer, { flex: 1 }]}>
+          {["menu", "postre"].map((v) => (
+            <TouchableOpacity
+              key={v}
+              onPress={() => vistaSelector.setVista(v as "menu" | "postre")}
+              style={[
+                styles.vistaSelectorButton,
+                vistaSelector.vista === v && styles.vistaSelectorButtonActive,
+              ]}
+            >
+              <Image
+                source={{
+                  uri: ArasaacService.getPictograma(
+                    v === "menu" ? "comida" : "postre",
+                  ),
+                }}
+                style={styles.image}
+              />
+              <Text style={styles.vistaSelectorText}>{v.toUpperCase()}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+      {!isPhone && vistaSelector && (
+        <View style={[styles.vistaSelectorContainer]}>
+          {["menu", "postre"].map((v) => (
+            <TouchableOpacity
+              key={v}
+              onPress={() => vistaSelector.setVista(v as "menu" | "postre")}
+              style={[
+                styles.vistaSelectorButton,
+                vistaSelector.vista === v && styles.vistaSelectorButtonActive,
+              ]}
+            >
+              <Image
+                source={{
+                  uri: ArasaacService.getPictograma(
+                    v === "menu" ? "comida" : "postre",
+                  ),
+                }}
+                style={styles.image}
+              />
+              <Text style={styles.vistaSelectorText}>{v.toUpperCase()}</Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      )}
+
+      {/* Pictograma o foto */}
+
+      {!hideHeaderMeta && uriPictograma && (
         <Image
           source={{ uri: ArasaacService.getPictograma(uriPictograma) }}
-          style={{ width: 90, height: 90 }}
+          style={{ width: 90, height: 90, alignSelf: "center", marginTop: 5 }}
         />
       )}
-      {uriApi && uriFoto && (
-        <View>
+      {!hideHeaderMeta && uriApi && uriFoto && (
+        <View style={{ alignItems: "center", marginTop: 5 }}>
           <Image source={{ uri: uriFoto }} style={{ width: 90, height: 90 }} />
           <Text
             style={[
@@ -68,7 +137,7 @@ export default function Header({
               { color: "white", fontSize: 17, textAlign: "center" },
             ]}
           >
-            {profesor}
+            {profesor.toUpperCase()}
           </Text>
         </View>
       )}
