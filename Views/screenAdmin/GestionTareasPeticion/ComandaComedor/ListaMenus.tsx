@@ -11,6 +11,7 @@ import Boton from "../../../../components/Boton";
 import TarjetaDescipcion from "../../../../components/TarjetaDescripcion";
 import { UserContext } from "../../../../class/context/UserContext";
 import Splash from "../../../../components/Splash";
+import { Profesor } from "../../../../class/Interface/Profesor";
 
 export default function ComandaComedor({ navigation }: { navigation: any }) {
   const [menus, setMenus] = useState<Menu[]>([]);
@@ -31,7 +32,8 @@ export default function ComandaComedor({ navigation }: { navigation: any }) {
   const [confirmarBorrado, setConfirmarBorrado] = useState<boolean>(false);
   const [vista, setVista] = useState<"menu" | "postre">("menu");
 
-  const user = useContext(UserContext).user;
+  const profesor = useContext(UserContext).user as Profesor;
+
   const api = new ConnectApi();
   const arassacService = new Arasaac();
 
@@ -54,7 +56,6 @@ export default function ComandaComedor({ navigation }: { navigation: any }) {
   ) => {
     api.getMenuByName(texto, newOffset, limit, vista).then((data) => {
       if (data !== null) {
-        console.log("Data recibida:", JSON.stringify(data, null, 2));
         setMenus(data.menus || []);
         setOffset(newOffset);
         setTotal(data.count || 0);
@@ -292,53 +293,54 @@ export default function ComandaComedor({ navigation }: { navigation: any }) {
               </Text>
             )}
 
-            {confirmarBorrado ? (
-              <View style={{ alignItems: "center" }}>
-                <Text style={[styles.error, { fontSize: scaleFont(20) }]}>
-                  ¿SEGURO QUE QUIERES BORRAR LA TAREA?
-                </Text>
+            {profesor.tipo === "admin" &&
+              (confirmarBorrado ? (
+                <View style={{ alignItems: "center" }}>
+                  <Text style={[styles.error, { fontSize: scaleFont(20) }]}>
+                    ¿SEGURO QUE QUIERES BORRAR LA TAREA?
+                  </Text>
+                  <View style={styles.navigationButtons}>
+                    <Boton
+                      uri="x"
+                      nameBottom="NO ELIMINAR"
+                      onPress={() => setConfirmarBorrado(false)}
+                    />
+                    <Boton
+                      uri="ok"
+                      nameBottom="SI, ELIMINAR"
+                      onPress={handleEliminarTareaPress}
+                    />
+                  </View>
+                </View>
+              ) : (
                 <View style={styles.navigationButtons}>
                   <Boton
-                    uri="x"
-                    nameBottom="NO ELIMINAR"
-                    onPress={() => setConfirmarBorrado(false)}
+                    uri="mas"
+                    nameBottom="CREAR.MENÚ"
+                    onPress={handleCreaPress}
                   />
+
+                  {!esCreada ? (
+                    <Boton
+                      uri="tareasPeticion"
+                      nameBottom="CREAR.TAREA"
+                      onPress={handleCrearTareaPress}
+                    />
+                  ) : (
+                    <Boton
+                      uri="tareasPeticion"
+                      nameBottom="ELIMINAR.TAREA"
+                      onPress={() => setConfirmarBorrado(true)}
+                    />
+                  )}
+
                   <Boton
-                    uri="ok"
-                    nameBottom="SI, ELIMINAR"
-                    onPress={handleEliminarTareaPress}
+                    uri="comanda"
+                    nameBottom="VER.COMANDA"
+                    onPress={handleVerComandaPress}
                   />
                 </View>
-              </View>
-            ) : (
-              <View style={styles.navigationButtons}>
-                <Boton
-                  uri="mas"
-                  nameBottom="CREAR.MENÚ"
-                  onPress={handleCreaPress}
-                />
-
-                {!esCreada ? (
-                  <Boton
-                    uri="tareasPeticion"
-                    nameBottom="CREAR.TAREA"
-                    onPress={handleCrearTareaPress}
-                  />
-                ) : (
-                  <Boton
-                    uri="tareasPeticion"
-                    nameBottom="ELIMINAR.TAREA"
-                    onPress={() => setConfirmarBorrado(true)}
-                  />
-                )}
-
-                <Boton
-                  uri="comanda"
-                  nameBottom="VER.COMANDA"
-                  onPress={handleVerComandaPress}
-                />
-              </View>
-            )}
+              ))}
           </>
         )}
       </View>

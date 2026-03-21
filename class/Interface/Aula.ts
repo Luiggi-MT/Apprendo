@@ -1,6 +1,6 @@
 export interface Aula{
     id: number;
-    nombre_aula: string;
+    nombre: string;
     id_profesor?: number;
     foto_profesor?: string; 
     nombre_profesor?:string;

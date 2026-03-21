@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Header from "../../../../components/Header";
 import { scaleFont, styles } from "../../../../styles/styles";
@@ -8,6 +8,8 @@ import { Arasaac } from "../../../../class/Arasaac/getPictograma";
 import { Image, Text, TextInput, TouchableOpacity, View } from "react-native";
 import Boton from "../../../../components/Boton";
 import Splash from "../../../../components/Splash";
+import { UserContext } from "../../../../class/context/UserContext";
+import { Profesor } from "../../../../class/Interface/Profesor";
 
 export default function DetalleMenu({
   navigation,
@@ -33,6 +35,8 @@ export default function DetalleMenu({
   const [mensajeValue, setMensajeValue] = useState<string>("");
   const [error, setError] = useState<boolean>(false);
   const [borrar, setBorrar] = useState<boolean>(false);
+
+  const profesor = useContext(UserContext).user as Profesor;
 
   const { menu_id } = route.params;
   const api = new ConnectApi();
@@ -188,7 +192,12 @@ export default function DetalleMenu({
         case 0:
           return (
             <View>
-              <TouchableOpacity onPress={() => handleAñadirPress("menu")}>
+              <TouchableOpacity
+                onPress={() =>
+                  profesor.tipo === "admin" && handleAñadirPress("menu")
+                }
+                disabled={profesor.tipo !== "admin"}
+              >
                 <Text style={styles.text_legend}>SELECCIONAR FOTO:</Text>
                 <View style={{ alignItems: "center" }}>
                   {!isTachado ? (
@@ -221,35 +230,42 @@ export default function DetalleMenu({
                 </View>
               </TouchableOpacity>
               <View style={{ marginTop: 15 }}>
-                <Text style={styles.text_legend}>TACHAR:</Text>
-                <TouchableOpacity
-                  style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    marginTop: 10,
-                  }}
-                  onPress={() => setIsTachado(!isTachado)}
-                >
-                  <View
-                    style={[
-                      styles.radioOuter,
-                      {
-                        borderColor: isTachado ? "#FF0000" : "#555",
-                        marginBottom: 0,
-                      },
-                    ]}
-                  >
-                    {isTachado && <View style={styles.radioInner} />}
-                  </View>
-                  <Text
-                    style={[
-                      styles.text,
-                      { marginLeft: 10, textAlignVertical: "center" },
-                    ]}
-                  >
-                    {isTachado ? "SÍ, TACHADO" : "NO, NORMAL"}
-                  </Text>
-                </TouchableOpacity>
+                {profesor.tipo === "admin" && (
+                  <>
+                    <Text style={styles.text_legend}>TACHAR:</Text>
+                    <TouchableOpacity
+                      style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        marginTop: 10,
+                      }}
+                      onPress={() =>
+                        profesor.tipo === "admin" && setIsTachado(!isTachado)
+                      }
+                      disabled={profesor.tipo !== "admin"}
+                    >
+                      <View
+                        style={[
+                          styles.radioOuter,
+                          {
+                            borderColor: isTachado ? "#FF0000" : "#555",
+                            marginBottom: 0,
+                          },
+                        ]}
+                      >
+                        {isTachado && <View style={styles.radioInner} />}
+                      </View>
+                      <Text
+                        style={[
+                          styles.text,
+                          { marginLeft: 10, textAlignVertical: "center" },
+                        ]}
+                      >
+                        {isTachado ? "SÍ, TACHADO" : "NO, NORMAL"}
+                      </Text>
+                    </TouchableOpacity>
+                  </>
+                )}
               </View>
               <View style={{ marginTop: 15 }}>
                 <Text style={styles.text_legend}>DESCRIPCIÓN:</Text>
@@ -262,6 +278,7 @@ export default function DetalleMenu({
                   placeholder="EJEMPLO CON CARNE..."
                   onChangeText={setDescripcion}
                   value={descripcion}
+                  editable={profesor.tipo === "admin"}
                 />
               </View>
             </View>
@@ -279,10 +296,14 @@ export default function DetalleMenu({
                 placeholder="EJEMPLO: POLLO CON ARROZ..."
                 onChangeText={setPrimerPlato}
                 value={primerPlato}
+                editable={profesor.tipo === "admin"}
               />
               <TouchableOpacity
                 style={{ marginTop: 15 }}
-                onPress={() => handleAñadirPress("primerPlato")}
+                onPress={() =>
+                  profesor.tipo === "admin" && handleAñadirPress("primerPlato")
+                }
+                disabled={profesor.tipo !== "admin"}
               >
                 <Text style={styles.text_legend}>SELECCIONAR PICTOGRÁMA:</Text>
                 <View style={{ alignItems: "center" }}>
@@ -312,10 +333,14 @@ export default function DetalleMenu({
                 placeholder="EJEMPLO: PESCADO CON PATATAS..."
                 onChangeText={setSegundoPlato}
                 value={segundoPlato}
+                editable={profesor.tipo === "admin"}
               />
               <TouchableOpacity
                 style={{ marginTop: 15 }}
-                onPress={() => handleAñadirPress("segundoPlato")}
+                onPress={() =>
+                  profesor.tipo === "admin" && handleAñadirPress("segundoPlato")
+                }
+                disabled={profesor.tipo !== "admin"}
               >
                 <Text style={styles.text_legend}>SELECCIONAR PICTOGRÁMA:</Text>
                 <View style={{ alignItems: "center" }}>
@@ -346,10 +371,14 @@ export default function DetalleMenu({
             placeholder="EJEMPLO: YOGURT..."
             onChangeText={setPostre}
             value={postre}
+            editable={profesor.tipo === "admin"}
           />
           <TouchableOpacity
             style={{ marginTop: 15 }}
-            onPress={() => handleAñadirPress("postre")}
+            onPress={() =>
+              profesor.tipo === "admin" && handleAñadirPress("postre")
+            }
+            disabled={profesor.tipo !== "admin"}
           >
             <Text style={styles.text_legend}>SELECCIONAR PICTOGRÁMA:</Text>
             <View style={{ alignItems: "center" }}>
@@ -445,21 +474,52 @@ export default function DetalleMenu({
                   {mensajeValue}
                 </Text>
               )}
-              <View style={styles.navigationButtons}>
-                <Boton
-                  uri="borrar"
-                  nameBottom="ELIMINAR.MENÚ"
-                  onPress={() => setBorrar(true)}
-                />
-                <Boton
-                  uri="ok"
-                  nameBottom="MODIFICAR.MENÚ"
-                  onPress={handleModificarMenu}
-                />
-              </View>
+              {profesor.tipo === "admin" && (
+                <>
+                  {error && (
+                    <Text style={[styles.error, { fontSize: scaleFont(20) }]}>
+                      {mensajeValue}
+                    </Text>
+                  )}
+
+                  {borrar ? (
+                    <View>
+                      <Text style={[styles.error, { fontSize: scaleFont(20) }]}>
+                        QUIERES BORRAR EL MENÚ
+                      </Text>
+                      <View style={styles.navigationButtons}>
+                        <Boton
+                          uri="x"
+                          nameBottom="NO ELIMINAR"
+                          onPress={() => setBorrar(false)}
+                        />
+                        <Boton
+                          uri="ok"
+                          nameBottom="ELIMINAR"
+                          onPress={handleEliminarMenu}
+                        />
+                      </View>
+                    </View>
+                  ) : (
+                    <View style={styles.navigationButtons}>
+                      <Boton
+                        uri="borrar"
+                        nameBottom="ELIMINAR.MENÚ"
+                        onPress={() => setBorrar(true)}
+                      />
+                      <Boton
+                        uri="ok"
+                        nameBottom="MODIFICAR.MENÚ"
+                        onPress={handleModificarMenu}
+                      />
+                    </View>
+                  )}
+                </>
+              )}
             </>
           ) : (
-            view === 2 && (
+            view === 2 &&
+            profesor.tipo === "admin" && (
               <>
                 {error && (
                   <Text style={[styles.error, { fontSize: scaleFont(20) }]}>

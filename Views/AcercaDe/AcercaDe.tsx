@@ -39,7 +39,7 @@ export default function AcercaDe({ navigation }: { navigation: any }) {
             <Text
               style={[styles.text, { textAlign: "justify", marginBottom: 15 }]}
             >
-              <Text style={styles.text_legend}>PROYECTA</Text> ES UNA APLICACIÓN
+              <Text style={styles.text_legend}>APPRENDO</Text> ES UNA APLICACIÓN
               DESARROLLADA CON EL OBJETIVO DE MEJORAR LA COMUNICACIÓN Y
               ORGANIZACIÓN EN ENTORNOS EDUCATIVOS, CON UN ENFOQUE ESPECIAL EN LA
               ACCESIBILIDAD COGNITIVA. ESTA HERRAMIENTA ESTÁ DISEÑADA PARA SER

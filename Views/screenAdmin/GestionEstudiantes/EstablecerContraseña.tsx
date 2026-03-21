@@ -38,6 +38,7 @@ export default function EstablecerContraseña({
   const [distractors, setDistractors] = useState<ImagePassword[]>([]);
   const [disablePassword, setDisablePassword] = useState<boolean>(false);
   const [disableDistractors, setDisableDistractors] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
 
   const totalImagenes = password.length + distractors.length;
   const remainingTotal = MAX_TOTAL_IMAGENES - totalImagenes;
@@ -115,7 +116,7 @@ export default function EstablecerContraseña({
       }
     } catch (error) {
       console.error("Error seleccionando imágenes:", error);
-      Alert.alert("Error", "No se pudieron cargar las imágenes");
+      setError("No se pudieron cargar las imágenes");
     }
   };
 
@@ -131,7 +132,7 @@ export default function EstablecerContraseña({
 
   const handleGuardarContraseñaPress = async () => {
     if (password.length < MIN_PASSWORD || distractors.length < MIN_DISTRACTOR) {
-      Alert.alert("Es necesario añadir una imagen de cada tipo");
+      setError("Es necesario añadir una imagen de cada tipo");
       return;
     }
     if (onPasswordSelected) onPasswordSelected(password, distractors);
@@ -313,6 +314,13 @@ export default function EstablecerContraseña({
               />
             </View>
           </View>
+          {error && (
+            <View style={[styles.errorContainer]}>
+              <Text style={[styles.error, { fontSize: 16 }]}>
+                {error.toUpperCase()}
+              </Text>
+            </View>
+          )}
         </>
       )}
     </SafeAreaProvider>

@@ -3,10 +3,7 @@ import { Aula } from '../Interface/Aula';
 import { Api } from "./Api";
 
 export class AulaApi extends Api {
-    public async getAulas(
-        offset: number = Api.INITIAL_OFFSET,
-        limit: number = Api.LIMIT
-    ): Promise<ApiResponseAulas> {
+    public async getAulas( offset: number = Api.INITIAL_OFFSET, limit: number = Api.LIMIT): Promise<ApiResponseAulas> {
         try{
             const response = await fetch(`${Api.apiUrl}/aulas?offset=${offset}&limit=${limit}`);
             if (!response.ok) {
@@ -38,11 +35,7 @@ export class AulaApi extends Api {
         }
     }
 
-    public async getAulaByName(
-        nombre: string,
-        offset: number = Api.INITIAL_OFFSET,
-        limit: number = Api.LIMIT
-    ): Promise<ApiResponseAulas> {
+    public async getAulaByName(nombre: string, offset: number = Api.INITIAL_OFFSET, limit: number = Api.LIMIT): Promise<ApiResponseAulas> {
         try{
             const response = await fetch(`${Api.apiUrl}/aulas/buscar?nombre=${encodeURIComponent(nombre)}&offset=${offset}&limit=${limit}`);
             if (!response.ok) {

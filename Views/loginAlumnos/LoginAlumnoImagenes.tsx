@@ -18,6 +18,7 @@ import { UserContext } from "../../class/context/UserContext";
 import { ImagePassword } from "../../class/Interface/ImagePassword";
 import { useVoice } from "../../class/context/VoiceContext";
 import { useFocusEffect } from "@react-navigation/native";
+import { homeScreem_styles } from "../../styles/homeScreem_styles";
 
 export default function LoginAlumnoImagenes({ navigation, route }: any) {
   const { student } = route.params;
@@ -79,7 +80,7 @@ export default function LoginAlumnoImagenes({ navigation, route }: any) {
         voice.startWake(activarAsistente);
       }, 1000);
     }
-  }, []);
+  }, [voice, speak, navigation]);
 
   const atras = () => {
     speak.detener();
@@ -130,6 +131,10 @@ export default function LoginAlumnoImagenes({ navigation, route }: any) {
       }
 
       await setUser(student);
+      if (student.asistenteVoz === "bidireccional") {
+        await voice.stopWake();
+        await voice.pauseListening();
+      }
       navigation.navigate(
         student.preferenciasVisualizacion === "diarias"
           ? "DiariasScreem"
@@ -158,14 +163,15 @@ export default function LoginAlumnoImagenes({ navigation, route }: any) {
             await speak.hablar("Atrás para ir a la pantalla de atrás.");
             await speak.hablar("borrar si te has equivocado con tu contraseña");
             await speak.hablar("o confirmar para iniciar sesión");
-            voice.startWake(() => {
-              activarAsistente();
-            });
+            voice.startWake(activarAsistente);
           }
         }
       };
 
       init();
+      return () => {
+        voice.stopWake();
+      };
     }, []),
   );
 
@@ -191,7 +197,7 @@ export default function LoginAlumnoImagenes({ navigation, route }: any) {
           flex: 1,
           paddingHorizontal: 15,
           justifyContent: "space-evenly",
-          paddingBottom: 8,
+          paddingBottom: 10,
         }}
       >
         <View
@@ -201,11 +207,8 @@ export default function LoginAlumnoImagenes({ navigation, route }: any) {
             {
               backgroundColor: "#F5F5F5",
               alignItems: "center",
-              paddingVertical: 15,
+              paddingVertical: 5,
               borderRadius: 20,
-              flexDirection: "row",
-              justifyContent: "space-between",
-              paddingHorizontal: 20,
             },
           ]}
         >
@@ -213,9 +216,9 @@ export default function LoginAlumnoImagenes({ navigation, route }: any) {
             <Image
               source={{ uri: api.getFoto(student.foto) }}
               style={{
-                width: 60,
-                height: 60,
-                borderRadius: 30,
+                width: 90,
+                height: 90,
+                borderRadius: 45,
                 borderWidth: 2,
                 borderColor: "#FF8C42",
                 marginRight: 15,
@@ -223,50 +226,15 @@ export default function LoginAlumnoImagenes({ navigation, route }: any) {
             />
             <View>
               <Text
-                style={{
-                  fontFamily: "escolar-bold",
-                  fontSize: scaleFont(15),
-                  color: "#333",
-                }}
+                style={[
+                  homeScreem_styles.studentCardUsername,
+                  { marginBottom: 5, fontSize: scaleFont(18) },
+                ]}
               >
                 {student.username.toUpperCase()}
               </Text>
-              <Text
-                style={{
-                  fontFamily: "escolar-regular",
-                  fontSize: scaleFont(12),
-                  color: "#666",
-                }}
-              >
-                Asistente: {student.asistenteVoz}
-              </Text>
             </View>
           </View>
-
-          {student.asistenteVoz !== "none" && (
-            <View style={{ alignItems: "center" }}>
-              <View
-                style={{
-                  width: 14,
-                  height: 14,
-                  borderRadius: 7,
-                  backgroundColor: isListening ? "#4CD964" : "#FF9500",
-                  marginBottom: 4,
-                  borderWidth: 2,
-                  borderColor: isListening ? "#2ECC71" : "#FFF",
-                }}
-              />
-              <Text
-                style={{
-                  fontFamily: "escolar-regular",
-                  fontSize: scaleFont(10),
-                  color: "#666",
-                }}
-              >
-                {isListening ? "Escuchando" : "Listo"}
-              </Text>
-            </View>
-          )}
         </View>
 
         <View

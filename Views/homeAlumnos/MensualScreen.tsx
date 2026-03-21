@@ -135,7 +135,7 @@ export default function MensualScreen({ navigation }: { navigation: any }) {
           await speak.hablar("¡Felicidades! No tienes tareas pendientes.");
         } else {
           await speak.hablar(
-            `Vamos a realizar la primera tarea pendiente del ${fechaPendiente}`,
+            `Vamos a realizar la primera tarea pendiente del ${speak.formatearFechaVerbal(fechaPendiente)}`,
           );
           navigation.navigate("DiariasScreem", {
             fecha: fechaPendiente,
@@ -145,8 +145,9 @@ export default function MensualScreen({ navigation }: { navigation: any }) {
       } else {
         // Intentar obtener una fecha del comando
         const fecha = obtenerFechaDelComando(comando);
+
         if (fecha) {
-          await speak.hablar(`Vamos al ${fecha}`);
+          await speak.hablar(`Vamos al ${speak.formatearFechaVerbal(fecha)}`);
           navigation.navigate("DiariasScreem", {
             fecha: fecha,
             semanales: true,

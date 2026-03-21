@@ -2,9 +2,11 @@ import Voice, {
   SpeechResultsEvent,
   SpeechErrorEvent,
 } from '@react-native-voice/voice';
+import { NativeModules } from 'react-native';
 
 class WakeWord {
   private static instance: WakeWord;
+  private readonly hasNativeVoiceModule = Boolean(NativeModules?.Voice);
 
   private listeningWake = false;
   private listeningCommand = false;
@@ -22,6 +24,11 @@ class WakeWord {
   private _isRecognizing = false;
 
   private constructor() {
+    if (!this.hasNativeVoiceModule) {
+      console.warn(
+        'El modulo nativo de voz no esta disponible. Puede ser Expo Go o incompatibilidad con New Architecture en Android.',
+      );
+    }
     this.setupListeners();
   }
 
@@ -101,6 +108,10 @@ class WakeWord {
    * Detiene la escucha actual (tanto wake como command) sin reiniciar.
    */
   private async stopListening() {
+    if (!this.hasNativeVoiceModule) {
+      return;
+    }
+
     // Evita múltiples llamadas simultáneas a stop
     if (this.stopPromise) {
       return this.stopPromise;
@@ -126,6 +137,11 @@ class WakeWord {
    * Reinicia el reconocimiento: detiene cualquier escucha previa y vuelve a iniciar.
    */
   private async restartVoice() {
+    if (!this.hasNativeVoiceModule) {
+      console.warn('Voice no disponible en este runtime de Android.');
+      return;
+    }
+
     // Si ya hay un inicio en curso, esperamos a que termine
     if (this.startPromise) {
       return this.startPromise;

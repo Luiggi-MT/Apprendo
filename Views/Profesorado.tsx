@@ -38,6 +38,10 @@ export default function Profesorado({ navigation }: { navigation: any }) {
   };
 
   const onEnviarPress = async () => {
+    if (!usuario || !contraseña) {
+      setError("DEBES RELLENAR TODOS LOS CAMPOS");
+      return;
+    }
     if (contraseña.length < 4) {
       setError("LA CONTRASEÑA DEBE TENER AL MENOS 4 CARACTERES");
       return;

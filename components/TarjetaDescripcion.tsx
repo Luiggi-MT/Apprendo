@@ -41,7 +41,7 @@ export default function TarjetaDescipcion({
 
       <View style={tarjetaDescipcion_styles.nameContainer}>
         <Text numberOfLines={2} style={[styles.text_legend, style]}>
-          {name}
+          {name?.toUpperCase()}
         </Text>
       </View>
 

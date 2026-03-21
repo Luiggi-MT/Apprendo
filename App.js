@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { View } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
@@ -135,8 +135,7 @@ export default function App() {
   });
 
 
-  //Creamos un VoiceContext
-  const voiceContext = createContext();
+  
 
 
   // Cargar las tipografias 

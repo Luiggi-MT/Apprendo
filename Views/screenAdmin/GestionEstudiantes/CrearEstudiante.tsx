@@ -225,7 +225,7 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
           <TextInput
             style={[styles.buscador, styles.shadow]}
             onChangeText={handleTextChange}
-            value={text}
+            value={text.toUpperCase()}
           />
 
           <Text style={styles.text_legend}>TIPO DE CONTRASEÑA:</Text>
@@ -259,7 +259,7 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
               <TextInput
                 style={{ flex: 1, height: "100%" }}
                 onChangeText={handlePasswordChange}
-                value={password}
+                value={password.toUpperCase()}
                 secureTextEntry={secureText}
               />
               <TouchableOpacity onPress={() => setSecureText(!secureText)}>

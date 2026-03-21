@@ -9,7 +9,7 @@ import Splash from "../../../components/Splash";
 import { ConnectApi } from "../../../class/Connect.Api/ConnectApi";
 export default function CrearProfesor({ navigation }: { navigation: any }) {
   const [username, setUsername] = useState<string>("");
-  const [palabraClave, setPalabraCalve] = useState<string>("PROFEESOR");
+  const [palabraClave, setPalabraCalve] = useState<string>("PROFESOR");
   const [isLoading, setIsloading] = useState<boolean>(false);
   const [error, setError] = useState<boolean>(false);
   const [errorValue, setErrorValue] = useState<string>("");
@@ -28,6 +28,11 @@ export default function CrearProfesor({ navigation }: { navigation: any }) {
     if (username.length === 0) {
       setError(true);
       setErrorValue("EL CAMPO USUARIO NO PUEDE ESTAR VACIO");
+      return;
+    }
+    if (palabraClave.length === 0) {
+      setError(true);
+      setErrorValue("EL CAMPO PALABRA CLAVE NO PUEDE ESTAR VACIO");
       return;
     }
     api.createProfesor(username, palabraClave).then((response) => {
@@ -63,12 +68,12 @@ export default function CrearProfesor({ navigation }: { navigation: any }) {
               value={username}
               placeholder="INTRODUCIR NOMBRE DE USUARIO"
             />
-            <Text style={[styles.text_legend]}>PALABREA CLAVE:</Text>
+            <Text style={[styles.text_legend]}>PALABRA CLAVE:</Text>
             <TextInput
               style={[styles.buscador]}
               onChangeText={handlePalabraClaveChange}
               value={palabraClave}
-              placeholder="INTRODUCIR NOMBRE DE USUARIO"
+              placeholder="INTRODUCIR PALABRA CLAVE"
             />
           </View>
           {error && <Text style={[styles.error]}>{errorValue}</Text>}

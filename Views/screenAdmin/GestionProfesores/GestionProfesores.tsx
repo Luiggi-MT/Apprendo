@@ -15,7 +15,6 @@ export default function GestionProfesores({ navigation }: { navigation: any }) {
   const [offset, setOffset] = useState<number>(0);
   const [limit, setLimit] = useState<number>(3);
   const [total, setTotal] = useState<number>(0);
-  const profesor = useContext(UserContext).user;
 
   const api = new ConnectApi();
 

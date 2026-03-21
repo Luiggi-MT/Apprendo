@@ -15,7 +15,6 @@ import {
   Text,
   View,
   Image,
-  ScrollView,
   TouchableOpacity,
   ActivityIndicator,
   StyleSheet,
@@ -38,13 +37,15 @@ export default function DiariasScreen({
   const [offset, setOffset] = useState<number>(0);
   const [limit, setLimit] = useState<number>(3);
   const [isListening, setIsListening] = useState(false);
+  const [fechaSeleccionada, setFechaSeleccionada] = useState<string>(
+    route?.params?.fecha
+      ? route.params.fecha
+      : new Date().toISOString().split("T")[0],
+  );
   const { user } = useContext(UserContext);
   const student = user as Students;
 
   const esSemanales = route?.params?.semanales || false;
-  const fechaSeleccionada = route?.params?.fecha
-    ? route.params.fecha
-    : new Date().toISOString().split("T")[0];
 
   const api = new ConnectApi();
   const arasaacService = new Arasaac();
@@ -56,6 +57,55 @@ export default function DiariasScreen({
   const atras = () => {
     speak.detener();
     navigation.goBack();
+  };
+
+  // Función para parsear fechas del comando de voz
+  const parsearFechaDelComando = (comando: string): string | null => {
+    const meses: { [key: string]: string } = {
+      enero: "01",
+      febrero: "02",
+      marzo: "03",
+      abril: "04",
+      mayo: "05",
+      junio: "06",
+      julio: "07",
+      agosto: "08",
+      septiembre: "09",
+      setiembre: "09",
+      octubre: "10",
+      noviembre: "11",
+      diciembre: "12",
+    };
+
+    // Buscar patrón como "3 de febrero" o "dia 3 de febrero"
+    const regexPatron = /(?:día|del?)?\s*(\d{1,2})\s+de\s+(\w+)/i;
+    const match = comando.match(regexPatron);
+
+    if (match) {
+      const dia = match[1].padStart(2, "0");
+      const mesNombre = match[2].toLowerCase();
+      const mesNumero = meses[mesNombre];
+
+      if (mesNumero) {
+        const año = new Date().getFullYear();
+        return `${año}-${mesNumero}-${dia}`;
+      }
+    }
+    return null;
+  };
+
+  // Función para obtener la última tarea pendiente
+  const obtenerUltimaTareaPendiente = (): TareaEstudiante | null => {
+    const tareasPendientes = tareas.filter((t) => t.completado === 0);
+    return tareasPendientes.length > 0
+      ? tareasPendientes[tareasPendientes.length - 1]
+      : null;
+  };
+
+  // Función para obtener la primera tarea pendiente
+  const obtenerPrimeraTareaPendiente = (): TareaEstudiante | null => {
+    const tareasPendientes = tareas.filter((t) => t.completado === 0);
+    return tareasPendientes.length > 0 ? tareasPendientes[0] : null;
   };
 
   const cargarTareas = async () => {
@@ -78,7 +128,7 @@ export default function DiariasScreen({
 
   useEffect(() => {
     cargarTareas();
-  }, [fechaSeleccionada]);
+  }, [fechaSeleccionada, offset, limit]);
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
@@ -91,10 +141,8 @@ export default function DiariasScreen({
   // ================= ASISTENTE DE VOZ =================
 
   const activarAsistente = useCallback(async () => {
-    if (isProcessing.current) {
-      console.log("⚠️ Asistente ocupado");
-      return;
-    }
+    if (isProcessing.current) return;
+
     isProcessing.current = true;
     setIsListening(true);
 
@@ -103,11 +151,18 @@ export default function DiariasScreen({
 
       const comando = (await voice.listenCommand()).toLocaleLowerCase();
 
-      if (comando.includes("atrás") || comando.includes("atras")) {
+      // Comando: realizar la primera tarea pendiente
+      if (comando.includes("vamos")) {
+        const primeraTarea = obtenerPrimeraTareaPendiente();
+        if (primeraTarea) {
+          await speak.hablar(`Vamos a realizar: ${primeraTarea.nombre}`);
+          manejarPresionarTarea(primeraTarea);
+        } else {
+          await speak.hablar("No tienes tareas pendientes en este momento");
+        }
+      } else if (comando.includes("atrás") || comando.includes("atras")) {
         await speak.hablar("Volviendo atrás");
         navigation.goBack();
-      } else if (comando.includes("no") || comando.includes("cancelar")) {
-        await speak.hablar("De acuerdo");
       } else {
         // Buscar tarea que coincida con el comando
         const tareaEncontrada = tareas.find((t) =>
@@ -147,16 +202,26 @@ export default function DiariasScreen({
         await new Promise((resolve) => setTimeout(resolve, 300));
 
         if (!loading && student.asistenteVoz !== "none") {
+          const fechaFormato = speak.formatearFechaVerbal(fechaSeleccionada);
           if (tareas.length === 0) {
-            speak.hablar(`¡Genial! No tienes tareas pendientes para hoy.`);
+            await speak.hablar(
+              `¡Genial! No tienes tareas pendientes para ${fechaFormato}.`,
+            );
           } else {
             const pendientes = tareas.filter((t) => t.completado === 0).length;
             if (pendientes > 0) {
               if (pendientes === 1)
-                speak.hablar(`Tienes ${pendientes} tarea pendiente.`);
-              else speak.hablar(`Tienes ${pendientes} tareas pendientes.`);
+                speak.hablar(
+                  `Tienes ${pendientes} tarea pendiente para ${fechaFormato}.`,
+                );
+              else
+                speak.hablar(
+                  `Tienes ${pendientes} tareas pendientes para ${fechaFormato}.`,
+                );
             } else {
-              speak.hablar(`¡Muy bien! Has terminado todas tus tareas.`);
+              speak.hablar(
+                `¡Muy bien! Has terminado todas tus tareas para ${fechaFormato}.`,
+              );
             }
           }
 

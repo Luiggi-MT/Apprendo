@@ -32,7 +32,7 @@
     "expo-splash-screen": "~31.0.13",
     "expo-status-bar": "~3.0.9",
     "expo-video": "~3.0.15",
-    "jest-expo": "~54.0.17",
+    "jest-expo": "^47.0.1",
     "react": "19.1.0",
     "react-dom": "19.1.0",
     "react-native": "0.81.5",
@@ -50,6 +50,7 @@
     "@types/jest": "29.5.14",
     "@types/react": "~19.1.10",
     "@types/react-native": "^0.72.8",
-    "jest-fetch-mock": "^3.0.3"
+    "jest-fetch-mock": "^3.0.3",
+    "jetifier": "^2.0.0"
   }
 }

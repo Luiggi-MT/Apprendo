@@ -20,6 +20,9 @@ export default function GestionAulas({ navigation }: { navigation: any }) {
   const api = new ConnectApi();
   const arassacService = new Arasaac();
 
+  const totalPaginas = Math.ceil(total / limit) || 1;
+  const paginaActual = offset <= limit ? 1 : Math.ceil(offset / limit);
+
   const atras = () => {
     navigation.goBack();
   };
@@ -135,6 +138,16 @@ export default function GestionAulas({ navigation }: { navigation: any }) {
               onPress={handleAtrasPress}
               dissable={offset <= limit}
             />
+
+            <Text
+              style={[
+                styles.text,
+                { fontSize: scaleFont(20), marginHorizontal: 10 },
+              ]}
+            >
+              {paginaActual} / {totalPaginas}
+            </Text>
+
             <Boton
               uri="delante"
               onPress={handleDelantePress}

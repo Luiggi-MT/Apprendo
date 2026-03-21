@@ -112,15 +112,20 @@ export default function ComandaTarea({
           await speak.hablar("Primero necesitas visitar todas las aulas");
         }
       } else {
-        // Buscar aula que coincida con el comando
-        const aulaEncontrada = aulas.find((a) =>
-          a.nombre_aula.toLowerCase().includes(comando),
+        // Buscar aula que coincida con el comando (por nombre del aula o por nombre del profesor)
+        const aulaEncontrada = aulas.find(
+          (a) =>
+            a.nombre.toLowerCase().includes(comando) ||
+            a.nombre_profesor.toLowerCase().includes(comando),
         );
 
         if (aulaEncontrada) {
+          await speak.hablar(`Vamos a ${aulaEncontrada.nombre}`);
           irADetalleAula(aulaEncontrada);
         } else {
-          await speak.hablar("No encontré esa aula, intenta de nuevo");
+          await speak.hablar(
+            "No encontré esa aula ni ese profesor, intenta de nuevo",
+          );
         }
       }
     } catch (error) {
@@ -165,8 +170,12 @@ export default function ComandaTarea({
 
           if (student.asistenteVoz === "bidireccional") {
             await speak.hablar(
-              "Dime el nombre de un aula o di finalizar cuando termines",
+              "Dime el nombre de un aula o el nombre del profesor para ir al aula",
             );
+            await speak.hablar(
+              "Cuando termines, puedes decir finalizar para terminar la tarea",
+            );
+
             // Registrar el callback AQUÍ en esta pantalla
             WakeWord.startWake(activarAsistente);
           }
@@ -174,17 +183,11 @@ export default function ComandaTarea({
       };
 
       init();
-
-      return () => {
-        isMounted = false;
-        speak.detener();
-        WakeWord.stopWake();
-      };
     }, [loading, student.asistenteVoz, activarAsistente]),
   );
 
   const aulasFiltradas = aulas.filter((a) =>
-    a.nombre_aula.toLowerCase().includes(busqueda.toLowerCase()),
+    a.nombre.toLowerCase().includes(busqueda.toLowerCase()),
   );
 
   const renderAula = ({ item }: { item: Aula }) => (
@@ -216,10 +219,10 @@ export default function ComandaTarea({
 
       <View style={{ flex: 1 }}>
         <Text style={{ fontFamily: "escolar-bold", fontSize: scaleFont(18) }}>
-          {item.nombre_aula}
+          {item.nombre}
         </Text>
         <Text style={{ color: "#666", fontSize: scaleFont(14) }}>
-          Prof: {item.nombre_profesor}
+          {item.nombre_profesor.toLocaleUpperCase()}
         </Text>
       </View>
 

@@ -23,6 +23,7 @@ export default function AdminScreen({ navigation }: { navigation: any }) {
       nameBottom: "GESTIÓN.DE.PROFESORES",
       navigation: "GestionProfesores",
     },
+
     {
       id: "3",
       uriPictograma: "aula",
