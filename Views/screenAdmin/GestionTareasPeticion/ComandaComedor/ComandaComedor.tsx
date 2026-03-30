@@ -1,22 +1,26 @@
 import React, { useEffect } from "react";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import Header from "../../../../components/Header";
 import { scaleFont, styles } from "../../../../styles/styles";
 import { View, Text } from "react-native";
 import { Calendar } from "react-native-calendars";
-import Boton from "../../../../components/Boton";
-import Splash from "../../../../components/Splash";
+
 import { ConnectApi } from "../../../../class/Connect.Api/ConnectApi";
 
 export default function CrearMenu({ navigation }: { navigation: any }) {
-  const api = new ConnectApi();
-
   const atras = () => navigation.goBack();
 
   // Función para verificar si la tarea existe
 
+  const insets = useSafeAreaInsets();
+
   return (
-    <SafeAreaProvider style={{ backgroundColor: "#F5F5F5" }}>
+    <SafeAreaProvider
+      style={[styles.container, { paddingBottom: insets.bottom }]}
+    >
       <Header
         uri="volver"
         nameBottom="ATRÁS"

@@ -2,7 +2,10 @@ import React, { useEffect, useState } from "react";
 import { Text, View, FlatList, Image, TouchableOpacity } from "react-native";
 import { scaleFont, styles } from "../styles/styles";
 import Header from "../components/Header";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import Boton from "../components/Boton";
 import { ConnectApi } from "../class/Connect.Api/ConnectApi";
 import { Students } from "../class/Interface/Students";
@@ -20,6 +23,7 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   const [limit, setLimit] = useState(0);
   const [busqueda, setBusqueda] = useState(false);
   const [message, setMessage] = useState("");
+  const inset = useSafeAreaInsets();
 
   const itemsPerPage = 6;
 
@@ -73,7 +77,9 @@ export default function HomeScreen({ navigation }: { navigation: any }) {
   };
 
   return (
-    <SafeAreaProvider style={styles.container}>
+    <SafeAreaProvider
+      style={[styles.container, { paddingBottom: inset.bottom }]}
+    >
       <Header
         uri="profesor"
         nameBottom="PROFESORADO"

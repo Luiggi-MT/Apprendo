@@ -7,7 +7,10 @@ import {
   ActivityIndicator,
   StyleSheet,
 } from "react-native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import Header from "../../../../components/Header";
 import { scaleFont, styles } from "../../../../styles/styles";
 import { ConnectApi } from "../../../../class/Connect.Api/ConnectApi";
@@ -21,6 +24,7 @@ export default function DetalleComandaAula({ navigation, route }: any) {
   const [menuSeleccionado, setMenuSeleccionado] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const insets = useSafeAreaInsets();
   const api = new ConnectApi();
   const arasaac = new Arasaac();
 
@@ -28,7 +32,6 @@ export default function DetalleComandaAula({ navigation, route }: any) {
     setLoading(true);
     try {
       const data = await api.getComandaDetalladaPorFecha(fecha, id_aula);
-      console.log(JSON.stringify(data, null, 2));
       setMenus(data);
 
       if (data.length > 0) {
@@ -62,7 +65,9 @@ export default function DetalleComandaAula({ navigation, route }: any) {
   }, [id_aula, fecha]);
 
   return (
-    <SafeAreaProvider style={{ backgroundColor: "#F5F5F5" }}>
+    <SafeAreaProvider
+      style={[styles.container, { paddingBottom: insets.bottom }]}
+    >
       <Header
         uri="volver"
         nameBottom="ATRÁS"

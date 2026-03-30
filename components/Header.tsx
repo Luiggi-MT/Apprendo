@@ -58,11 +58,7 @@ export default function Header({
           {headerText.map((text) => (
             <Text
               key={text}
-              style={[
-                styles.titleHeaderText,
-                styles.shadow,
-                { fontSize: style },
-              ]}
+              style={[styles.titleHeaderText, { fontSize: style }]}
             >
               {text}
             </Text>
@@ -72,7 +68,7 @@ export default function Header({
 
       {/* Selector MENÚ / POSTRES centrado abajo */}
       {isPhone && vistaSelector && (
-        <View style={[styles.vistaSelectorContainer, { flex: 1 }]}>
+        <View style={styles.vistaSelectorContainer} pointerEvents="box-none">
           {["menu", "postre"].map((v) => (
             <TouchableOpacity
               key={v}
@@ -96,7 +92,7 @@ export default function Header({
         </View>
       )}
       {!isPhone && vistaSelector && (
-        <View style={[styles.vistaSelectorContainer]}>
+        <View style={styles.vistaSelectorContainer} pointerEvents="box-none">
           {["menu", "postre"].map((v) => (
             <TouchableOpacity
               key={v}

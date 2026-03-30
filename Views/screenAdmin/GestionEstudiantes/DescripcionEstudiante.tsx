@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, TouchableOpacity, Image, TextInput } from "react-native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import Header from "../../../components/Header";
 import { ConnectApi } from "../../../class/Connect.Api/ConnectApi";
 import { scaleFont, styles } from "../../../styles/styles";
@@ -221,12 +224,11 @@ export default function DescripcionEstudiante({
     });
   };
 
-  useEffect(() => {
-    console.log("Student data:", JSON.stringify(student, null, 2));
-    console.log("Accesibilidad Value:", accesibilidadValue);
-  }, [student, accesibilidadValue]);
+  const insets = useSafeAreaInsets();
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider
+      style={[styles.container, { paddingBottom: insets.bottom }]}
+    >
       <Header
         uri="volver"
         nameBottom="ATRÁS"

@@ -1,5 +1,8 @@
 import React, { useContext, useState } from "react";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { View, Text, TextInput, TouchableOpacity, Image } from "react-native";
 import { ConnectApi } from "../class/Connect.Api/ConnectApi";
 import Header from "../components/Header";
@@ -23,12 +26,13 @@ export default function Profesorado({ navigation }: { navigation: any }) {
 
   const atras = () => navigation.goBack();
 
+  const insets = useSafeAreaInsets();
   const handleUsuarioChange = (word: string) => {
-    setUsuario(word.toUpperCase());
+    setUsuario(word);
   };
 
   const handleContraseñaChange = (word: string) => {
-    setContraseña(word.toUpperCase());
+    setContraseña(word);
   };
 
   const onBorrarPress = () => {
@@ -67,7 +71,9 @@ export default function Profesorado({ navigation }: { navigation: any }) {
   };
 
   return (
-    <SafeAreaProvider style={styles.container}>
+    <SafeAreaProvider
+      style={[styles.container, { paddingBottom: insets.bottom }]}
+    >
       <Header
         uri="volver"
         nameBottom="ATRÁS"
@@ -95,6 +101,7 @@ export default function Profesorado({ navigation }: { navigation: any }) {
             nameInput="USUARIO:"
             input={handleUsuarioChange}
             value={usuario}
+            autoCapitalize="characters"
           />
 
           <Text style={[styles.text_legend, { marginTop: 15 }]}>

@@ -8,6 +8,7 @@ export default function InputText({
   value,
   placehorder,
   editable = true,
+  autoCapitalize = "characters",
 }: {
   nameInput?: string;
   input: (inputText: string) => void;
@@ -15,6 +16,7 @@ export default function InputText({
   value: string;
   placehorder?: string;
   editable?: boolean;
+  autoCapitalize?: "none" | "sentences" | "words" | "characters";
 }) {
   const [text, setText] = useState("");
   const handleTextChange = (inputText: string) => {
@@ -31,6 +33,8 @@ export default function InputText({
         secureTextEntry={secure}
         placeholder={placehorder}
         editable={editable}
+        autoCapitalize={autoCapitalize}
+        autoCorrect={false}
       />
     </View>
   );

@@ -13,7 +13,10 @@ import {
   Image,
   ActivityIndicator,
 } from "react-native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import Header from "../../../components/Header";
 import { scaleFont, styles } from "../../../styles/styles";
 import { Arasaac } from "../../../class/Arasaac/getPictograma";
@@ -76,7 +79,6 @@ export default function ComandaAula({ navigation, route }: any) {
       }
     }
 
-    console.log("idPlado: ", idPlato);
     const response = await api.setCantidadPedido(
       id_tarea_estudiante,
       student.id,
@@ -478,8 +480,12 @@ export default function ComandaAula({ navigation, route }: any) {
     );
   };
 
+  const insets = useSafeAreaInsets();
+
   return (
-    <SafeAreaProvider style={{ backgroundColor: "#F9F9F9", flex: 1 }}>
+    <SafeAreaProvider
+      style={[styles.container, { paddingBottom: insets.bottom }]}
+    >
       <Header
         uri="volver"
         nameBottom="ATRÁS"

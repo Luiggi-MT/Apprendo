@@ -1,5 +1,8 @@
 import React, { useEffect, useReducer, useState } from "react";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import Header from "../../../../components/Header";
 import { scaleFont, styles } from "../../../../styles/styles";
 import { Tarea } from "../../../../class/Interface/Tarea";
@@ -38,15 +41,17 @@ export default function AsignacionTareas({
       setTareas(response.tareas);
       setOffset(response.offset);
       setTotal(response.count);
-      console.log(JSON.stringify(response, null, 2));
     });
   }, []);
 
   const atras = () => {
     navigation.goBack();
   };
+  const insets = useSafeAreaInsets();
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider
+      style={[styles.container, { paddingBottom: insets.bottom }]}
+    >
       <Header
         uri="volver"
         nameBottom="ATRÁS"

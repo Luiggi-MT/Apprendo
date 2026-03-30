@@ -1,12 +1,10 @@
-import Voice, {
-  SpeechResultsEvent,
-  SpeechErrorEvent,
-} from '@react-native-voice/voice';
-import { NativeModules } from 'react-native';
+import { ExpoSpeechRecognitionModule } from 'expo-speech-recognition';
 
 class WakeWord {
   private static instance: WakeWord;
-  private readonly hasNativeVoiceModule = Boolean(NativeModules?.Voice);
+  private resultSubscription: any = null;
+  private errorSubscription: any = null;
+  private endSubscription: any = null;
 
   private listeningWake = false;
   private listeningCommand = false;
@@ -24,11 +22,6 @@ class WakeWord {
   private _isRecognizing = false;
 
   private constructor() {
-    if (!this.hasNativeVoiceModule) {
-      console.warn(
-        'El modulo nativo de voz no esta disponible. Puede ser Expo Go o incompatibilidad con New Architecture en Android.',
-      );
-    }
     this.setupListeners();
   }
 
@@ -40,39 +33,44 @@ class WakeWord {
   }
 
   private setupListeners() {
-    Voice.onSpeechStart = () => {
-      this._isRecognizing = true;
-    };
+    // Setup listeners para expo-speech-recognition
+    this.resultSubscription = ExpoSpeechRecognitionModule.addListener(
+      'result',
+      (event) => {
+        const text = event?.results?.[0]?.transcript?.toLowerCase();
+        if (!text) return;
 
-    Voice.onSpeechEnd = () => {
-      this._isRecognizing = false;
-    };
-
-    Voice.onSpeechResults = (e: SpeechResultsEvent) => {
-      const text = e.value?.[0]?.toLowerCase();
-      console.log('Voice input raw: ', e.value);
-      if (!text) return;
-
-      if (this.listeningWake) {
-        if (this.wakeWords.some(w => text.includes(w))) {
-          this.stopListening(); // detiene sin reiniciar
-          this.listeningWake = false;
-          this.onWakeDetected?.();
+        if (this.listeningWake) {
+          if (this.wakeWords.some(w => text.includes(w))) {
+            this.stopListening();
+            this.listeningWake = false;
+            this.onWakeDetected?.();
+          }
+          return;
         }
-        return;
-      }
 
-      if (this.listeningCommand && this.commandResolve) {
-        this.commandResolve(text);
+        if (this.listeningCommand && this.commandResolve) {
+          this.commandResolve(text);
+          this.cleanupCommand();
+        }
+      }
+    );
+
+    this.errorSubscription = ExpoSpeechRecognitionModule.addListener(
+      'error',
+      (event) => {
+        console.warn('Voice error:', event?.error);
+        this._isRecognizing = false;
         this.cleanupCommand();
       }
-    };
+    );
 
-    Voice.onSpeechError = (e: SpeechErrorEvent) => {
-      console.warn('Voice error:', e.error);
-      this._isRecognizing = false;
-      this.cleanupCommand();
-    };
+    this.endSubscription = ExpoSpeechRecognitionModule.addListener(
+      'end',
+      () => {
+        this._isRecognizing = false;
+      }
+    );
   }
 
   /**
@@ -80,6 +78,9 @@ class WakeWord {
    * @param onWake Callback a ejecutar cuando se detecta la palabra.
    */
   public async startWake(onWake: () => void) {
+    if (!this.resultSubscription || !this.errorSubscription || !this.endSubscription) {
+      this.setupListeners();
+    }
     this.onWakeDetected = onWake;
     this.listeningWake = true;
     await this.restartVoice();
@@ -108,10 +109,6 @@ class WakeWord {
    * Detiene la escucha actual (tanto wake como command) sin reiniciar.
    */
   private async stopListening() {
-    if (!this.hasNativeVoiceModule) {
-      return;
-    }
-
     // Evita múltiples llamadas simultáneas a stop
     if (this.stopPromise) {
       return this.stopPromise;
@@ -120,7 +117,7 @@ class WakeWord {
     this.stopPromise = (async () => {
       this._isStopping = true;
       try {
-        await Voice.stop();
+        await ExpoSpeechRecognitionModule.stop();
       } catch (error) {
         // Ignorar errores (por ejemplo, si ya estaba detenido)
       } finally {
@@ -137,11 +134,6 @@ class WakeWord {
    * Reinicia el reconocimiento: detiene cualquier escucha previa y vuelve a iniciar.
    */
   private async restartVoice() {
-    if (!this.hasNativeVoiceModule) {
-      console.warn('Voice no disponible en este runtime de Android.');
-      return;
-    }
-
     // Si ya hay un inicio en curso, esperamos a que termine
     if (this.startPromise) {
       return this.startPromise;
@@ -164,7 +156,18 @@ class WakeWord {
       }
 
       try {
-        await Voice.start('es-ES', { EXTRA_PARTIAL_RESULTS: false });
+        // Solicitar permisos antes de iniciar
+        const { granted } =
+          await ExpoSpeechRecognitionModule.requestPermissionsAsync();
+        if (!granted) {
+          throw new Error('Microphone permissions not granted');
+        }
+
+        await ExpoSpeechRecognitionModule.start({
+          lang: 'es-ES',
+          maxAlternatives: 1,
+          interimResults: false,
+        });
         this._isRecognizing = true;
       } catch (error) {
         console.warn('Error al iniciar voz:', error);

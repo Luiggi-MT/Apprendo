@@ -1,6 +1,9 @@
 import React, { useState } from "react";
 import { View, Text, ScrollView, Linking } from "react-native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import Header from "../../components/Header";
 import { scaleFont, styles } from "../../styles/styles";
 import Boton from "../../components/Boton";
@@ -8,6 +11,7 @@ import Boton from "../../components/Boton";
 export default function AcercaDe({ navigation }: { navigation: any }) {
   const [view, setView] = useState(0);
   const atrasHeader = () => navigation.goBack();
+  const inset = useSafeAreaInsets();
 
   // Función para abrir la URL externa
   const openArasaac = () => {
@@ -136,7 +140,9 @@ export default function AcercaDe({ navigation }: { navigation: any }) {
   };
 
   return (
-    <SafeAreaProvider style={styles.container}>
+    <SafeAreaProvider
+      style={[styles.container, { paddingBottom: inset.bottom }]}
+    >
       <Header
         uri="volver"
         nameBottom="ATRÁS"

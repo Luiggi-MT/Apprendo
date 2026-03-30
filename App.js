@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { View } from "react-native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 import { ConnectApi } from "./class/Connect.Api/ConnectApi";
 import { UserContext } from "./class/context/UserContext";
 import { PaperProvider } from "react-native-paper";
@@ -56,6 +57,13 @@ import DetalleMenu from "./Views/screenAdmin/GestionTareasPeticion/ComandaComedo
 import VerComanda from "./Views/screenAdmin/GestionTareasPeticion/ComandaComedor/VerComanda";
 import DetalleComandaAula from "./Views/screenAdmin/GestionTareasPeticion/ComandaComedor/DetalleComandaAula";
 
+
+// Material escolar 
+import MaterialEscolar from "./Views/screenAdmin/GestionTareasPeticion/MaterialEscolar/MaterialEscolar";
+import CrearMaterial from "./Views/screenAdmin/GestionTareasPeticion/MaterialEscolar/CrearMaterial";
+import DetallesMaterial from "./Views/screenAdmin/GestionTareasPeticion/MaterialEscolar/DetallesMaterial";
+
+
 //Gestion de aulas
 import GestionAulas from "./Views/screenAdmin/GestionAulas/GestionAulas";
 import CrearAula from "./Views/screenAdmin/GestionAulas/CrearAula";
@@ -69,6 +77,8 @@ import CrearProfesor from "./Views/screenAdmin/GestionProfesores/CrearProfesor";
 
 //Añadir Pictograma
 import AñadirPictograma from "./Views/screenAdmin/AñadirPictograma/AñadirPictograma";
+
+
 
 
 import ComandaTarea from "./Views/homeAlumnos/ComandaTarea/ComandaTarea";
@@ -130,8 +140,10 @@ LocaleConfig.defaultLocale = "es";
 export default function App() {
   const [initialRoute, setInitialRoute] = useState(null);
   const [user, setUser] = useState({
+    id: null,
     foto: null,
     username: null,
+    tipo: null,
   });
 
 
@@ -139,11 +151,18 @@ export default function App() {
 
 
   // Cargar las tipografias 
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     'fredoka': require('./assets/fonts/fredoka.ttf'),
+    'fredoka-bold': require('./assets/fonts/fredoka.ttf'),
     'escolar': require('./assets/fonts/escolar_G.ttf'),
     'escolar-bold' : require('./assets/fonts/escolar-bold.ttf'),
   });
+
+  useEffect(() => {
+    if (fontError) {
+      console.error("Error cargando fuentes:", fontError);
+    }
+  }, [fontError]);
   
 
   const checkSession = async () => {
@@ -174,7 +193,12 @@ export default function App() {
           }
           
         }else{
-          setUser({ id: response.id, foto: response.foto, username: response.username});
+          setUser({
+            id: response.id,
+            foto: response.foto,
+            username: response.username,
+            tipo: response.tipo,
+          });
           if (response.tipo === "admin"){ 
             setInitialRoute("AdminScreen"); 
             return;
@@ -187,8 +211,8 @@ export default function App() {
         setInitialRoute("Home");
       }
     } catch (error) {
-      setInitialRoute("LoginAlumno");
-      setUser({ foto: null, username: null });
+      setInitialRoute("Home");
+      setUser({ id: null, foto: null, username: null, tipo: null });
     }
   };
   
@@ -198,15 +222,17 @@ export default function App() {
   }, []);
   
   const onLayoutRootView = useCallback(async () => {
-    if(fontsLoaded && initialRoute) await SplashScreen.hideAsync()
-  }, [fontsLoaded, initialRoute]);
-  if(!fontsLoaded || !initialRoute) 
-    return 
+    if((fontsLoaded || fontError) && initialRoute) await SplashScreen.hideAsync()
+  }, [fontsLoaded, fontError, initialRoute]);
+  if((!fontsLoaded && !fontError) || !initialRoute) 
+    return (
       <View style={{justifyContent: "center", alignItems: "center"}}>
-        <Splash name="CARGANDO SESIÓN" />; 
+        <Splash name="CARGANDO SESIÓN" />
       </View>
+    );
 
   return (
+    <SafeAreaProvider>
     <VoiceProvider>
     <View style={{flex: 1}} onLayout={onLayoutRootView}>
     <PaperProvider>
@@ -251,6 +277,10 @@ export default function App() {
         <Stack.Screen name="VerComanda" component={VerComanda} />
         <Stack.Screen name="DetalleComandaAula" component={DetalleComandaAula} />
 
+        <Stack.Screen name="MaterialEscolar" component={MaterialEscolar} />
+        <Stack.Screen name="CrearMaterial" component={CrearMaterial} />
+        <Stack.Screen name="DetallesMaterial" component={DetallesMaterial} />
+
         <Stack.Screen name="GestionAulas" component={GestionAulas} />
         <Stack.Screen name="CrearAula" component={CrearAula} />
         <Stack.Screen name="DetallesAula" component={DetallesAula} />
@@ -270,5 +300,6 @@ export default function App() {
     </PaperProvider>
     </View>
     </VoiceProvider>
+    </SafeAreaProvider>
   );
 }

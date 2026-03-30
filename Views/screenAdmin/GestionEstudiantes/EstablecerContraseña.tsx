@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import Header from "../../../components/Header";
 import { ConnectApi } from "../../../class/Connect.Api/ConnectApi";
 import {
@@ -146,8 +149,12 @@ export default function EstablecerContraseña({
     setDistractors((prev) => prev.filter((_, i) => i !== index));
   };
 
+  const insets = useSafeAreaInsets();
+
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider
+      style={[styles.container, { paddingBottom: insets.bottom }]}
+    >
       <Header
         uri="volver"
         nameBottom="ATRÁS"

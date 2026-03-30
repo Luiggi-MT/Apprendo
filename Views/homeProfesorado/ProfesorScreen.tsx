@@ -1,6 +1,9 @@
 import React, { useContext, useState } from "react";
 import { View } from "react-native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import Header from "../../components/Header";
 import { UserContext } from "../../class/context/UserContext";
 import { ConnectApi } from "../../class/Connect.Api/ConnectApi";
@@ -16,8 +19,11 @@ export default function ProfesorScreen({ navigation }: { navigation: any }) {
   const perfil = () => {
     navigation.navigate("PerfilScreen");
   };
+  const insets = useSafeAreaInsets();
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider
+      style={[styles.container, { paddingBottom: insets.bottom }]}
+    >
       <Header
         uri={profesor.foto}
         nameBottom="PERFIL"

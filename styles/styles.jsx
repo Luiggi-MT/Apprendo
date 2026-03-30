@@ -2,10 +2,10 @@ import { StyleSheet, Platform, Dimensions, PixelRatio } from "react-native";
 import * as Device from "expo-device";
 export const gradientColors = ["#4C80D7", "#42C9A6", "#FDD050"];
 
+
 const isPhone = Device.deviceType === Device.DeviceType.PHONE;
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
-
 
 /**
  * Escala el tamaño de la fuente basándose en el ancho de pantalla
@@ -64,20 +64,19 @@ export const styles = StyleSheet.create({
   container: {
     backgroundColor: "#E9E9E9",
     flex: 1,
-    
   },
 
 
   //HEADER
 
   header: {
-    height: 180,
+    height: Platform.OS === 'android' ? 140: 180,
     width: "100%",
     backgroundColor: "#2E4053",
     flexDirection: "row",
     alignItems: "center",
     paddingTop: 30,
-    fontWeight: ''
+    fontWeight: 'condensedBold',
   },
 
   bottomContainerHeder: {
@@ -91,10 +90,18 @@ export const styles = StyleSheet.create({
   },
 
   titleHeaderText: {
-    fontFamily: 'fredoka', 
-    fontWeight: 'bold',  
+    fontFamily: 'fredoka-bold',
+    fontWeight: 'condensedBold',
     color: "white",
-    textAlign: 'center'
+    textAlign: 'center',
+    textShadowColor: 'rgba(0, 0, 0, 0.35)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+    ...Platform.select({
+      android: {
+        includeFontPadding: false,
+      },
+    }),
   },
 
   // Sombras
@@ -193,11 +200,13 @@ export const styles = StyleSheet.create({
     marginTop: 20,
     fontSize: 18,
     fontWeight: "bold",
+    color: "#333",
   },
 
   text_legend: {
     fontFamily: "escolar-bold",
     fontSize: 16,
+    color: "#000",
   },
 
   textBoton: {

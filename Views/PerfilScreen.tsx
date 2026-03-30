@@ -1,5 +1,8 @@
 import React, { useContext, useEffect } from "react";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import Header from "../components/Header";
 import { ConnectApi } from "../class/Connect.Api/ConnectApi";
 import { View } from "react-native";
@@ -17,8 +20,11 @@ export default function PerfilScreen({ navigation }: { navigation: any }) {
     if (respose) navigation.navigate("Home");
   };
   const api = new ConnectApi();
+  const insets = useSafeAreaInsets();
   return (
-    <SafeAreaProvider style={styles.container}>
+    <SafeAreaProvider
+      style={[styles.container, { paddingBottom: insets.bottom }]}
+    >
       <Header
         uri="volver"
         nameBottom="ATRÁS"

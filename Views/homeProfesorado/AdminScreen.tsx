@@ -1,5 +1,8 @@
 import React, { useContext, useState } from "react";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import Header from "../../components/Header";
 import { scaleFont, styles } from "../../styles/styles";
 import { View, FlatList, Dimensions } from "react-native";
@@ -54,8 +57,11 @@ export default function AdminScreen({ navigation }: { navigation: any }) {
   const perfil = () => {
     navigation.navigate("PerfilScreen");
   };
+  const insets = useSafeAreaInsets();
   return (
-    <SafeAreaProvider style={styles.container}>
+    <SafeAreaProvider
+      style={[styles.container, { paddingBottom: insets.bottom }]}
+    >
       <Header
         uri={profesor.foto}
         nameBottom="PERFIL"

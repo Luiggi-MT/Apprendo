@@ -13,7 +13,7 @@ export default function Buscador({
   const [text, onChangeText] = useState("");
   const handleTextChange = (input: string) => {
     onChangeText(input);
-    onPress(input);
+    onPress(input.toUpperCase());
   };
   const api = new Arasaac();
   return (
@@ -21,8 +21,11 @@ export default function Buscador({
       <TextInput
         style={[styles.buscador, styles.shadow]}
         onChangeText={handleTextChange}
-        value={text.toUpperCase()}
+        value={text}
         placeholder={nameBuscador}
+        placeholderTextColor="#999"
+        autoCapitalize="characters"
+        autoCorrect={false}
       />
       <Image
         source={{ uri: api.getPictograma("buscador") }}

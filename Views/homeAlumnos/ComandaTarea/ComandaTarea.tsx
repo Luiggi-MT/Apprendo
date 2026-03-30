@@ -14,7 +14,10 @@ import {
   Image,
   Alert,
 } from "react-native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
 import Header from "../../../components/Header";
 import Buscador from "../../../components/Buscador";
@@ -60,7 +63,6 @@ export default function ComandaTarea({
         student.id,
         fechaSeleccionada,
       );
-      console.log(JSON.stringify(data, null, 2));
       if (data) {
         setAulas(data.aulas);
         setMenu(data.menu_del_dia);
@@ -88,7 +90,6 @@ export default function ComandaTarea({
 
   const activarAsistente = useCallback(async () => {
     if (isProcessing.current) {
-      console.log("⚠️ Asistente ocupado");
       return;
     }
     isProcessing.current = true;
@@ -129,7 +130,6 @@ export default function ComandaTarea({
         }
       }
     } catch (error) {
-      console.log("Error asistente:", error);
       await speak.hablar("No te he entendido");
     } finally {
       setIsListening(false);
@@ -242,9 +242,11 @@ export default function ComandaTarea({
       fecha: hoy,
     });
   };
-
+  const insets = useSafeAreaInsets();
   return (
-    <SafeAreaProvider style={{ backgroundColor: "#F5F5F5" }}>
+    <SafeAreaProvider
+      style={[styles.container, { paddingBottom: insets.bottom }]}
+    >
       <Header
         uri="volver"
         nameBottom="ATRÁS"

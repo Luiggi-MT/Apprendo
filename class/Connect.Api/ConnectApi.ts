@@ -24,7 +24,9 @@ import { TareasApi } from "./Tareas";
 import { ApiResponseTareas } from "../Interface/ApiResponseTareas";
 import { Comanda } from "./Comanda";
 import {Menu as MenuInterface} from "../Interface/Menu";
-
+import { MaterialEscolarApi } from "./MaterialEscolar";
+import { MaterialEscolarSend } from "../Interface/MaterialEscolarSend";
+import { MaterialEscolar, materialEscolarResponse } from "../Interface/MaterialEscolar";
 
 export class ConnectApi {
     
@@ -40,6 +42,7 @@ export class ConnectApi {
     private aula: AulaApi;
     private tarea: TareasApi; 
     private comanda: Comanda;
+    private materialEscolar: MaterialEscolarApi;
     
     constructor(){
         this.api = new Api(); 
@@ -54,8 +57,7 @@ export class ConnectApi {
         this.aula = new AulaApi();
         this.tarea = new TareasApi();
         this.comanda = new Comanda();
-    
-        
+        this.materialEscolar = new MaterialEscolarApi();
     }
     // APi
     public getLimit(): number{
@@ -128,6 +130,10 @@ export class ConnectApi {
     //Fotos
     public getFoto(filename: string): string {
         return this.foto.getFoto(filename);
+    }
+
+    public getMedia(filename: string): string {
+        return this.foto.getMedia(filename);
     }
 
     //Login 
@@ -271,4 +277,28 @@ export class ConnectApi {
         return this.comanda.setCantidadPedido(tareaId, estudianteId, fecha, aulaId, idMenu, idPlato, cantidad); 
     }
     
+    // Material Escolar
+    public async createMaterialEscolar(materialData: MaterialEscolarSend): Promise<string | null> {
+        return this.materialEscolar.createMaterialEscolar(materialData);
+    }
+
+    public async getMaterialesEcolares(offset: number = this.api.getInitial_offset(), limit: number = this.api.getLimit()): Promise<materialEscolarResponse> {
+        return this.materialEscolar.getMaterialesEcolares(offset, limit);
+    }
+
+    public async getMaterialesEscolaresByName(name: string, offset: number = this.api.getInitial_offset(), limit: number = this.api.getLimit()): Promise<materialEscolarResponse | null> {
+        return this.materialEscolar.getMaterialesEscolaresByName(name, offset, limit);
+    }
+
+    public async getMaterialEscolarById(id: number): Promise<MaterialEscolar> {
+        return this.materialEscolar.getMaterialEscolarById(id);
+    }
+
+    public async updateMaterialEscolar(id: number, materialData: MaterialEscolarSend): Promise<string | null> {
+        return this.materialEscolar.updateMaterialEscolar(id, materialData);
+    }
+
+    public async deleteMaterialEscolar(id: number): Promise<string | null> {
+        return this.materialEscolar.deleteMaterialEscolar(id);  
+    }
 }

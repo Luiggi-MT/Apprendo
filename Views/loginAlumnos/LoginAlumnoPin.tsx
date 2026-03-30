@@ -1,5 +1,8 @@
 import React, { useContext, useEffect, useState } from "react";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import Header from "../../components/Header";
 import { ConnectApi } from "../../class/Connect.Api/ConnectApi";
 import {
@@ -104,9 +107,11 @@ export default function LoginAlumnoPin({
 
   // Definimos el contenedor dinámicamente
   const Container = Platform.OS === "web" ? ScrollView : View;
-
+  const insets = useSafeAreaInsets();
   return (
-    <SafeAreaProvider style={styles.container}>
+    <SafeAreaProvider
+      style={[styles.container, { paddingBottom: insets.bottom }]}
+    >
       <Header
         uri="volver"
         nameBottom="ATRÁS"

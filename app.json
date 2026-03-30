@@ -15,16 +15,19 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.luiggimt.apprendo",
+      "googleServicesFile": "./GoogleService-Info.plist",
       "buildNumber": "1",
       "infoPlist": {
         "NSCameraUsageDescription": "La cámara se usa para seleccionar imágenes de perfil",
         "NSMicrophoneUsageDescription": "El micrófono se usa para funciones educativas",
         "NSPhotoLibraryUsageDescription": "Acceso a la galería para seleccionar imágenes",
-        "NSSpeechRecognitionUsageDescription": "El micrófono se usa para el reconocimiento de voz para procesar comandos."
+        "NSSpeechRecognitionUsageDescription": "El micrófono se usa para el reconocimiento de voz para procesar comandos.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
-      "package": "com.luiggimt.app",
+      "package": "com.luiggimt.apprendo",
+      "googleServicesFile": "./google-services.json",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -32,23 +35,34 @@
       "edgeToEdgeEnabled": true,
       "permissions": [
         "android.permission.RECORD_AUDIO",
-        "android.permission.MODIFY_AUDIO_SETTINGS"
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.POST_NOTIFICATIONS"
       ]
     },
     "web": {
       "favicon": "./assets/favicon.png",
       "bundler": "metro"
     },
-    "extra": {
-      "eas": {
-        "projectId": "15b1fe61-e9c6-401d-9e9b-99ec6c4310fd"
-      }
-    },
     "plugins": [
       "expo-font",
       "expo-audio",
       "expo-video",
-      "expo-secure-store"
-    ]
+      "expo-secure-store",
+      "expo-speech-recognition",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Acceso a la galería para seleccionar imágenes",
+          "cameraPermission": "La cámara se usa para añadir fotos al material"
+        }
+      ],
+      "expo-asset"
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "264d2b0b-7218-4796-b65d-a53c80ef6edb"
+      }
+    },
+    "owner": "luiggimt"
   }
 }

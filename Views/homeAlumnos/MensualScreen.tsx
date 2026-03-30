@@ -6,7 +6,10 @@ import React, {
   useState,
 } from "react";
 import { View, ActivityIndicator } from "react-native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
 import { Calendar, LocaleConfig } from "react-native-calendars";
 
@@ -118,7 +121,6 @@ export default function MensualScreen({ navigation }: { navigation: any }) {
 
   const activarAsistente = useCallback(async () => {
     if (isProcessing.current) {
-      console.log("⚠️ Asistente ocupado");
       return;
     }
     isProcessing.current = true;
@@ -241,9 +243,11 @@ export default function MensualScreen({ navigation }: { navigation: any }) {
   const perfil = () => {
     navigation.navigate("PerfilScreen");
   };
-
+  const insets = useSafeAreaInsets();
   return (
-    <SafeAreaProvider style={{ backgroundColor: "#F5F5F5" }}>
+    <SafeAreaProvider
+      style={[styles.container, { paddingBottom: insets.bottom }]}
+    >
       <Header
         uri={student.foto}
         nameBottom="PERFIL"

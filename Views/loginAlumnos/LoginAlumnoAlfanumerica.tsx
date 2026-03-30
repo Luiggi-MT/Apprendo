@@ -10,7 +10,10 @@ import {
   TouchableWithoutFeedback,
   Keyboard,
 } from "react-native";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 
 import { ConnectApi } from "../../class/Connect.Api/ConnectApi";
 import { scaleFont, styles } from "../../styles/styles";
@@ -84,8 +87,11 @@ export default function LoginAlumnoAlfanumerica({
       //);
     }
   }, []);
+  const insets = useSafeAreaInsets();
   return (
-    <SafeAreaProvider style={styles.container}>
+    <SafeAreaProvider
+      style={[styles.container, { paddingBottom: insets.bottom }]}
+    >
       <Header
         uri="volver"
         nameBottom="ATRÁS"

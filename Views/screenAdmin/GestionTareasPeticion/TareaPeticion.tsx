@@ -1,5 +1,8 @@
 import React, { useState } from "react";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { Dimensions, FlatList, View } from "react-native";
 import { scaleFont, styles } from "../../../styles/styles";
 import { BotonHomeAdmin } from "../../../class/Interface/BotonHomeAdmin";
@@ -35,8 +38,11 @@ export default function TareaPeticion({ navigation }: { navigation: any }) {
   const atras = () => {
     navigation.goBack();
   };
+  const insets = useSafeAreaInsets();
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider
+      style={[styles.container, { paddingBottom: insets.bottom }]}
+    >
       <Header
         uri="volver"
         nameBottom="ATRÁS"

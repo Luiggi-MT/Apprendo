@@ -5,7 +5,10 @@ import React, {
   useContext,
   useCallback,
 } from "react";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { FlatList, Image, Text, TouchableOpacity, View } from "react-native";
 
 import Header from "../../components/Header";
@@ -44,7 +47,6 @@ export default function LoginAlumnoImagenes({ navigation, route }: any) {
 
   const activarAsistente = useCallback(async () => {
     if (isProcessing.current) {
-      console.log("⚠️ Asistente ocupado");
       return;
     }
 
@@ -179,10 +181,14 @@ export default function LoginAlumnoImagenes({ navigation, route }: any) {
     selectedRef.current = selected;
   }, [selected]);
 
+  const insets = useSafeAreaInsets();
+
   // ================= UI =================
 
   return (
-    <SafeAreaProvider style={styles.container}>
+    <SafeAreaProvider
+      style={[styles.container, { paddingBottom: insets.bottom }]}
+    >
       <Header
         uri="volver"
         nameBottom="ATRÁS"

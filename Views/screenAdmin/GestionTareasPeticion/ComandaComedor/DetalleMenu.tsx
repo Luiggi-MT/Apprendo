@@ -1,5 +1,8 @@
 import React, { useContext, useEffect, useState } from "react";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import Header from "../../../../components/Header";
 import { scaleFont, styles } from "../../../../styles/styles";
 import { ConnectApi } from "../../../../class/Connect.Api/ConnectApi";
@@ -41,6 +44,8 @@ export default function DetalleMenu({
   const { menu_id } = route.params;
   const api = new ConnectApi();
   const arasaacService = new Arasaac();
+
+  const insets = useSafeAreaInsets();
 
   const handleAñadirPress = (tipo: string) => {
     navigation.navigate("AñadirPictograma", {
@@ -152,7 +157,6 @@ export default function DetalleMenu({
     api
       .getMenuById(menu_id)
       .then((data) => {
-        console.log("Data recibida:", JSON.stringify(data, null, 2));
         const m = data.menu;
         if (!m) {
           setMenu(null);
@@ -433,7 +437,9 @@ export default function DetalleMenu({
   }
 
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider
+      style={[styles.container, { paddingBottom: insets.bottom }]}
+    >
       <Header
         uri="volver"
         nameBottom="ATRÁS"

@@ -5,8 +5,12 @@ import React, {
   useCallback,
   useRef,
 } from "react";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import { useFocusEffect } from "@react-navigation/native";
+import LottieView from "lottie-react-native";
 import Header from "../../components/Header";
 import { ConnectApi } from "../../class/Connect.Api/ConnectApi";
 import { UserContext } from "../../class/context/UserContext";
@@ -18,6 +22,7 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   StyleSheet,
+  Platform,
 } from "react-native";
 import { Arasaac } from "../../class/Arasaac/getPictograma";
 import { Students } from "../../class/Interface/Students";
@@ -117,7 +122,6 @@ export default function DiariasScreen({
         limit,
         fechaSeleccionada,
       );
-      console.log(JSON.stringify(response, null, 2));
       setTareas(response.tareasEstudiante || []);
     } catch (error) {
       console.error("Error al obtener tareas:", error);
@@ -176,7 +180,6 @@ export default function DiariasScreen({
         }
       }
     } catch (error) {
-      console.log("Error asistente:", error);
       await speak.hablar("No te he entendido");
     } finally {
       setIsListening(false);
@@ -257,9 +260,11 @@ export default function DiariasScreen({
       });
     }
   };
-
+  const insets = useSafeAreaInsets();
   return (
-    <SafeAreaProvider style={{ backgroundColor: "#F5F5F5" }}>
+    <SafeAreaProvider
+      style={[styles.container, { paddingBottom: insets.bottom }]}
+    >
       <Header
         uri={esSemanales ? "volver" : student.foto}
         nameBottom={esSemanales ? "ATRÁS" : "PERFIL"}
@@ -278,11 +283,14 @@ export default function DiariasScreen({
         ) : tareas.length === 0 ? (
           <View style={{ alignItems: "center", marginTop: 40 }}>
             <Text style={localStyles.textoExito}>¡TODO TERMINADO POR HOY!</Text>
-            <Image
-              source={{ uri: arasaacService.getPictograma("ok") }}
-              style={{ width: 220, height: 220 }}
-              resizeMode="contain"
-            />
+            <View style={{ width: 300, height: 300, overflow: "hidden" }}>
+              <LottieView
+                source={require("../../assets/animations/clapping.json")}
+                autoPlay
+                loop
+                style={{ width: "100%", height: "100%" }}
+              />
+            </View>
           </View>
         ) : (
           <View>

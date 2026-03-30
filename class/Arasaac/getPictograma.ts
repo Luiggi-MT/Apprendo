@@ -81,6 +81,9 @@ export class Arasaac {
         ["comida", 4610],
         ["postre", 7216],
 
+        //Inventario
+        ["inventario", 39611],
+
 
     ]);
     private apiUrl: string = `https://api.arasaac.org/v1/pictograms`;

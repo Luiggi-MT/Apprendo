@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import {
+  SafeAreaProvider,
+  useSafeAreaInsets,
+} from "react-native-safe-area-context";
 import {
   View,
   Text,
@@ -64,9 +67,11 @@ export default function OlvideContraseña({ navigation }: { navigation: any }) {
       }, 2000);
     });
   };
-
+  const insets = useSafeAreaInsets();
   return (
-    <SafeAreaProvider style={styles.container}>
+    <SafeAreaProvider
+      style={[styles.container, { paddingBottom: insets.bottom }]}
+    >
       <Header
         uri="volver"
         nameBottom="ATRÁS"

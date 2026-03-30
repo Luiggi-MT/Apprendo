@@ -31,9 +31,7 @@ export class Login extends Api {
                 })
             });
 
-            if (response.ok) {
-                console.log("Token de notificaciones actualizado en el servidor.");
-            } else {
+            if (!response.ok) {
                 console.error("Error al guardar el token en el backend.");
             }
         } catch (error) {
@@ -59,9 +57,7 @@ export class Login extends Api {
                 })
             });
 
-            if (response.ok) {
-                console.log("Token de notificaciones del profesor actualizado en el servidor.");
-            } else {
+            if (!response.ok) {
                 console.error("Error al guardar el token del profesor en el backend.");
             }
         } catch (error) {
@@ -188,10 +184,14 @@ export class Login extends Api {
                 return { ok: false, message: "Sesión expirada" };
             }
 
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 5000);
             const response = await fetch(`${Api.apiUrl}/session`, {
                 method: 'GET',
                 headers: { 'Authorization': `Bearer ${token}` },
+                signal: controller.signal,
             });
+            clearTimeout(timeoutId);
 
             const data = await response.json();
             if (response.status === 401) {
