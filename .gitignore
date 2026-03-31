@@ -54,3 +54,6 @@ yarn-error.*
 .fseventsd
 #credenciales 
 apprendo-fcm-firebase-adminsdk-fbsvc-c186ba3873.json
+google-services.json
+GoogleService-Info.plist
+android/app/google-services.json
