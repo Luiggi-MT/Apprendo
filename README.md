@@ -1,53 +1,97 @@
+# Cole App Frontend (Mobile)
 
-# 📱 Cole App - Frontend (Mobile)
+Cliente movil del proyecto Cole, orientado a una experiencia educativa inclusiva para alumnado y profesorado.
 
-Este es el cliente móvil del proyecto **Cole**, una plataforma educativa inclusiva. La aplicación está diseñada para facilitar la interacción de los estudiantes mediante múltiples métodos de autenticación y herramientas de accesibilidad.
+## Funcionalidades principales
 
-## 🚀 Funcionalidades Principales
+- Autenticacion para estudiantes y profesorado.
+- Soporte de accesibilidad con asistente de voz y preferencias de visualizacion.
+- Gestion de sesiones y perfil de usuario.
+- Flujos de tareas diarias y mensuales.
+- Integracion de notificaciones push con Firebase.
 
-* **Autenticación Flexible**: Soporte para login tradicional (usuario/contraseña) y login basado en imágenes para estudiantes.
-* **Accesibilidad Avanzada**: Integración con lectores de pantalla y preferencias visuales personalizadas.
-* **Speech-to-Text**: Utiliza **OpenAI Whisper** para la transcripción de voz en tareas específicas.
-* **Gestión de Sesiones**: Persistencia de datos de usuario y estados de conexión.
-* **Perfil Personalizado**: Visualización y actualización de fotos de perfil y preferencias.
+## Stack tecnico
 
-## 🛠️ Tecnologías
+- React Native con Expo (SDK 54).
+- Navegacion con React Navigation.
+- API HTTP con fetch hacia backend Flask.
+- Estado global con Context API.
+- Almacenamiento seguro con expo-secure-store.
+- Voz y multimedia con modulos Expo.
 
-* **Framework**: [React Native](https://reactnative.dev/) con [Expo](https://expo.dev/).
-* **Navegación**: React Navigation (Stack & Tabs).
-* **Comunicación**: fetch para peticiones al servidor Flask.
-* **Estado Global**: React Context API.
-* **Estilos**: StyleSheet (Native) y soporte para temas claro/oscuro.
+## Requisitos
 
-## 📦 Instalación de dependencias
+- Node.js 20 LTS recomendado.
+- npm.
+- Android Studio (si ejecutas Android nativo).
+- Xcode (si ejecutas iOS en macOS).
+
+## Instalacion
 
 ```bash
 npm install
 ```
 
-## Ejecución
+## Ejecucion
+
+Desarrollo con Expo:
 
 ```bash
-expo start
+npm run start
 ```
 
-## 📂 Estructura de Carpetas
+Android:
 
 ```bash
-├── src/
-│   ├── components/     # Componentes atómicos reutilizables
-│   ├── screens/        # Pantallas completas (Login, Perfil, Home)
-│   ├── navigation/     # Configuración de rutas y menús
-│   ├── context/        # Lógica de autenticación y estado global
-│   ├── services/       # Clientes de API (Axios)
-│   └── utils/          # Funciones de ayuda y constantes
-├── assets/             # Recursos estáticos (imágenes, fuentes)
-└── App.js              # Punto de entrada principal
-
+npm run android
 ```
 
-## 🧪 Testing
+iOS:
+
+```bash
+npm run ios
+```
+
+Web:
+
+```bash
+npm run web
+```
+
+## Estructura de carpetas (resumen)
+
+```text
+app/
+├── App.js
+├── index.js
+├── assets/
+├── components/
+├── Views/
+├── class/
+├── styles/
+├── android/
+├── ios/
+└── package.json
+```
+
+## Testing
 
 ```bash
 npm test
 ```
+
+## Notas de configuracion
+
+- El proyecto usa archivos de configuracion de Firebase en local para Android/iOS.
+- Esos archivos deben estar en .gitignore y no subirse al repositorio.
+
+## Creditos y licencia de recursos
+
+Este proyecto utiliza pictogramas de ARASAAC.
+
+- Fuente: <https://arasaac.org>
+- El uso de pictogramas y recursos graficos debe respetar las condiciones y atribucion indicadas por ARASAAC.
+
+## Licencia del proyecto
+
+Revisar el archivo LICENSE para conocer las condiciones de uso publicadas para este repositorio.
