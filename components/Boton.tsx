@@ -10,13 +10,15 @@ export default function Boton({
   dissable = false,
   arasaacService = true,
   component = false,
+  arasaacServiceID = false,
 }: {
-  uri?: string;
+  uri?: any;
   nameBottom?: string;
   onPress?: () => void;
   dissable?: boolean;
   arasaacService?: boolean;
   component?: boolean;
+  arasaacServiceID?: boolean;
 }) {
   const ArasaacService = new Arasaac();
   const api = new ConnectApi();
@@ -36,12 +38,18 @@ export default function Boton({
           <Image source={{ uri: api.getComponent(uri) }} style={styles.image} />
         </View>
       ) : arasaacService ? (
-        uri && (
+        uri &&
+        (arasaacServiceID ? (
+          <Image
+            source={{ uri: ArasaacService.getPictogramaId(uri) }}
+            style={styles.image}
+          />
+        ) : (
           <Image
             source={{ uri: ArasaacService.getPictograma(uri) }}
             style={styles.image}
           />
-        )
+        ))
       ) : (
         <Image source={{ uri: api.getFoto(uri) }} style={styles.image} />
       )}

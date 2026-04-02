@@ -70,7 +70,7 @@ export const styles = StyleSheet.create({
   //HEADER
 
   header: {
-    height: Platform.OS === 'android' ? 140: 180,
+    height: Platform.OS === 'android' ? 170: 180,
     width: "100%",
     backgroundColor: "#2E4053",
     flexDirection: "row",

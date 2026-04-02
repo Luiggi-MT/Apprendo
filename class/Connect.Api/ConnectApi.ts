@@ -234,6 +234,14 @@ export class ConnectApi {
     public async asignarTarea(tareaId: number, studentId: number, fechaInicio: string, fechaFin: string): Promise<boolean> {
         return this.tarea.asignarTarea(tareaId, studentId, fechaInicio, fechaFin);
     }
+
+    public async asignarTareaPedido(tareaId: number, studentId: number, profesorId: number, fechaInicio: string, fechaFin: string): Promise<boolean> {
+        return this.tarea.asignarTareaPedido(tareaId, studentId, profesorId, fechaInicio, fechaFin);
+    }
+    
+    public async getTareasPeticionProfesor(profesorId: number, offset: number = this.api.getInitial_offset(), limit: number = this.api.getLimit(), fecha: string): Promise<ApiResponseTareas>{
+        return this.tarea.getTareasPeticionProfesor(profesorId, offset, limit, fecha);
+    }
     public async getTareaEstudiante(estudianteId: number, offset: number = this.api.getInitial_offset(), limit: number = this.api.getLimit(), fecha: string): Promise<ApiResponseTareas>{
         return this.tarea.getTareaEstudiante(estudianteId, offset, limit, fecha);
     }
@@ -243,6 +251,10 @@ export class ConnectApi {
 
     public async finalizarTarea(tarea_id: number, estudiante_id: number, fecha: string): Promise<boolean>{
         return this.tarea.finalizarTarea(tarea_id, estudiante_id, fecha);
+    }
+
+    public async createTareaComandaMaterialEscolar(): Promise<boolean>{
+        return this.tarea.createTareaComandaMaterialEscolar();
     }
 
     //Comanda
@@ -294,11 +306,17 @@ export class ConnectApi {
         return this.materialEscolar.getMaterialEscolarById(id);
     }
 
-    public async updateMaterialEscolar(id: number, materialData: MaterialEscolarSend): Promise<string | null> {
-        return this.materialEscolar.updateMaterialEscolar(id, materialData);
+    public async updateMaterialEscolar(materialData: MaterialEscolarSend): Promise<string | null> {
+        return this.materialEscolar.updateMaterialEscolar(materialData);
     }
 
     public async deleteMaterialEscolar(id: number): Promise<string | null> {
         return this.materialEscolar.deleteMaterialEscolar(id);  
     }
+
+    public async downloadInventarioMaterialEscolarPDF(): Promise<string | null> {
+        return this.materialEscolar.downloadInventarioPDF();
+    }
+
+    
 }

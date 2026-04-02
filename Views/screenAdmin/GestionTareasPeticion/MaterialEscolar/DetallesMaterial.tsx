@@ -63,6 +63,8 @@ const DetallesMaterial = ({
   const [error, setError] = useState<string>("");
   const [videoSend, setVideoSend] = useState<string>("");
   const [splashName, setSplashName] = useState<string>("");
+  const [videoServer, setVideoServer] = useState<boolean>(true);
+  const [imagenServer, setImagenServer] = useState<boolean>(true);
 
   const imageMediaType =
     (ImagePicker as any)["MediaType"]?.Images ??
@@ -72,7 +74,9 @@ const DetallesMaterial = ({
     ImagePicker.MediaTypeOptions.Videos;
   const api = new ConnectApi();
   const player = useVideoPlayer(
-    selectedVideo ? { uri: api.getMedia(selectedVideo) } : null,
+    selectedVideo
+      ? { uri: videoServer ? api.getMedia(selectedVideo) : selectedVideo }
+      : null,
     (player) => {
       player.loop = false;
     },
@@ -189,17 +193,44 @@ const DetallesMaterial = ({
     }, 2000);
   };
   const handleActualizarPress = async () => {
+    if (
+      !nombre.trim() ||
+      !materialId ||
+      cantidad <= 0 ||
+      !forma.trim() ||
+      !tamaño.trim() ||
+      !selectedImage.trim() ||
+      !videoSend.trim()
+    ) {
+      setError("TODOS LOS CAMPOS SON OBLIGATORIOS.");
+    }
     setError("");
-    if (nombre.trim().length === 0) {
-      setError("EL NOMBRE NO PUEDE ESTAR VACÍO");
-      return;
-    }
-    if (cantidad < 0) {
-      setError("LA CANTIDAD NO PUEDE SER NEGATIVA");
-      return;
-    }
     setIsModificate(true);
     setSplashName("ACTUALIZANDO");
+    const materialUpdate = {
+      id: id,
+      nombre: nombre,
+      color: selectedColor,
+      pictogramaId: materialId,
+      cantidad: cantidad,
+      forma: forma,
+      tamaño: tamaño,
+      imagen: selectedImage,
+      video: videoSend,
+      imagenModificada: !imagenServer,
+      videoModificado: !videoServer,
+    };
+    api.updateMaterialEscolar(materialUpdate).then((response) => {
+      if (response !== null) {
+        setError(response.toUpperCase());
+        setIsModificate(false);
+        return;
+      }
+      setTimeout(() => {
+        setIsModificate(false);
+        navigation.goBack();
+      }, 2000);
+    });
   };
   useEffect(() => {
     setIsModificate(true);
@@ -366,7 +397,11 @@ const DetallesMaterial = ({
                 {selectedImage !== "" && (
                   <View style={stylesLocal.imageContainer}>
                     <Image
-                      source={{ uri: api.getMedia(selectedImage) }}
+                      source={{
+                        uri: imagenServer
+                          ? api.getMedia(selectedImage)
+                          : selectedImage,
+                      }}
                       style={styles.imageBase}
                     />
                     <TouchableOpacity
@@ -374,7 +409,10 @@ const DetallesMaterial = ({
                         stylesLocal.deleteCircleBtn,
                         { top: -10, right: -10 },
                       ]}
-                      onPress={() => setSelectedImage("")}
+                      onPress={() => {
+                        setSelectedImage("");
+                        setImagenServer(false);
+                      }}
                     >
                       <Text style={stylesLocal.deleteCircleBtnText}>✕</Text>
                     </TouchableOpacity>
@@ -407,6 +445,7 @@ const DetallesMaterial = ({
                       onPress={() => {
                         setSelectedVideo("");
                         setVideoSend("");
+                        setVideoServer(false);
                       }}
                     >
                       <Text style={stylesLocal.deleteCircleBtnText}>✕</Text>

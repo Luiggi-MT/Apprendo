@@ -1,4 +1,5 @@
 export interface MaterialEscolarSend {
+    id?: number; 
     nombre: string;
     color: string;
     pictogramaId: number;
@@ -7,4 +8,6 @@ export interface MaterialEscolarSend {
     tamaño: string;
     imagen: string;
     video: string;
+    imagenModificada?: boolean;
+    videoModificado?: boolean;
 }

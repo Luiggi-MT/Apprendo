@@ -18,13 +18,13 @@ export default function AsignarTarea({
   navigation: any;
   route: any;
 }) {
-  const { tareaId, studentId } = route.params;
+  const { tareaId, studentId, asignacionProfesor } = route.params;
   const [fechaInicio, setFechaInicio] = useState<string>("");
   const [fechaFin, setFechaFin] = useState<string>("");
   const [error, setError] = useState<boolean>(false);
   const [isLoaging, setIsLoading] = useState<boolean>(false);
   const [errorValue, setErrorValue] = useState<string>("");
-
+  const [profesorId, setProfesorId] = useState<number | null>(null);
   const api = new ConnectApi();
 
   // Función para calcular y colorear todos los días del rango
@@ -77,6 +77,16 @@ export default function AsignarTarea({
     }
   };
 
+  const handleAsignarProfesorPress = () => {
+    navigation.navigate("AsignarProfesor", {
+      tareaId: tareaId,
+      studentId: studentId,
+      onSelectProfesor: (id: number) => {
+        setProfesorId(id);
+      },
+    });
+  };
+
   const handleAsignarPress = () => {
     setError(false);
     setErrorValue("");
@@ -92,19 +102,41 @@ export default function AsignarTarea({
       return;
     }
     setIsLoading(true);
-    api
-      .asignarTarea(tareaId, studentId, fechaInicio, fechaFin)
-      .then((respose) => {
-        if (!respose) {
-          setError(true);
-          setErrorValue("NO SE HA PODIDO ASIGNAR LA TAREA");
-          return;
-        }
-        setTimeout(() => {
-          setIsLoading(false);
-          navigation.goBack();
-        }, 2000);
-      });
+    if (profesorId !== null) {
+      api
+        .asignarTareaPedido(
+          tareaId,
+          studentId,
+          profesorId,
+          fechaInicio,
+          fechaFin,
+        )
+        .then((respose) => {
+          if (!respose) {
+            setError(true);
+            setErrorValue("NO SE HA PODIDO ASIGNAR LA TAREA");
+            return;
+          }
+          setTimeout(() => {
+            setIsLoading(false);
+            navigation.goBack();
+          }, 2000);
+        });
+    } else {
+      api
+        .asignarTarea(tareaId, studentId, fechaInicio, fechaFin)
+        .then((respose) => {
+          if (!respose) {
+            setError(true);
+            setErrorValue("NO SE HA PODIDO ASIGNAR LA TAREA");
+            return;
+          }
+          setTimeout(() => {
+            setIsLoading(false);
+            navigation.goBack();
+          }, 2000);
+        });
+    }
   };
 
   const atras = () => navigation.goBack();
@@ -165,11 +197,19 @@ export default function AsignarTarea({
             </View>
           )}
           <View style={{ marginBottom: 20 }}>
-            <Boton
-              nameBottom="ASIGNAR.TAREA"
-              uri="ok"
-              onPress={handleAsignarPress}
-            />
+            {asignacionProfesor && profesorId === null ? (
+              <Boton
+                nameBottom="ASIGNAR.PROFESOR"
+                uri="ok"
+                onPress={handleAsignarProfesorPress}
+              />
+            ) : (
+              <Boton
+                nameBottom="ASIGNAR.TAREA"
+                uri="ok"
+                onPress={handleAsignarPress}
+              />
+            )}
           </View>
         </>
       )}

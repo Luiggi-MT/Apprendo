@@ -30,10 +30,13 @@ export default function AsignacionTareas({
   const api = new ConnectApi();
   const arasaacService = new Arasaac();
 
-  const handleAsignaTareaPress = (tareaId: number) => {
+  const handleAsignaTareaPress = (tareaId: number, nombre: string) => {
+    const asignacionProfesor = nombre === "pedido material" ? true : false;
+
     navigation.navigate("AsignarTarea", {
       tareaId: tareaId,
       studentId: student.id,
+      asignacionProfesor: asignacionProfesor,
     });
   };
   useEffect(() => {
@@ -76,7 +79,9 @@ export default function AsignacionTareas({
                 uri={arasaacService.getPictogramaId(tarea.id_pictograma)}
                 description="ASIGNAR.TAREA"
                 name={tarea.nombre.toUpperCase()}
-                navigation={() => handleAsignaTareaPress(tarea.id)}
+                navigation={() =>
+                  handleAsignaTareaPress(tarea.id, tarea.nombre)
+                }
               />
             ))}
           </View>

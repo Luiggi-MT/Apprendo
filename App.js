@@ -45,6 +45,7 @@ import EstablecerContraseña from "./Views/screenAdmin/GestionEstudiantes/Establ
 //--->Asignación de tareas
 import AsignacionTareas from "./Views/screenAdmin/GestionEstudiantes/AsignacionTareas/AsignacionTareas";
 import AsignarTarea from "./Views/screenAdmin/GestionEstudiantes/AsignacionTareas/AsignarTarea";
+import AsignarProfesor from "./Views/screenAdmin/GestionEstudiantes/AsignacionTareas/AsignarPofesor";
 
 // Gestion de tareas de petición 
 import TareaPeticion from "./Views/screenAdmin/GestionTareasPeticion/TareaPeticion";
@@ -62,6 +63,7 @@ import DetalleComandaAula from "./Views/screenAdmin/GestionTareasPeticion/Comand
 import MaterialEscolar from "./Views/screenAdmin/GestionTareasPeticion/MaterialEscolar/MaterialEscolar";
 import CrearMaterial from "./Views/screenAdmin/GestionTareasPeticion/MaterialEscolar/CrearMaterial";
 import DetallesMaterial from "./Views/screenAdmin/GestionTareasPeticion/MaterialEscolar/DetallesMaterial";
+import PedidoMaterial from "./Views/homeProfesorado/PedidoMaterial/PedidoMaterial";
 
 
 //Gestion de aulas
@@ -168,7 +170,9 @@ export default function App() {
   const checkSession = async () => {
     try {
       const response = await api.checkSession();
+      
       if (!response.ok) {
+        
         setInitialRoute("Home");
       } else {
         if(response.tipo === "estudiante"){
@@ -267,6 +271,7 @@ export default function App() {
         <Stack.Screen name="EstablecerContraseña" component={EstablecerContraseña}/>
         <Stack.Screen name="AsignacionTareas" component={AsignacionTareas} /> 
         <Stack.Screen name="AsignarTarea" component={AsignarTarea} /> 
+        <Stack.Screen name="AsignarProfesor" component={AsignarProfesor} />
 
         <Stack.Screen name="TareaPeticion" component={TareaPeticion} />
 
@@ -280,6 +285,7 @@ export default function App() {
         <Stack.Screen name="MaterialEscolar" component={MaterialEscolar} />
         <Stack.Screen name="CrearMaterial" component={CrearMaterial} />
         <Stack.Screen name="DetallesMaterial" component={DetallesMaterial} />
+        <Stack.Screen name="PedidoMaterial" component={PedidoMaterial} />
 
         <Stack.Screen name="GestionAulas" component={GestionAulas} />
         <Stack.Screen name="CrearAula" component={CrearAula} />

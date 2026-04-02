@@ -141,8 +141,8 @@ export default function GestionAulas({ navigation }: { navigation: any }) {
 
             <Text
               style={[
-                styles.text,
-                { fontSize: scaleFont(20), marginHorizontal: 10 },
+                styles.text_legend,
+                { fontSize: scaleFont(22), color: "#333" },
               ]}
             >
               {paginaActual} / {totalPaginas}

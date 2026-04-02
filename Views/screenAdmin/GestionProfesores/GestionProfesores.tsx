@@ -12,7 +12,7 @@ import None from "../../../components/None";
 import Boton from "../../../components/Boton";
 import { ConnectApi } from "../../../class/Connect.Api/ConnectApi";
 import TarjetaDescipcion from "../../../components/TarjetaDescripcion";
-import { UserContext } from "../../../class/context/UserContext";
+
 export default function GestionProfesores({ navigation }: { navigation: any }) {
   const [profesores, setProfesores] = useState<Profesor[]>([]);
   const [offset, setOffset] = useState<number>(0);

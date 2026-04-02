@@ -1,6 +1,9 @@
 import { MaterialEscolar, materialEscolarResponse } from "../Interface/MaterialEscolar";
 import { MaterialEscolarSend } from "../Interface/MaterialEscolarSend";
 import { Api } from "./Api";
+import { Platform } from "react-native";
+import * as FileSystem from "expo-file-system/legacy";
+import * as Sharing from "expo-sharing";
 export class MaterialEscolarApi extends Api {
     // Devuelve null si todo fue bien, o el mensaje de error si falló
     public async createMaterialEscolar(materialData: MaterialEscolarSend): Promise<string | null> {
@@ -78,9 +81,9 @@ export class MaterialEscolarApi extends Api {
         }
     }
 
-    public async updateMaterialEscolar(id: number, materialData: MaterialEscolarSend): Promise<string | null> {
+    public async updateMaterialEscolar(materialData: MaterialEscolarSend): Promise<string | null> {
         try {
-            const response = await fetch(`${Api.apiUrl}/materiales-escolares/${id}`, {
+            const response = await fetch(`${Api.apiUrl}/materiales-escolares/${materialData.id}`, {
                 method: "PUT",
                 headers: {
                     'Content-Type': 'application/json'
@@ -111,6 +114,42 @@ export class MaterialEscolarApi extends Api {
             return null;
         } catch (error) {
             return "ERROR DE CONEXIÓN CON EL SERVIDOR";
+        }
+    }
+
+    public async downloadInventarioPDF(): Promise<string | null> {
+        try {
+            const url = `${Api.apiUrl}/materiales-escolares/inventario/pdf`;
+
+            if (Platform.OS === "android" || Platform.OS === "ios") {
+                const fileUri = `${FileSystem.documentDirectory}inventario_material_escolar.pdf`;
+                const downloadRes = await FileSystem.downloadAsync(url, fileUri);
+
+                if (downloadRes.status !== 200) {
+                    return `ERROR ${downloadRes.status}`;
+                }
+
+                if (await Sharing.isAvailableAsync()) {
+                    await Sharing.shareAsync(downloadRes.uri);
+                } else {
+                    alert(`PDF descargado en: ${downloadRes.uri}`);
+                }
+                return null;
+            }
+
+            if (Platform.OS === "web") {
+                const link = document.createElement("a");
+                link.href = url;
+                link.download = "inventario_material_escolar.pdf";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                return null;
+            }
+
+            return null;
+        } catch (error) {
+            return "ERROR AL DESCARGAR EL INVENTARIO";
         }
     }
 }

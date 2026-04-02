@@ -28,6 +28,44 @@ export class TareasApi extends Api{
         }
     }
 
+    public async createTareaComandaMaterialEscolar(): Promise<boolean>{
+        try{
+
+            const response = await fetch(`${Api.apiUrl}/tareas-material-escolar`, {
+                method: "POST", 
+                headers: {'Content-Type': 'application/json'},
+            }); 
+            if(!response.ok){
+                throw new Error("Network response was not ok");
+            }
+            return true; 
+        }catch{
+            return false;
+        }
+    }
+
+    public async deleteTareaMaterialEscolar(): Promise<boolean> {
+        try {
+            const response = await fetch(`${Api.apiUrl}/tareas-material-escolar/`, {
+                method: "DELETE",
+                headers: {
+                    'Content-Type': 'application/json'
+                }, 
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error("Error del servidor:", errorData.error);
+                return false;
+            }
+
+            return true;
+        } catch (error) {
+            console.error("Error de red al eliminar tarea:", error);
+            return false;
+        }
+    }
+
     public async createTareaComanda(): Promise<boolean>{
         try{
 
@@ -45,6 +83,7 @@ export class TareasApi extends Api{
             return false;
         }
     }
+
 
     public async deleteTareaComanda(): Promise<boolean> {
         try {
@@ -85,6 +124,27 @@ export class TareasApi extends Api{
             return response.ok;
         } catch (error) {
             console.error("Error de red al asignar tarea:", error);
+            return false;
+        }
+    }
+
+    public async asignarTareaPedido(tareaId: number, studentId: number, profesorId: number, fechaInicio: string, fechaFin: string): Promise<boolean> {
+        try {
+            const response = await fetch(`${Api.apiUrl}/asignar-tarea-pedido`, {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    'id_tarea': tareaId,
+                    'id_estudiante': studentId,
+                    'id_profesor': profesorId,
+                    'fecha_inicio': fechaInicio,
+                    'fecha_fin': fechaFin
+                })
+            });
+
+            return response.ok;
+        } catch (error) {
+            console.error("Error de red al asignar tarea de pedido:", error);
             return false;
         }
     }
@@ -149,6 +209,19 @@ export class TareasApi extends Api{
         } catch (error) {
             console.error("Error al finalizar la tarea:", error);
             return false;
+        }
+    }
+
+    public async getTareasPeticionProfesor(profesorId: number, offset: number = Api.INITIAL_OFFSET, limit: number = Api.LIMIT, fecha: string): Promise<ApiResponseTareas>{
+        try{
+            const response = await fetch(`${Api.apiUrl}/tareas-peticion-profesor/${profesorId}?offset=${offset}&limit=${limit}&fecha=${fecha}`);
+            if(!response.ok){
+                throw new Error("Network response was not ok");   
+            }
+            const data: ApiResponseTareas = await response.json();
+            return data;
+        }catch{
+            return { ok: false, tareas: [], offset: 0, count: 0 };
         }
     }
 }

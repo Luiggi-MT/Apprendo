@@ -129,7 +129,6 @@ const CrearMaterial = ({ navigation }: { navigation: any }) => {
     const result = await ImagePicker.launchCameraAsync({
       mediaTypes: imageMediaType,
       allowsEditing: true,
-      aspect: [4, 3],
       quality: 1,
       base64: true,
     });
@@ -299,7 +298,8 @@ const CrearMaterial = ({ navigation }: { navigation: any }) => {
                   ]}
                   placeholder="EJ: CUADRADO, CÍRCULO..."
                   onChangeText={handleFormaChange}
-                  value={forma.toUpperCase()}
+                  value={forma}
+                  autoCapitalize="characters"
                 />
                 <Text style={[styles.text_legend, { marginTop: 20 }]}>
                   TAMAÑO:
@@ -312,7 +312,8 @@ const CrearMaterial = ({ navigation }: { navigation: any }) => {
                   ]}
                   placeholder="EJ: PEQUEÑO, MEDIANO, GRANDE..."
                   onChangeText={handleTamañoChange}
-                  value={tamaño.toUpperCase()}
+                  value={tamaño}
+                  autoCapitalize="characters"
                 />
               </View>
             )}

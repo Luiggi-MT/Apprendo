@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { use, useContext, useEffect, useState } from "react";
 import { View } from "react-native";
 import {
   SafeAreaProvider,
@@ -9,17 +9,35 @@ import { UserContext } from "../../class/context/UserContext";
 import { ConnectApi } from "../../class/Connect.Api/ConnectApi";
 import { scaleFont, styles } from "../../styles/styles";
 import Boton from "../../components/Boton";
+import { Tarea } from "../../class/Interface/Tarea";
 export default function ProfesorScreen({ navigation }: { navigation: any }) {
   const profesor = useContext(UserContext).user;
   const api = new ConnectApi();
-  const [peticion, setPeticion] = useState<boolean>(false);
+  const [tareas, setTareas] = useState<Tarea[]>([]);
+  const [offset, setOffset] = useState<number>(0);
+  const [limit, setLimit] = useState<number>(3);
   const handleComandaPress = () => {
     navigation.navigate("ListaMenus");
   };
   const perfil = () => {
     navigation.navigate("PerfilScreen");
   };
+
+  const hoy = new Date().toISOString().split("T")[0];
   const insets = useSafeAreaInsets();
+  const handleMaterialPress = (tareaId: number) => {
+    navigation.navigate("PedidoMaterial", {
+      tareaId: tareaId,
+    });
+  };
+  useEffect(() => {
+    api
+      .getTareasPeticionProfesor(profesor.id, offset, limit, hoy)
+      .then((response) => {
+        console.log(JSON.stringify(response.tareas, null, 2));
+        setTareas(response.tareas);
+      });
+  }, []);
   return (
     <SafeAreaProvider
       style={[styles.container, { paddingBottom: insets.bottom }]}
@@ -35,14 +53,18 @@ export default function ProfesorScreen({ navigation }: { navigation: any }) {
       />
       <View style={[styles.content, styles.shadow]}>
         <Boton nameBottom="COMANDA" uri="pollo" onPress={handleComandaPress} />
-        {peticion === true && (
-          <Boton
-            nameBottom="MATERIAL.ESCOLAR"
-            uri="materialEscolar"
-            onPress={() => {
-              navigation.navigate("GestionAulas");
-            }}
-          />
+        {tareas.length > 0 && (
+          <>
+            {tareas.map((tarea) => (
+              <Boton
+                key={tarea.id}
+                nameBottom={tarea.nombre.toUpperCase()}
+                uri={tarea.id_pictograma}
+                arasaacServiceID={true}
+                onPress={() => handleMaterialPress(tarea.id)}
+              />
+            ))}
+          </>
         )}
       </View>
     </SafeAreaProvider>

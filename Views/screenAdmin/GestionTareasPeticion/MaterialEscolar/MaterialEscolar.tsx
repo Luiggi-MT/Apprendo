@@ -55,6 +55,13 @@ const MaterialEscolar = ({ navigation }: { navigation: any }) => {
   const handleCreaPress = () => {
     navigation.navigate("CrearMaterial");
   };
+
+  const handleInventarioPress = async () => {
+    const error = await api.downloadInventarioMaterialEscolarPDF();
+    if (error) {
+      alert("No se pudo descargar el inventario en PDF");
+    }
+  };
   const handleAtrasPagina = () => {
     const newOffset = offset - limit;
     if (newOffset >= 0) {
@@ -68,6 +75,10 @@ const MaterialEscolar = ({ navigation }: { navigation: any }) => {
       setOffset(newOffset);
       cargarMateriales(newOffset);
     }
+  };
+
+  const handleCrearTareaPress = async () => {
+    const response = await api.createTareaComandaMaterialEscolar();
   };
 
   const handleBuscadorPress = (seachText: string) => {
@@ -149,11 +160,8 @@ const MaterialEscolar = ({ navigation }: { navigation: any }) => {
               />
               <Text
                 style={[
-                  styles.text,
-                  {
-                    fontSize: scaleFont(20),
-                    marginHorizontal: 10,
-                  },
+                  styles.text_legend,
+                  { fontSize: scaleFont(22), color: "#333" },
                 ]}
               >
                 {paginaActual} / {totalPaginas}
@@ -176,12 +184,12 @@ const MaterialEscolar = ({ navigation }: { navigation: any }) => {
         <Boton
           uri="tareasPeticion"
           nameBottom="CREAR.TAREA"
-          onPress={() => {}}
+          onPress={handleCrearTareaPress}
         />
         <Boton
           uri="inventario"
           nameBottom="VER.INVENTARIO"
-          onPress={() => {}}
+          onPress={handleInventarioPress}
         />
       </View>
     </SafeAreaProvider>
