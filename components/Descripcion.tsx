@@ -1,5 +1,5 @@
 import { Image, Text, TouchableOpacity, View } from "react-native";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { styles } from "../styles/styles";
 import { tarjetaDescipcion_styles } from "../styles/tarjetaDescripcion_styles";
@@ -10,6 +10,8 @@ export default function Descripcion({
   name,
   description,
   cantidad,
+  selectedCantidadInicial = 0,
+  onCantidadChange,
   navigation,
   tachado,
   style,
@@ -18,13 +20,57 @@ export default function Descripcion({
   name?: string;
   description?: string;
   cantidad?: number;
+  selectedCantidadInicial?: number;
+  onCantidadChange?: (cantidad: number) => void;
   navigation?: () => void;
   tachado?: boolean;
   style?: any;
 }) {
-  const [selectedCantidad, setSelectedCantidad] = useState(0);
+  const [selectedCantidad, setSelectedCantidad] = useState(
+    selectedCantidadInicial,
+  );
   const arassacService = new Arasaac();
   const maxCantidad = cantidad ?? 0;
+  const holdIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const stopContinuousChange = () => {
+    if (holdIntervalRef.current) {
+      clearInterval(holdIntervalRef.current);
+      holdIntervalRef.current = null;
+    }
+  };
+
+  const applyDelta = (delta: number) => {
+    setSelectedCantidad((prev) => {
+      const next = Math.max(0, Math.min(maxCantidad, prev + delta));
+      if (next === prev) {
+        stopContinuousChange();
+      }
+      return next;
+    });
+  };
+
+  const startContinuousChange = (delta: number) => {
+    stopContinuousChange();
+    applyDelta(delta);
+    holdIntervalRef.current = setInterval(() => {
+      applyDelta(delta);
+    }, 120);
+  };
+
+  useEffect(() => {
+    return () => {
+      stopContinuousChange();
+    };
+  }, []);
+
+  useEffect(() => {
+    setSelectedCantidad(selectedCantidadInicial);
+  }, [selectedCantidadInicial]);
+
+  useEffect(() => {
+    onCantidadChange?.(selectedCantidad);
+  }, [selectedCantidad, onCantidadChange]);
 
   return (
     <View style={tarjetaDescipcion_styles.tarjet}>
@@ -61,7 +107,10 @@ export default function Descripcion({
       >
         <TouchableOpacity
           disabled={selectedCantidad === 0}
-          onPress={() => setSelectedCantidad(Math.max(0, selectedCantidad - 1))}
+          onPress={() => applyDelta(-1)}
+          onLongPress={() => startContinuousChange(-1)}
+          onPressOut={stopContinuousChange}
+          delayLongPress={180}
         >
           <Ionicons
             name="remove-circle"
@@ -82,9 +131,10 @@ export default function Descripcion({
         </Text>
         <TouchableOpacity
           disabled={selectedCantidad >= maxCantidad}
-          onPress={() =>
-            setSelectedCantidad(Math.min(maxCantidad, selectedCantidad + 1))
-          }
+          onPress={() => applyDelta(1)}
+          onLongPress={() => startContinuousChange(1)}
+          onPressOut={stopContinuousChange}
+          delayLongPress={180}
         >
           <Ionicons
             name="add-circle"

@@ -63,7 +63,12 @@ export default function Boton({
           ]}
         >
           {texts.map((text, it) => (
-            <Text key={it} style={styles.textBoton}>
+            <Text
+              key={it}
+              style={styles.textBoton}
+              numberOfLines={1}
+              adjustsFontSizeToFit={true}
+            >
               {text}
             </Text>
           ))}

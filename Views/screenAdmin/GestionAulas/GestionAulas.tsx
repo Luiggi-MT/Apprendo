@@ -16,6 +16,7 @@ export default function GestionAulas({ navigation }: { navigation: any }) {
   const [busqueda, setBusqueda] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
   const [total, setTotal] = useState<number>(0);
+  const [almacenCreado, setAlmacenCreado] = useState<boolean>(false);
 
   const api = new ConnectApi();
   const arassacService = new Arasaac();
@@ -29,6 +30,20 @@ export default function GestionAulas({ navigation }: { navigation: any }) {
 
   const handleCrearPress = () => {
     navigation.navigate("CrearAula");
+  };
+  const handleCrearAlmacen = async () => {
+    api.createAlmacen().then((response) => {
+      if (response) {
+        setAlmacenCreado(true);
+      }
+    });
+  };
+  const handleBorrarPress = async () => {
+    api.deleteAlmacen().then((response) => {
+      if (response) {
+        setAlmacenCreado(false);
+      }
+    });
   };
   const handleBuscarPress = (searchText: string) => {
     if (searchText.length === 0) {
@@ -86,7 +101,13 @@ export default function GestionAulas({ navigation }: { navigation: any }) {
       setOffset(response.offset);
       setTotal(response.total);
     });
+    api.getAlmacen().then((response) => {
+      setAlmacenCreado(response);
+    });
   }, []);
+  useEffect(() => {
+    console.log("Almacen:", almacenCreado);
+  }, [almacenCreado]);
   return (
     <SafeAreaProvider>
       <Header
@@ -156,8 +177,23 @@ export default function GestionAulas({ navigation }: { navigation: any }) {
           </View>
         )}
       </View>
+      <View style={[styles.navigationButtons]}>
+        <Boton uri="mas" nameBottom="CREAR.AULA" onPress={handleCrearPress} />
 
-      <Boton uri="mas" nameBottom="CREAR.AULA" onPress={handleCrearPress} />
+        {almacenCreado === false ? (
+          <Boton
+            uri="ok"
+            nameBottom="CREAR.ALMACEN"
+            onPress={handleCrearAlmacen}
+          />
+        ) : (
+          <Boton
+            uri="borrar"
+            nameBottom="BORRAR.ALMACEN"
+            onPress={handleBorrarPress}
+          />
+        )}
+      </View>
     </SafeAreaProvider>
   );
 }

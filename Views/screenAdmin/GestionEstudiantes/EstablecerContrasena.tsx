@@ -19,7 +19,7 @@ import * as ImagePicker from "expo-image-picker";
 import Boton from "../../../components/Boton";
 import { ImagePassword } from "../../../class/Interface/ImagePassword";
 
-export default function EstablecerContraseña({
+export default function EstablecerContrasena({
   navigation,
   route,
 }: {

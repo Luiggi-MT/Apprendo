@@ -266,6 +266,9 @@ export default function CrearMenu({
                     placeholder="EJEMPLO CON CARNE..."
                     onChangeText={handleDescripcionChange}
                     value={descripcion}
+                    autoCapitalize="characters"
+                    autoCorrect={false}
+                    autoComplete="off"
                   />
                 </View>
               </View>
@@ -287,6 +290,9 @@ export default function CrearMenu({
                   placeholder="EJEMPLO: POLLO CON ARROZ..."
                   onChangeText={handlePrimeroPlatoChange}
                   value={primerPlato}
+                  autoCapitalize="characters"
+                  autoCorrect={false}
+                  autoComplete="off"
                 />
                 <TouchableOpacity
                   style={{ marginTop: 15 }}
@@ -326,6 +332,9 @@ export default function CrearMenu({
                   placeholder="EJEMPLO: PESCADO CON PATATAS..."
                   onChangeText={handleSegundoPlatoChange}
                   value={segundoPlato}
+                  autoCapitalize="characters"
+                  autoCorrect={false}
+                  autoComplete="off"
                 />
                 <TouchableOpacity
                   style={{ marginTop: 15 }}
@@ -365,6 +374,9 @@ export default function CrearMenu({
                   placeholder="EJEMPLO: FLAN CON CHOCOLATE..."
                   onChangeText={handlePostreChange}
                   value={postre}
+                  autoCapitalize="characters"
+                  autoCorrect={false}
+                  autoComplete="off"
                 />
                 <TouchableOpacity
                   style={{ marginTop: 15 }}

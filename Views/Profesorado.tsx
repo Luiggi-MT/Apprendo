@@ -32,7 +32,7 @@ export default function Profesorado({ navigation }: { navigation: any }) {
   };
 
   const handleContraseñaChange = (word: string) => {
-    setContraseña(word);
+    setContraseña(word.toUpperCase());
   };
 
   const onBorrarPress = () => {
@@ -134,7 +134,9 @@ export default function Profesorado({ navigation }: { navigation: any }) {
               onChangeText={handleContraseñaChange}
               value={contraseña}
               secureTextEntry={secureText}
-              autoCapitalize="none"
+              autoCapitalize="characters"
+              autoCorrect={false}
+              autoComplete="off"
             />
             <TouchableOpacity
               onPress={() => setSecureText(!secureText)}

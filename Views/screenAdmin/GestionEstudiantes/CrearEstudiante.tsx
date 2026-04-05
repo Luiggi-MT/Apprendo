@@ -96,7 +96,7 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
     setText(input);
   };
   const handlePasswordChange = (input: string) => {
-    setPassword(input);
+    setPassword(input.toUpperCase());
   };
 
   const handleAccesibilidadPress = () => {
@@ -230,7 +230,10 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
           <TextInput
             style={[styles.buscador, styles.shadow]}
             onChangeText={handleTextChange}
-            value={text.toUpperCase()}
+            value={text}
+            autoCapitalize="characters"
+            autoCorrect={false}
+            autoComplete="off"
           />
 
           <Text style={styles.text_legend}>TIPO DE CONTRASEÑA:</Text>
@@ -264,8 +267,10 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
               <TextInput
                 style={{ flex: 1, height: "100%" }}
                 onChangeText={handlePasswordChange}
-                value={password.toUpperCase()}
+                value={password}
                 secureTextEntry={secureText}
+                autoCorrect={false}
+                autoComplete="off"
               />
               <TouchableOpacity onPress={() => setSecureText(!secureText)}>
                 {secureText && (

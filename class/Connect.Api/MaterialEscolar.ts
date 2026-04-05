@@ -152,4 +152,28 @@ export class MaterialEscolarApi extends Api {
             return "ERROR AL DESCARGAR EL INVENTARIO";
         }
     }
+
+    public async seleccionadoMaterial(profesor_id: number, material_id: number, fecha: string): Promise<boolean> {
+        try {
+            const response = await fetch(`${Api.apiUrl}/material-seleccionado`, {
+                method: "POST",
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    'profesor_id': profesor_id,
+                    'material_id': material_id,
+                    'fecha': fecha
+                })
+            });
+
+            if (!response.ok) {
+                return false;
+            }
+            const data = await response.json();
+            return data?.seleccionado || false;
+        } catch (error) {
+            return false;
+        }
+    }
 }

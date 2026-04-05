@@ -91,12 +91,12 @@ export const styles = StyleSheet.create({
 
   titleHeaderText: {
     fontFamily: 'fredoka-bold',
-    fontWeight: 'condensedBold',
+    fontWeight: '900',
     color: "white",
     textAlign: 'center',
-    textShadowColor: 'rgba(0, 0, 0, 0.35)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
+    textShadowColor: 'white',
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 15,
     ...Platform.select({
       android: {
         includeFontPadding: false,

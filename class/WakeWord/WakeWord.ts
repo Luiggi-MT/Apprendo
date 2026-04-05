@@ -20,6 +20,7 @@ class WakeWord {
   private startPromise: Promise<void> | null = null;
   private _isStopping = false;
   private _isRecognizing = false;
+  private permissionDenied = false;
 
   private constructor() {
     this.setupListeners();
@@ -59,8 +60,16 @@ class WakeWord {
     this.errorSubscription = ExpoSpeechRecognitionModule.addListener(
       'error',
       (event) => {
-        console.warn('Voice error:', event?.error);
+        const errorCode = event?.error;
         this._isRecognizing = false;
+        if (errorCode === 'no-speech') {
+          // Normal: nadie habló. Si estamos en modo wake, reiniciamos silenciosamente.
+          if (this.listeningWake && this.onWakeDetected) {
+            this.restartVoice();
+          }
+          return;
+        }
+        console.warn('Voice error:', errorCode);
         this.cleanupCommand();
       }
     );
@@ -156,11 +165,20 @@ class WakeWord {
       }
 
       try {
+        // Si el usuario ya denegó permisos, no volver a preguntar
+        if (this.permissionDenied) {
+          return;
+        }
+
         // Solicitar permisos antes de iniciar
         const { granted } =
           await ExpoSpeechRecognitionModule.requestPermissionsAsync();
         if (!granted) {
-          throw new Error('Microphone permissions not granted');
+          this.permissionDenied = true;
+          this.listeningWake = false;
+          this.listeningCommand = false;
+          this.onWakeDetected = undefined;
+          return;
         }
 
         await ExpoSpeechRecognitionModule.start({

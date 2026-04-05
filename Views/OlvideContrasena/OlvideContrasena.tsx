@@ -19,7 +19,7 @@ import { scaleFont, styles } from "../../styles/styles";
 import { ConnectApi } from "../../class/Connect.Api/ConnectApi";
 import Splash from "../../components/Splash";
 
-export default function OlvideContraseña({ navigation }: { navigation: any }) {
+export default function OlvideContrasena({ navigation }: { navigation: any }) {
   const [username, setUsername] = useState<string>("");
   const [palabraClave, setPalabraClave] = useState<string>("");
   const [contraseña, setContraseña] = useState<string>("");

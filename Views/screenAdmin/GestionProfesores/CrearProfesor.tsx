@@ -73,6 +73,9 @@ export default function CrearProfesor({ navigation }: { navigation: any }) {
               onChangeText={handleUsernameChange}
               value={username}
               placeholder="INTRODUCIR NOMBRE DE USUARIO"
+              autoCapitalize="characters"
+              autoCorrect={false}
+              autoComplete="off"
             />
             <Text style={[styles.text_legend]}>PALABRA CLAVE:</Text>
             <TextInput

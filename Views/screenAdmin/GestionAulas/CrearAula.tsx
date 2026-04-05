@@ -84,6 +84,9 @@ export default function CrearAula({ navigation }: { navigation: any }) {
               placeholder="EJ: AULA 1"
               value={aulaName}
               onChangeText={handleChangePress}
+              autoCapitalize="characters"
+              autoCorrect={false}
+              autoComplete="off"
             />
           </View>
           {error && <Text style={[styles.error]}>{errorValue}</Text>}

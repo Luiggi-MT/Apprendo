@@ -26,7 +26,7 @@ import LoginAlumnoImagenes from "./Views/loginAlumnos/LoginAlumnoImagenes";
 import LoginAlumnoPin from "./Views/loginAlumnos/LoginAlumnoPin";
 
 // Olvide contraseña 
-import OlvideContraseña from "./Views/OlvideContraseña/OlvideContraseña";
+import OlvideContrasena from "./Views/OlvideContrasena/OlvideContrasena";
 
 //Páginas principales de los usuarios
 import AdminScreen from "./Views/homeProfesorado/AdminScreen";
@@ -41,7 +41,7 @@ import PerfilScreen from "./Views/PerfilScreen";
 import GestionEstudiantes from "./Views/screenAdmin/GestionEstudiantes/GestionEstudiantes";
 import DescripcionEstudiante from "./Views/screenAdmin/GestionEstudiantes/DescripcionEstudiante";
 import CrearEstudiante from "./Views/screenAdmin/GestionEstudiantes/CrearEstudiante";
-import EstablecerContraseña from "./Views/screenAdmin/GestionEstudiantes/EstablecerContraseña";
+import EstablecerContrasena from "./Views/screenAdmin/GestionEstudiantes/EstablecerContrasena";
 //--->Asignación de tareas
 import AsignacionTareas from "./Views/screenAdmin/GestionEstudiantes/AsignacionTareas/AsignacionTareas";
 import AsignarTarea from "./Views/screenAdmin/GestionEstudiantes/AsignacionTareas/AsignarTarea";
@@ -64,6 +64,7 @@ import MaterialEscolar from "./Views/screenAdmin/GestionTareasPeticion/MaterialE
 import CrearMaterial from "./Views/screenAdmin/GestionTareasPeticion/MaterialEscolar/CrearMaterial";
 import DetallesMaterial from "./Views/screenAdmin/GestionTareasPeticion/MaterialEscolar/DetallesMaterial";
 import PedidoMaterial from "./Views/homeProfesorado/PedidoMaterial/PedidoMaterial";
+import PedidoMaterialTarea from "./Views/homeAlumnos/PedidoMaterialTarea/PedidoMaterialTarea";
 
 
 //Gestion de aulas
@@ -255,7 +256,7 @@ export default function App() {
         <Stack.Screen name="LoginAlumnoPin" component={LoginAlumnoPin} />
         <Stack.Screen name="LoginAlumnoImagenes" component={LoginAlumnoImagenes} />
 
-        <Stack.Screen name="OlvideContraseña" component={OlvideContraseña} />
+        <Stack.Screen name="OlvideContraseña" component={OlvideContrasena} />
         
         <Stack.Screen name="AdminScreen" component={AdminScreen} />
         <Stack.Screen name="ProfesorScreen" component={ProfesorScreen} />
@@ -268,7 +269,7 @@ export default function App() {
         <Stack.Screen name="GestionEstudiantes" component={GestionEstudiantes} />
         <Stack.Screen name="DescripcionEstudiante" component={DescripcionEstudiante}/>
         <Stack.Screen name="CrearEstudiante" component={CrearEstudiante}/>
-        <Stack.Screen name="EstablecerContraseña" component={EstablecerContraseña}/>
+        <Stack.Screen name="EstablecerContraseña" component={EstablecerContrasena}/>
         <Stack.Screen name="AsignacionTareas" component={AsignacionTareas} /> 
         <Stack.Screen name="AsignarTarea" component={AsignarTarea} /> 
         <Stack.Screen name="AsignarProfesor" component={AsignarProfesor} />
@@ -286,6 +287,7 @@ export default function App() {
         <Stack.Screen name="CrearMaterial" component={CrearMaterial} />
         <Stack.Screen name="DetallesMaterial" component={DetallesMaterial} />
         <Stack.Screen name="PedidoMaterial" component={PedidoMaterial} />
+        <Stack.Screen name="PedidoMaterialTarea" component={PedidoMaterialTarea} />
 
         <Stack.Screen name="GestionAulas" component={GestionAulas} />
         <Stack.Screen name="CrearAula" component={CrearAula} />

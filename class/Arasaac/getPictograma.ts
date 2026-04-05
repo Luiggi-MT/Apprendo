@@ -85,6 +85,16 @@ export class Arasaac {
         ["inventario", 39611],
 
 
+        //Caminar
+        ["caminar", 6044],
+
+        //Almacen
+        ["almacen", 24683],
+
+        //Regresar
+        ["regresar", 6630],
+
+
     ]);
     private apiUrl: string = `https://api.arasaac.org/v1/pictograms`;
     private apiSearch: string = `https://api.arasaac.org/v1/pictograms/es/search`;

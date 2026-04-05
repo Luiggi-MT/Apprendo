@@ -13,7 +13,7 @@ export default function Buscador({
   const [text, onChangeText] = useState("");
   const handleTextChange = (input: string) => {
     onChangeText(input);
-    onPress(input.toUpperCase());
+    onPress(input);
   };
   const api = new Arasaac();
   return (

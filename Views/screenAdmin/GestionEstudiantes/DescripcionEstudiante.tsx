@@ -114,7 +114,7 @@ export default function DescripcionEstudiante({
     setText(input);
   };
   const handlePasswordChange = (input: string) => {
-    setPassword(input);
+    setPassword(input.toUpperCase());
   };
 
   const handleAccesibilidadPress = () => {
@@ -276,8 +276,9 @@ export default function DescripcionEstudiante({
           <TextInput
             style={[styles.buscador, styles.shadow]}
             onChangeText={handleTextChange}
-            value={text.toUpperCase()}
-            placeholder={student.username.toUpperCase()}
+            value={text}
+            placeholder={student.username}
+            autoCapitalize="characters"
           />
           <Text style={styles.text_legend}>TIPO DE CONTRASEÑA:</Text>
           <View style={{ zIndex: 1000 }}>
@@ -310,8 +311,10 @@ export default function DescripcionEstudiante({
               <TextInput
                 style={{ flex: 1, height: "100%" }}
                 onChangeText={handlePasswordChange}
-                value={password.toUpperCase()}
+                value={password}
                 secureTextEntry={secureText}
+                autoCorrect={false}
+                autoComplete="off"
               />
               <TouchableOpacity onPress={() => setSecureText(!secureText)}>
                 {secureText && (

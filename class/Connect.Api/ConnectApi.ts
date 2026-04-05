@@ -214,6 +214,25 @@ export class ConnectApi {
         return this.aula.deletaAula(aulaId);
     }
 
+    public async getAlmacen(): Promise<boolean>{
+        return this.aula.getAlmacen();
+    }
+
+    public async createAlmacen(): Promise<boolean>{
+        return this.aula.createAlmacen();
+     }
+
+    public async deleteAlmacen(): Promise<boolean>{
+        return this.aula.deleteAlmacen();
+    }
+
+    public async getTareaMaterialAulas(id_tarea: number, fecha: string, id_estudiante: number): Promise<any[]> {
+        return this.aula.getTareaMaterialAulas(id_tarea, fecha, id_estudiante);
+    }
+
+    public async visitadoAula(aula_id: number, estudiante_id: number, fecha: string): Promise<boolean> {
+        return this.aula.visitadoAula(aula_id, estudiante_id, fecha);
+    }
     // Tareas
     public async getTareas(offset: number = this.api.getInitial_offset(), limit: number = this.api.getLimit()): Promise<ApiResponseTareas>{
         return this.tarea.getTareas(offset, limit);
@@ -257,6 +276,12 @@ export class ConnectApi {
         return this.tarea.createTareaComandaMaterialEscolar();
     }
 
+    public async asignarTareaPedidoMaterial(materialesSeleccionados: { materialId: number; cantidad: number }[], tareaId: number, profesorId: number): Promise<string | null> {
+        return this.tarea.asignarTareaPedidoMaterial(materialesSeleccionados, tareaId, profesorId);
+    }
+    public async getTareaMaterialMateriales(id_tarea_estudiante: number, fecha: string, student_id: number): Promise<any[]> {
+        return this.tarea.getTareaMaterialMateriales(id_tarea_estudiante, fecha, student_id);
+    }
     //Comanda
     public async getDetalleComanda(id_tarea_estudiante: number, estudiante_id: number, fecha: string): Promise<{ aulas: any[], menu_del_dia: any[] } | null> {
         return this.comanda.getDetalleComanda(id_tarea_estudiante, estudiante_id, fecha);
@@ -316,6 +341,10 @@ export class ConnectApi {
 
     public async downloadInventarioMaterialEscolarPDF(): Promise<string | null> {
         return this.materialEscolar.downloadInventarioPDF();
+    }
+
+    public async seleccionadoMaterial(profesor_id: number, material_id: number, fecha: string): Promise<boolean> {
+        return this.materialEscolar.seleccionadoMaterial(profesor_id, material_id, fecha);
     }
 
     

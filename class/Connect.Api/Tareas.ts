@@ -224,4 +224,47 @@ export class TareasApi extends Api{
             return { ok: false, tareas: [], offset: 0, count: 0 };
         }
     }
+
+    public async asignarTareaPedidoMaterial(materialesSeleccionados: { materialId: number; cantidad: number }[], tareaId: number, profesor_id: number): Promise<string | null> {
+        try {
+            const response = await fetch(`${Api.apiUrl}/asignar-material-profesor`, {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    materiales: materialesSeleccionados, 
+                    id_tarea: tareaId,
+                    profesor_id: profesor_id
+                })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                return errorData.error;
+            }
+
+            return null;
+        } catch (error) {
+            return error instanceof Error ? error.message : String(error);
+            
+        }
+    }
+    public async getTareaMaterialMateriales(id_tarea_estudiante: number, fecha: string, student_id: number): Promise<any[]> {
+        try {
+            const response = await fetch(`${Api.apiUrl}/tarea-material-materiales`, {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id_tarea_estudiante, fecha, student_id }),
+            });
+
+            if (!response.ok) {
+                throw new Error("Network response was not ok");
+            }
+
+            const data = await response.json();
+            return data || [];
+        } catch (error) {
+            console.error("Error al obtener los materiales de la tarea:", error);
+            return [];
+        }
+    }
 }

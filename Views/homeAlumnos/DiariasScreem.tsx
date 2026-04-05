@@ -29,6 +29,7 @@ import { Students } from "../../class/Interface/Students";
 import { Speak } from "../../class/Speak/Speak";
 import { TareaEstudiante } from "../../class/Interface/Tarea";
 import { useVoice } from "../../class/context/VoiceContext";
+import Boton from "../../components/Boton";
 
 export default function DiariasScreen({
   navigation,
@@ -122,6 +123,7 @@ export default function DiariasScreen({
         limit,
         fechaSeleccionada,
       );
+
       setTareas(response.tareasEstudiante || []);
     } catch (error) {
       console.error("Error al obtener tareas:", error);
@@ -258,6 +260,11 @@ export default function DiariasScreen({
         id_tarea_estudiante: tarea.id,
         fechaSeleccionada: fechaSeleccionada,
       });
+    } else if (tarea.categoria.toUpperCase() === "MATERIAL_ESCOLAR") {
+      navigation.navigate("PedidoMaterialTarea", {
+        id_tarea_estudiante: tarea.id,
+        fechaSeleccionada: fechaSeleccionada,
+      });
     }
   };
   const insets = useSafeAreaInsets();
@@ -275,13 +282,26 @@ export default function DiariasScreen({
         style={scaleFont(28)}
       />
 
-      <View style={{ padding: 15 }}>
+      <View
+        style={[localStyles.contenido, { paddingBottom: 100 + insets.bottom }]}
+      >
         {loading === true ? (
           <View style={{ marginTop: 50 }}>
             <ActivityIndicator size="large" color="#FF8C42" />
           </View>
         ) : tareas.length === 0 ? (
-          <View style={{ alignItems: "center", marginTop: 40 }}>
+          <View style={{ alignItems: "center" }}>
+            <View style={localStyles.insigniaCoheteContainer}>
+              <View style={localStyles.insigniaCoheteLottieWrapper}>
+                <LottieView
+                  source={require("../../assets/animations/cup.json")}
+                  autoPlay
+                  loop={false}
+                  style={localStyles.insigniaCoheteLottie}
+                />
+              </View>
+              <Text style={localStyles.insigniaCoheteTexto}> 1</Text>
+            </View>
             <Text style={localStyles.textoExito}>¡TODO TERMINADO POR HOY!</Text>
             <View style={{ width: 300, height: 300, overflow: "hidden" }}>
               <LottieView
@@ -294,6 +314,17 @@ export default function DiariasScreen({
           </View>
         ) : (
           <View>
+            <View style={localStyles.insigniaCoheteContainer}>
+              <View style={localStyles.insigniaCoheteLottieWrapper}>
+                <LottieView
+                  source={require("../../assets/animations/cup.json")}
+                  autoPlay
+                  loop={false}
+                  style={localStyles.insigniaCoheteLottie}
+                />
+              </View>
+              <Text style={localStyles.insigniaCoheteTexto}> 1</Text>
+            </View>
             {tareas.map((tarea) => (
               <TouchableOpacity
                 key={tarea.id}
@@ -381,11 +412,67 @@ export default function DiariasScreen({
           </View>
         )}
       </View>
+
+      {!loading && tareas.length > 0 && (
+        <View
+          style={[
+            localStyles.barraNavegacionFija,
+            { paddingBottom: insets.bottom + 6 },
+          ]}
+        >
+          <Boton uri="atras" onPress={() => {}} />
+          <Boton uri="delante" onPress={() => {}} />
+        </View>
+      )}
     </SafeAreaProvider>
   );
 }
 
 const localStyles = StyleSheet.create({
+  contenido: {
+    padding: 15,
+    flex: 1,
+  },
+  barraNavegacionFija: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    bottom: 0,
+    paddingHorizontal: 15,
+    paddingTop: 8,
+    backgroundColor: "#E9E9E9",
+    borderTopWidth: 1,
+    borderTopColor: "#D6D6D6",
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  insigniaCoheteContainer: {
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#FFF4EA",
+    borderRadius: 999,
+    borderWidth: 2,
+    borderColor: "#FFD7B8",
+    paddingHorizontal: 10,
+    marginBottom: 14,
+  },
+  insigniaCoheteLottieWrapper: {
+    width: 50,
+    height: 50,
+    overflow: "hidden",
+  },
+  insigniaCoheteLottie: {
+    width: 50,
+    height: 50,
+  },
+  insigniaCoheteTexto: {
+    marginLeft: 6,
+    fontFamily: "escolar-bold",
+    fontSize: scaleFont(20),
+    color: "#C26017",
+  },
   textoExito: {
     fontFamily: "escolar-bold",
     fontSize: scaleFont(26),
