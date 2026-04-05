@@ -39,18 +39,20 @@ export class StudentsApi extends Api{
 
     public async createStudent(student: Students, password: ImagePassword[], distractor: ImagePassword[]): Promise<ApiResponse>{
         try{
-            
+            const authHeader = await StudentsApi.getAuthHeader();
             const response = await fetch(`${Api.apiUrl}/student`, {
                 method: 'POST',
-                headers: {'Content-Type': 'application/json'},
+                headers: {'Content-Type': 'application/json', ...authHeader},
                 body: JSON.stringify(student)
             });
             
+            console.log("Response from createStudent:", response);
             if (!response.ok){
                 const errorData = await response.json(); 
+                console.log("Error data from createStudent:", errorData);
                 return {
                     ok: false, 
-                    message: errorData
+                    message: errorData.msg || "Error desconocido al crear el estudiante"
                 }; 
             }
             
@@ -112,6 +114,8 @@ export class StudentsApi extends Api{
             }
             if(student.foto !== null) this.uploadStudentPhoto(student.id, student.foto);
             if(password.length > 0 && distractor.length > 0){
+                // Limpiar imágenes anteriores antes de subir las nuevas
+                await fetch(`${Api.apiUrl}/student/${student.id}/image-password`, { method: 'DELETE' });
                 const responseFotoPassword = await this.sendPasswordImage(password, student.id);
                 const responseFotoDistractor = await this.sendPasswordImage(distractor, student.id);
                 if(!responseFotoPassword.ok || !responseFotoDistractor.ok){
@@ -263,6 +267,12 @@ export class StudentsApi extends Api{
     }
 
     public async setPasswordImage(password: ImagePassword[], distractor: ImagePassword[], id: number): Promise<ApiResponse>{
+        // Limpiar imágenes y registros anteriores antes de subir las nuevas
+        const clearResponse = await fetch(`${Api.apiUrl}/student/${id}/image-password`, { method: 'DELETE' });
+        if (!clearResponse.ok) {
+            return { ok: false, message: 'Error al limpiar las imágenes anteriores' };
+        }
+
         const responsePassword = await this.sendPasswordImage(password, id);
         const responseDistractor = await this.sendPasswordImage(distractor, id);
 
@@ -300,5 +310,17 @@ export class StudentsApi extends Api{
             message: imagenesModificadas,
         }
     }
-    
+
+    public async getTrofeos(id: number): Promise<{ puntos: number }>{
+        const response = await fetch(`${Api.apiUrl}/student/${id}/trofeos`);
+        if(!response.ok){
+            return{
+                puntos: 0,
+            }
+        }
+        const datas = await response.json();
+        return{
+            puntos: datas.puntos || 0,
+        }
+    }
 }

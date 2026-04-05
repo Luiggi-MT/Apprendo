@@ -9,6 +9,9 @@ import { MaterialEscolar } from "../../../../class/Interface/MaterialEscolar";
 import { ConnectApi } from "../../../../class/Connect.Api/ConnectApi";
 import {
   Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
   StyleSheet,
   Text,
   Touchable,
@@ -271,222 +274,254 @@ const DetallesMaterial = ({
       {isModificate ? (
         <Splash name={splashName} />
       ) : (
-        <>
-          <View style={[styles.content, styles.shadow]}>
-            {view === 0 && (
-              <View>
-                <Text style={styles.text_legend}>NOMBRE:</Text>
-                <TextInput
-                  style={[
-                    styles.buscador,
-                    styles.shadow,
-                    { textAlign: "left", paddingHorizontal: 15, height: 50 },
-                  ]}
-                  placeholder={material?.nombre}
-                  onChangeText={handleNombreChange}
-                  value={nombre}
-                  autoCapitalize="characters"
-                  autoCorrect={false}
-                  textColor="#000"
-                  placeholderTextColor="#666"
-                  underlineColor="transparent"
-                  activeUnderlineColor="transparent"
-                  theme={{
-                    colors: { onSurface: "#000", onSurfaceVariant: "#666" },
-                  }}
-                />
-                <Text style={[styles.text_legend, { marginTop: 20 }]}>
-                  COLOR:
-                </Text>
-                <ColorPicker
-                  colors={COLORS}
-                  initialColor={selectedColor}
-                  onChange={setSelectedColor}
-                />
-              </View>
-            )}
-            {view === 1 && (
-              <View>
-                <Text style={styles.text_legend}>PICTOGRAMA:</Text>
-                <TouchableOpacity
-                  style={{ marginTop: 15 }}
-                  onPress={() => handleAñadirPress("material")}
-                >
-                  <Image
-                    source={{ uri: arasaacService.getPictogramaId(materialId) }}
-                    style={[
-                      styles.imageBase,
-                      { borderWidth: 1, borderRadius: 5 },
-                    ]}
-                  />
-                </TouchableOpacity>
-                <Text style={[styles.text_legend, { marginTop: 20 }]}>
-                  CANTIDAD:
-                </Text>
-                <TextInput
-                  style={[
-                    styles.buscador,
-                    styles.shadow,
-                    { textAlign: "left", paddingHorizontal: 15, height: 50 },
-                  ]}
-                  theme={{
-                    colors: { onSurface: "#000", onSurfaceVariant: "#666" },
-                  }}
-                  placeholder={material?.cantidad?.toString() ?? "0"}
-                  onChangeText={(text) => setCantidad(Number(text))}
-                  value={cantidad.toString()}
-                  keyboardType="numeric"
-                />
-                <Text style={[styles.text_legend, { marginTop: 20 }]}>
-                  FORMA:
-                </Text>
-                <TextInput
-                  style={[
-                    styles.buscador,
-                    styles.shadow,
-                    { textAlign: "left", paddingHorizontal: 15, height: 50 },
-                  ]}
-                  theme={{
-                    colors: { onSurface: "#000", onSurfaceVariant: "#666" },
-                  }}
-                  value={forma}
-                  onChangeText={setForma}
-                  autoCapitalize="characters"
-                />
-                <Text style={[styles.text_legend, { marginTop: 20 }]}>
-                  TAMAÑO:
-                </Text>
-                <TextInput
-                  style={[
-                    styles.buscador,
-                    styles.shadow,
-                    { textAlign: "left", paddingHorizontal: 15, height: 50 },
-                  ]}
-                  theme={{
-                    colors: { onSurface: "#000", onSurfaceVariant: "#666" },
-                  }}
-                  value={tamaño}
-                  onChangeText={setTamaño}
-                  autoCapitalize="characters"
-                />
-              </View>
-            )}
-            {view === 2 && (
-              <View>
-                <Text style={[styles.text_legend]}>FOTO:</Text>
-                {selectedImage === "" && (
-                  <View style={stylesLocal.imageSourceRow}>
-                    <TouchableOpacity
-                      style={stylesLocal.imageSourceBtn}
-                      onPress={seleccionarDesdeGaleria}
-                    >
-                      <Text style={stylesLocal.imageSourceBtnText}>
-                        🖼 GALERÍA
-                      </Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      style={stylesLocal.imageSourceBtn}
-                      onPress={tomarFoto}
-                    >
-                      <Text style={stylesLocal.imageSourceBtnText}>
-                        📷 CÁMARA
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
-                {selectedImage !== "" && (
-                  <View style={stylesLocal.imageContainer}>
-                    <Image
-                      source={{
-                        uri: imagenServer
-                          ? api.getMedia(selectedImage)
-                          : selectedImage,
-                      }}
-                      style={styles.imageBase}
-                    />
-                    <TouchableOpacity
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior="padding"
+          keyboardVerticalOffset={Platform.OS === "ios" ? 120 : 80}
+        >
+          <ScrollView
+            contentContainerStyle={{ flexGrow: 1 }}
+            keyboardShouldPersistTaps="handled"
+            showsVerticalScrollIndicator={false}
+          >
+            <>
+              <View style={[styles.content, styles.shadow]}>
+                {view === 0 && (
+                  <View>
+                    <Text style={styles.text_legend}>NOMBRE:</Text>
+                    <TextInput
                       style={[
-                        stylesLocal.deleteCircleBtn,
-                        { top: -10, right: -10 },
+                        styles.buscador,
+                        styles.shadow,
+                        {
+                          textAlign: "left",
+                          paddingHorizontal: 15,
+                          height: 50,
+                        },
                       ]}
-                      onPress={() => {
-                        setSelectedImage("");
-                        setImagenServer(false);
+                      placeholder={material?.nombre}
+                      onChangeText={handleNombreChange}
+                      value={nombre}
+                      autoCapitalize="characters"
+                      autoCorrect={false}
+                      textColor="#000"
+                      placeholderTextColor="#666"
+                      underlineColor="transparent"
+                      activeUnderlineColor="transparent"
+                      theme={{
+                        colors: { onSurface: "#000", onSurfaceVariant: "#666" },
                       }}
-                    >
-                      <Text style={stylesLocal.deleteCircleBtnText}>✕</Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
-
-                <Text style={[styles.text_legend, { marginTop: 10 }]}>
-                  VIDEO:
-                </Text>
-                {selectedVideo === "" && (
-                  <TouchableOpacity
-                    style={stylesLocal.imageSourceBtn}
-                    onPress={seleccionarVideo}
-                  >
-                    <Text style={stylesLocal.imageSourceBtnText}>🎬 VIDEO</Text>
-                  </TouchableOpacity>
-                )}
-                {selectedVideo !== "" && (
-                  <View style={stylesLocal.videoContainer}>
-                    <VideoView
-                      style={stylesLocal.videoPreview}
-                      player={player}
-                      nativeControls
-                      contentFit="contain"
-                      allowsFullscreen
-                      allowsPictureInPicture
                     />
-                    <TouchableOpacity
-                      style={stylesLocal.deleteCircleBtn}
-                      onPress={() => {
-                        setSelectedVideo("");
-                        setVideoSend("");
-                        setVideoServer(false);
-                      }}
-                    >
-                      <Text style={stylesLocal.deleteCircleBtnText}>✕</Text>
-                    </TouchableOpacity>
+                    <Text style={[styles.text_legend, { marginTop: 20 }]}>
+                      COLOR:
+                    </Text>
+                    <ColorPicker
+                      colors={COLORS}
+                      initialColor={selectedColor}
+                      onChange={setSelectedColor}
+                    />
                   </View>
                 )}
+                {view === 1 && (
+                  <View>
+                    <Text style={styles.text_legend}>PICTOGRAMA:</Text>
+                    <TouchableOpacity
+                      style={{ marginTop: 15 }}
+                      onPress={() => handleAñadirPress("material")}
+                    >
+                      <Image
+                        source={{
+                          uri: arasaacService.getPictogramaId(materialId),
+                        }}
+                        style={[
+                          styles.imageBase,
+                          { borderWidth: 1, borderRadius: 5 },
+                        ]}
+                      />
+                    </TouchableOpacity>
+                    <Text style={[styles.text_legend, { marginTop: 20 }]}>
+                      CANTIDAD:
+                    </Text>
+                    <TextInput
+                      style={[
+                        styles.buscador,
+                        styles.shadow,
+                        {
+                          textAlign: "left",
+                          paddingHorizontal: 15,
+                          height: 50,
+                        },
+                      ]}
+                      theme={{
+                        colors: { onSurface: "#000", onSurfaceVariant: "#666" },
+                      }}
+                      placeholder={material?.cantidad?.toString() ?? "0"}
+                      onChangeText={(text) => setCantidad(Number(text))}
+                      value={cantidad.toString()}
+                      keyboardType="numeric"
+                    />
+                    <Text style={[styles.text_legend, { marginTop: 20 }]}>
+                      FORMA:
+                    </Text>
+                    <TextInput
+                      style={[
+                        styles.buscador,
+                        styles.shadow,
+                        {
+                          textAlign: "left",
+                          paddingHorizontal: 15,
+                          height: 50,
+                        },
+                      ]}
+                      theme={{
+                        colors: { onSurface: "#000", onSurfaceVariant: "#666" },
+                      }}
+                      value={forma}
+                      onChangeText={setForma}
+                      autoCapitalize="characters"
+                    />
+                    <Text style={[styles.text_legend, { marginTop: 20 }]}>
+                      TAMAÑO:
+                    </Text>
+                    <TextInput
+                      style={[
+                        styles.buscador,
+                        styles.shadow,
+                        {
+                          textAlign: "left",
+                          paddingHorizontal: 15,
+                          height: 50,
+                        },
+                      ]}
+                      theme={{
+                        colors: { onSurface: "#000", onSurfaceVariant: "#666" },
+                      }}
+                      value={tamaño}
+                      onChangeText={setTamaño}
+                      autoCapitalize="characters"
+                    />
+                  </View>
+                )}
+                {view === 2 && (
+                  <View>
+                    <Text style={[styles.text_legend]}>FOTO:</Text>
+                    {selectedImage === "" && (
+                      <View style={stylesLocal.imageSourceRow}>
+                        <TouchableOpacity
+                          style={stylesLocal.imageSourceBtn}
+                          onPress={seleccionarDesdeGaleria}
+                        >
+                          <Text style={stylesLocal.imageSourceBtnText}>
+                            🖼 GALERÍA
+                          </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={stylesLocal.imageSourceBtn}
+                          onPress={tomarFoto}
+                        >
+                          <Text style={stylesLocal.imageSourceBtnText}>
+                            📷 CÁMARA
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                    {selectedImage !== "" && (
+                      <View style={stylesLocal.imageContainer}>
+                        <Image
+                          source={{
+                            uri: imagenServer
+                              ? api.getMedia(selectedImage)
+                              : selectedImage,
+                          }}
+                          style={styles.imageBase}
+                        />
+                        <TouchableOpacity
+                          style={[
+                            stylesLocal.deleteCircleBtn,
+                            { top: -10, right: -10 },
+                          ]}
+                          onPress={() => {
+                            setSelectedImage("");
+                            setImagenServer(false);
+                          }}
+                        >
+                          <Text style={stylesLocal.deleteCircleBtnText}>✕</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+
+                    <Text style={[styles.text_legend, { marginTop: 10 }]}>
+                      VIDEO:
+                    </Text>
+                    {selectedVideo === "" && (
+                      <TouchableOpacity
+                        style={stylesLocal.imageSourceBtn}
+                        onPress={seleccionarVideo}
+                      >
+                        <Text style={stylesLocal.imageSourceBtnText}>
+                          🎬 VIDEO
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+                    {selectedVideo !== "" && (
+                      <View style={stylesLocal.videoContainer}>
+                        <VideoView
+                          style={stylesLocal.videoPreview}
+                          player={player}
+                          nativeControls
+                          contentFit="contain"
+                          allowsFullscreen
+                          allowsPictureInPicture
+                        />
+                        <TouchableOpacity
+                          style={stylesLocal.deleteCircleBtn}
+                          onPress={() => {
+                            setSelectedVideo("");
+                            setVideoSend("");
+                            setVideoServer(false);
+                          }}
+                        >
+                          <Text style={stylesLocal.deleteCircleBtnText}>✕</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                  </View>
+                )}
+                <View style={[styles.navigationButtons]}>
+                  <Boton
+                    uri="atras"
+                    onPress={handleAtrasPress}
+                    dissable={view === 0}
+                  />
+                  <Boton
+                    uri="delante"
+                    onPress={handleSiguientePress}
+                    dissable={view === 2}
+                  />
+                </View>
               </View>
-            )}
-            <View style={[styles.navigationButtons]}>
-              <Boton
-                uri="atras"
-                onPress={handleAtrasPress}
-                dissable={view === 0}
-              />
-              <Boton
-                uri="delante"
-                onPress={handleSiguientePress}
-                dissable={view === 2}
-              />
-            </View>
-          </View>
-          {error !== "" && (
-            <Text style={[styles.error, { fontSize: scaleFont(20) }]}>
-              {error}
-            </Text>
-          )}
-          {view === 2 && (
-            <View style={[styles.navigationButtons]}>
-              <Boton
-                uri="borrar"
-                onPress={handleBorrarPress}
-                nameBottom="BORRAR"
-              />
-              <Boton
-                uri="ok"
-                onPress={handleActualizarPress}
-                nameBottom="ACTUALIZAR"
-              />
-            </View>
-          )}
-        </>
+              {error !== "" && (
+                <Text style={[styles.error, { fontSize: scaleFont(20) }]}>
+                  {error}
+                </Text>
+              )}
+              {view === 2 && (
+                <View style={[styles.navigationButtons]}>
+                  <Boton
+                    uri="borrar"
+                    onPress={handleBorrarPress}
+                    nameBottom="BORRAR"
+                  />
+                  <Boton
+                    uri="ok"
+                    onPress={handleActualizarPress}
+                    nameBottom="ACTUALIZAR"
+                  />
+                </View>
+              )}
+            </>
+          </ScrollView>
+        </KeyboardAvoidingView>
       )}
     </SafeAreaProvider>
   );

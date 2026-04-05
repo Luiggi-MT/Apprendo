@@ -18,8 +18,7 @@ import { Arasaac } from "../../../class/Arasaac/getPictograma";
 
 const OK_ANIMATION_MS = 5000;
 const OK_SOUND_DELAY_MS = 2900;
-const CUP_ANIMATION_MS = 2000;
-const CUP_SOUND_DELAY_MS = 2900;
+const CUP_ANIMATION_MS = 3000;
 
 const PedidoMaterialTarea = ({
   navigation,
@@ -95,13 +94,6 @@ const PedidoMaterialTarea = ({
     );
     if (response) {
       setCompletadoTarea(true);
-      setTimeout(async () => {
-        try {
-          await cupPlayer.seekTo(0);
-        } catch (error) {
-          console.error("No se pudo reproducir cup.mp3:", error);
-        }
-      }, CUP_SOUND_DELAY_MS);
       cupPlayer.play();
       setTimeout(() => {
         navigation.goBack();
@@ -198,7 +190,7 @@ const PedidoMaterialTarea = ({
           <LottieView
             source={require("../../../assets/animations/cup.json")}
             autoPlay
-            loop
+            loop={false}
             style={{ width: 700, height: 700 }}
           />
         </View>

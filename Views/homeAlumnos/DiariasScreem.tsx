@@ -22,7 +22,6 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   StyleSheet,
-  Platform,
 } from "react-native";
 import { Arasaac } from "../../class/Arasaac/getPictograma";
 import { Students } from "../../class/Interface/Students";
@@ -43,12 +42,13 @@ export default function DiariasScreen({
   const [offset, setOffset] = useState<number>(0);
   const [limit, setLimit] = useState<number>(3);
   const [isListening, setIsListening] = useState(false);
+  const [puntos, setPuntos] = useState<number>(0);
   const [fechaSeleccionada, setFechaSeleccionada] = useState<string>(
     route?.params?.fecha
       ? route.params.fecha
       : new Date().toISOString().split("T")[0],
   );
-  const { user } = useContext(UserContext);
+  const { user } = useContext(UserContext) as { user: Students };
   const student = user as Students;
 
   const esSemanales = route?.params?.semanales || false;
@@ -139,10 +139,19 @@ export default function DiariasScreen({
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", () => {
       cargarTareas();
+      api.getTrofeos(student.id).then((response) => {
+        setPuntos(response.puntos || 0);
+      });
     });
 
     return unsubscribe;
   }, [navigation]);
+
+  useEffect(() => {
+    api.getTrofeos(student.id).then((response) => {
+      setPuntos(response.puntos || 0);
+    });
+  }, [user]);
 
   // ================= ASISTENTE DE VOZ =================
 
@@ -300,7 +309,7 @@ export default function DiariasScreen({
                   style={localStyles.insigniaCoheteLottie}
                 />
               </View>
-              <Text style={localStyles.insigniaCoheteTexto}> 1</Text>
+              <Text style={localStyles.insigniaCoheteTexto}> {puntos}</Text>
             </View>
             <Text style={localStyles.textoExito}>¡TODO TERMINADO POR HOY!</Text>
             <View style={{ width: 300, height: 300, overflow: "hidden" }}>
@@ -323,7 +332,7 @@ export default function DiariasScreen({
                   style={localStyles.insigniaCoheteLottie}
                 />
               </View>
-              <Text style={localStyles.insigniaCoheteTexto}> 1</Text>
+              <Text style={localStyles.insigniaCoheteTexto}> {puntos}</Text>
             </View>
             {tareas.map((tarea) => (
               <TouchableOpacity

@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, TouchableOpacity, Image, TextInput } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from "react-native";
 import {
   SafeAreaProvider,
   useSafeAreaInsets,
@@ -12,11 +21,11 @@ import { Alert } from "react-native";
 import DropDownPicker from "react-native-dropdown-picker";
 import Boton from "../../../components/Boton";
 import { ActivityIndicator } from "react-native-paper";
-import { Students } from "../../../class/Interface/Students";
 import { ImagePassword } from "../../../class/Interface/ImagePassword";
 import { tarjetaDescipcion_styles } from "../../../styles/tarjetaDescripcion_styles";
 import { Arasaac } from "../../../class/Arasaac/getPictograma";
 
+const ERROR_TIME_MS = 2500;
 export default function DescripcionEstudiante({
   navigation,
   route,
@@ -237,242 +246,255 @@ export default function DescripcionEstudiante({
         uriPictograma="estudiante"
         style={scaleFont(20)}
       />
-      {waitting ? (
-        <View style={[styles.content, styles.shadow]}>
-          <ActivityIndicator size="large" color="#FF8C42" />
-          <Text
-            style={[
-              styles.text,
-              {
-                fontFamily: "ecolar-bold",
-                marginTop: 20,
-                fontSize: scaleFont(18),
-                fontWeight: "bold",
-                color: "#333",
-              },
-            ]}
-          >
-            {messageWaiteng}
-          </Text>
-          <Text
-            style={[
-              styles.text,
-              { fontSize: scaleFont(15), marginTop: 10, color: "#666" },
-            ]}
-          >
-            POR FAVOR, ESPERE UN MOMENTO.
-          </Text>
-        </View>
-      ) : view === 0 ? (
-        <View style={[styles.content, styles.shadow]}>
-          <TouchableOpacity onPress={seleccionaImagen}>
-            <Text style={styles.text_legend}>MODIFICAR FOTO:</Text>
-            <Image
-              style={[tarjetaDescipcion_styles.imageTarjet]}
-              source={{ uri: selectedImage || api.getFoto(student.foto) }}
-            />
-          </TouchableOpacity>
-          <Text style={styles.text_legend}>NOMBRE DE USUARIO:</Text>
-          <TextInput
-            style={[styles.buscador, styles.shadow]}
-            onChangeText={handleTextChange}
-            value={text}
-            placeholder={student.username}
-            autoCapitalize="characters"
-          />
-          <Text style={styles.text_legend}>TIPO DE CONTRASEÑA:</Text>
-          <View style={{ zIndex: 1000 }}>
-            <DropDownPicker
-              open={openContraseña}
-              value={contraseñaValue}
-              items={contraseñaItems}
-              setOpen={setOpenContraseña}
-              setValue={setContraseñaValue}
-              setItems={setContraseñaItems}
-              style={[styles.shadow, styles.buscador, { width: "50%" }]}
-              textStyle={styles.dropdownTextStyle}
-            />
-          </View>
-
-          <Text style={styles.text_legend}>NUEVA CONTRASEÑA:</Text>
-          {contraseñaValue === "alfanumerica" ? (
-            <View
-              style={[
-                styles.buscador,
-                styles.shadow,
-                {
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  paddingRight: 15,
-                },
-              ]}
-            >
-              <TextInput
-                style={{ flex: 1, height: "100%" }}
-                onChangeText={handlePasswordChange}
-                value={password}
-                secureTextEntry={secureText}
-                autoCorrect={false}
-                autoComplete="off"
-              />
-              <TouchableOpacity onPress={() => setSecureText(!secureText)}>
-                {secureText && (
-                  <Image
-                    source={{ uri: api.getComponent("ojo.png") }}
-                    style={styles.image}
-                  />
-                )}
-                {!secureText && (
-                  <Image
-                    source={{ uri: arasaacService.getPictograma("ojo") }}
-                    style={styles.image}
-                  />
-                )}
-              </TouchableOpacity>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          {waitting ? (
+            <View style={[styles.content, styles.shadow]}>
+              <ActivityIndicator size="large" color="#FF8C42" />
+              <Text
+                style={[
+                  styles.text,
+                  {
+                    fontFamily: "ecolar-bold",
+                    marginTop: 20,
+                    fontSize: scaleFont(18),
+                    fontWeight: "bold",
+                    color: "#333",
+                  },
+                ]}
+              >
+                {messageWaiteng}
+              </Text>
+              <Text
+                style={[
+                  styles.text,
+                  { fontSize: scaleFont(15), marginTop: 10, color: "#666" },
+                ]}
+              >
+                POR FAVOR, ESPERE UN MOMENTO.
+              </Text>
             </View>
-          ) : contraseñaValue === "pin" ? (
-            <View>
+          ) : view === 0 ? (
+            <View style={[styles.content, styles.shadow]}>
+              <TouchableOpacity onPress={seleccionaImagen}>
+                <Text style={styles.text_legend}>MODIFICAR FOTO:</Text>
+                <Image
+                  style={[tarjetaDescipcion_styles.imageTarjet]}
+                  source={{ uri: selectedImage || api.getFoto(student.foto) }}
+                />
+              </TouchableOpacity>
+              <Text style={styles.text_legend}>NOMBRE DE USUARIO:</Text>
               <TextInput
                 style={[styles.buscador, styles.shadow]}
-                onChangeText={handlePasswordChange}
-                value={password}
-                keyboardType="number-pad"
-                secureTextEntry={secureText}
+                onChangeText={handleTextChange}
+                value={text}
+                placeholder={student.username}
+                autoCapitalize="characters"
               />
-              <TouchableOpacity onPress={() => setSecureText(!secureText)}>
-                {secureText && (
-                  <Image
-                    source={{ uri: api.getComponent("ojo.png") }}
-                    style={styles.image}
+              <Text style={styles.text_legend}>TIPO DE CONTRASEÑA:</Text>
+              <View style={{ zIndex: 1000 }}>
+                <DropDownPicker
+                  open={openContraseña}
+                  value={contraseñaValue}
+                  items={contraseñaItems}
+                  setOpen={setOpenContraseña}
+                  setValue={setContraseñaValue}
+                  setItems={setContraseñaItems}
+                  style={[styles.shadow, styles.buscador, { width: "50%" }]}
+                  textStyle={styles.dropdownTextStyle}
+                />
+              </View>
+
+              <Text style={styles.text_legend}>NUEVA CONTRASEÑA:</Text>
+              {contraseñaValue === "alfanumerica" ? (
+                <View
+                  style={[
+                    styles.buscador,
+                    styles.shadow,
+                    {
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      paddingRight: 15,
+                    },
+                  ]}
+                >
+                  <TextInput
+                    style={{ flex: 1, height: "100%" }}
+                    onChangeText={handlePasswordChange}
+                    value={password}
+                    secureTextEntry={secureText}
+                    autoCorrect={false}
+                    autoComplete="off"
                   />
-                )}
-                {!secureText && (
-                  <Image
-                    source={{ uri: arasaacService.getPictograma("ojo") }}
-                    style={styles.image}
+                  <TouchableOpacity onPress={() => setSecureText(!secureText)}>
+                    {secureText && (
+                      <Image
+                        source={{ uri: api.getComponent("ojo.png") }}
+                        style={styles.image}
+                      />
+                    )}
+                    {!secureText && (
+                      <Image
+                        source={{ uri: arasaacService.getPictograma("ojo") }}
+                        style={styles.image}
+                      />
+                    )}
+                  </TouchableOpacity>
+                </View>
+              ) : contraseñaValue === "pin" ? (
+                <View>
+                  <TextInput
+                    style={[styles.buscador, styles.shadow]}
+                    onChangeText={handlePasswordChange}
+                    value={password}
+                    keyboardType="number-pad"
+                    secureTextEntry={secureText}
                   />
-                )}
-              </TouchableOpacity>
-            </View>
-          ) : (
-            <Boton
-              uri="olvideContraseña"
-              nameBottom="ESTABLECER.CONTRASEÑA"
-              onPress={handleEstablecerContraseñaPress}
-            />
-          )}
-          <View style={styles.navigationButtons}>
-            <View></View>
-
-            <Boton uri="delante" onPress={() => handleAccesibilidadPress()} />
-          </View>
-        </View>
-      ) : (
-        <>
-          <View style={[styles.content, styles.shadow]}>
-            <Text style={styles.text_legend}>ACCESIBILIDAD:</Text>
-            <View style={{ zIndex: 1000 }}>
-              <DropDownPicker
-                multiple={true}
-                min={1}
-                max={3}
-                placeholder="SELECCIONAR OPCIONES"
-                mode="BADGE"
-                listMode="SCROLLVIEW"
-                open={openAccesibilidad}
-                value={accesibilidadValue}
-                items={accesibilidadItems}
-                setOpen={setOpenAccesibilidad}
-                setValue={setAccesibilidadValue}
-                setItems={setAccesibilidadItems}
-                style={[styles.shadow, styles.buscador, { width: "95%" }]}
-                textStyle={styles.dropdownTextStyle}
-              />
-            </View>
-
-            <Text style={styles.text_legend}>
-              PREFERENCIAS DE VISUALIZACIÓN DE TAREAS:
-            </Text>
-            <View style={{ zIndex: 900 }}>
-              <DropDownPicker
-                open={openVisualizacion}
-                value={visualizacionValue}
-                items={visualizacionItems}
-                setOpen={setOpenVisualizacion}
-                setValue={setVisualizacionValue}
-                setItems={setVisualizacionItems}
-                style={[styles.shadow, styles.buscador, { width: "70%" }]}
-                textStyle={styles.dropdownTextStyle}
-              />
-            </View>
-            <Text style={styles.text_legend}>ASISTENTE DE VOZ:</Text>
-            <View style={{ zIndex: 800 }}>
-              <DropDownPicker
-                open={openAsistenteVoz}
-                value={asistenteVozValue}
-                items={asistenteVozItems}
-                setOpen={setOpenAsistenteVoz}
-                setValue={setAsistenteVozValue}
-                setItems={setAsistenteVozItems}
-                style={[styles.shadow, styles.buscador, { width: "70%" }]}
-                textStyle={styles.dropdownTextStyle}
-              />
-            </View>
-
-            <View style={styles.navigationButtons}>
-              <Boton uri="atras" onPress={() => handlePerfilPress()} />
-              {!confirmarBorrado && (
+                  <TouchableOpacity onPress={() => setSecureText(!secureText)}>
+                    {secureText && (
+                      <Image
+                        source={{ uri: api.getComponent("ojo.png") }}
+                        style={styles.image}
+                      />
+                    )}
+                    {!secureText && (
+                      <Image
+                        source={{ uri: arasaacService.getPictograma("ojo") }}
+                        style={styles.image}
+                      />
+                    )}
+                  </TouchableOpacity>
+                </View>
+              ) : (
                 <Boton
-                  uri="ok"
-                  nameBottom="ACTUALIZAR"
-                  onPress={handleActualizarPress}
+                  uri="olvideContraseña"
+                  nameBottom="ESTABLECER.CONTRASEÑA"
+                  onPress={handleEstablecerContraseñaPress}
                 />
               )}
-            </View>
-          </View>
-          {!confirmarBorrado ? (
-            <View style={styles.buttons}>
-              <Boton
-                uri="grafica"
-                nameBottom=" .SEGUIMIENTO. "
-                onPress={() => {}}
-              />
-              <Boton
-                uri="borrar"
-                nameBottom=" .ELIMINAR ALUMNO. "
-                onPress={handleBorrarPress}
-              />
-              <Boton
-                uri="tareasPeticion"
-                nameBottom="ASIGNACIÓN.DE.TAREAS"
-                onPress={handleAsignacionTareas}
-              />
+              <View style={styles.navigationButtons}>
+                <View></View>
+
+                <Boton
+                  uri="delante"
+                  onPress={() => handleAccesibilidadPress()}
+                />
+              </View>
             </View>
           ) : (
             <>
-              <Text style={styles.error}>
-                CONFIRMAR PARA ELIMINAR AL ESTUDIANTE.
-              </Text>
-              <View style={styles.navigationButtons}>
-                <Boton
-                  uri="x"
-                  nameBottom="NO ELIMINAR"
-                  onPress={handleNoEliminarPress}
-                />
-                <Boton
-                  uri="ok"
-                  nameBottom="ELIMINAR"
-                  onPress={handleConfirmarBorradoPress}
-                />
+              <View style={[styles.content, styles.shadow]}>
+                <Text style={styles.text_legend}>ACCESIBILIDAD:</Text>
+                <View style={{ zIndex: 1000 }}>
+                  <DropDownPicker
+                    multiple={true}
+                    min={1}
+                    max={3}
+                    placeholder="SELECCIONAR OPCIONES"
+                    mode="BADGE"
+                    listMode="SCROLLVIEW"
+                    open={openAccesibilidad}
+                    value={accesibilidadValue}
+                    items={accesibilidadItems}
+                    setOpen={setOpenAccesibilidad}
+                    setValue={setAccesibilidadValue}
+                    setItems={setAccesibilidadItems}
+                    style={[styles.shadow, styles.buscador, { width: "95%" }]}
+                    textStyle={styles.dropdownTextStyle}
+                  />
+                </View>
+
+                <Text style={styles.text_legend}>
+                  PREFERENCIAS DE VISUALIZACIÓN DE TAREAS:
+                </Text>
+                <View style={{ zIndex: 900 }}>
+                  <DropDownPicker
+                    open={openVisualizacion}
+                    value={visualizacionValue}
+                    items={visualizacionItems}
+                    setOpen={setOpenVisualizacion}
+                    setValue={setVisualizacionValue}
+                    setItems={setVisualizacionItems}
+                    style={[styles.shadow, styles.buscador, { width: "70%" }]}
+                    textStyle={styles.dropdownTextStyle}
+                  />
+                </View>
+                <Text style={styles.text_legend}>ASISTENTE DE VOZ:</Text>
+                <View style={{ zIndex: 800 }}>
+                  <DropDownPicker
+                    open={openAsistenteVoz}
+                    value={asistenteVozValue}
+                    items={asistenteVozItems}
+                    setOpen={setOpenAsistenteVoz}
+                    setValue={setAsistenteVozValue}
+                    setItems={setAsistenteVozItems}
+                    style={[styles.shadow, styles.buscador, { width: "70%" }]}
+                    textStyle={styles.dropdownTextStyle}
+                  />
+                </View>
+
+                <View style={styles.navigationButtons}>
+                  <Boton uri="atras" onPress={() => handlePerfilPress()} />
+                  {!confirmarBorrado && (
+                    <Boton
+                      uri="ok"
+                      nameBottom="ACTUALIZAR"
+                      onPress={handleActualizarPress}
+                    />
+                  )}
+                </View>
               </View>
+              {!confirmarBorrado ? (
+                <View style={styles.buttons}>
+                  <Boton
+                    uri="grafica"
+                    nameBottom=" .SEGUIMIENTO. "
+                    onPress={() => {}}
+                  />
+                  <Boton
+                    uri="borrar"
+                    nameBottom=" .ELIMINAR ALUMNO. "
+                    onPress={handleBorrarPress}
+                  />
+                  <Boton
+                    uri="tareasPeticion"
+                    nameBottom="ASIGNACIÓN.DE.TAREAS"
+                    onPress={handleAsignacionTareas}
+                  />
+                </View>
+              ) : (
+                <>
+                  <Text style={styles.error}>
+                    CONFIRMAR PARA ELIMINAR AL ESTUDIANTE.
+                  </Text>
+                  <View style={styles.navigationButtons}>
+                    <Boton
+                      uri="x"
+                      nameBottom="NO ELIMINAR"
+                      onPress={handleNoEliminarPress}
+                    />
+                    <Boton
+                      uri="ok"
+                      nameBottom="ELIMINAR"
+                      onPress={handleConfirmarBorradoPress}
+                    />
+                  </View>
+                </>
+              )}
+              {messageError && (
+                <Text style={styles.error}>{messageErrorString}</Text>
+              )}
             </>
           )}
-          {messageError && (
-            <Text style={styles.error}>{messageErrorString}</Text>
-          )}
-        </>
-      )}
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaProvider>
   );
 }

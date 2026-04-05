@@ -100,6 +100,10 @@ export class ConnectApi {
         return this.student.getImagePassword(id);
     }
 
+    public async getTrofeos(id: number): Promise<{ puntos: number }> {
+        return this.student.getTrofeos(id);
+    }
+
     //Profesores
     public async getProfesores(offset: number = this.api.getInitial_offset(), limit: number = this.api.getLimit()): Promise<ApiResponseProfesor> {
         return this.profesores.getProfesores(offset,limit);

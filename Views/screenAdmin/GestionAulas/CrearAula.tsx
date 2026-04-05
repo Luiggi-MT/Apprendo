@@ -1,7 +1,14 @@
 import React, { useState } from "react";
 import { scaleFont, styles } from "../../../styles/styles";
 import Header from "../../../components/Header";
-import { Text, TextInput, View } from "react-native";
+import {
+  Text,
+  TextInput,
+  View,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import Boton from "../../../components/Boton";
 import { ConnectApi } from "../../../class/Connect.Api/ConnectApi";
@@ -76,26 +83,34 @@ export default function CrearAula({ navigation }: { navigation: any }) {
       />
       {isLoading && <Splash />}
       {!isLoading && (
-        <View>
-          <View style={[styles.content, styles.shadow]}>
-            <Text style={[styles.text_legend]}>NOMBRE DEL AULA:</Text>
-            <TextInput
-              style={[styles.buscador, { textAlign: "left" }]}
-              placeholder="EJ: AULA 1"
-              value={aulaName}
-              onChangeText={handleChangePress}
-              autoCapitalize="characters"
-              autoCorrect={false}
-              autoComplete="off"
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
+          <ScrollView
+            contentContainerStyle={{ flexGrow: 1 }}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={[styles.content, styles.shadow]}>
+              <Text style={[styles.text_legend]}>NOMBRE DEL AULA:</Text>
+              <TextInput
+                style={[styles.buscador, { textAlign: "left" }]}
+                placeholder="EJ: AULA 1"
+                value={aulaName}
+                onChangeText={handleChangePress}
+                autoCapitalize="characters"
+                autoCorrect={false}
+                autoComplete="off"
+              />
+            </View>
+            {error && <Text style={[styles.error]}>{errorValue}</Text>}
+            <Boton
+              uri="ok"
+              nameBottom="AÑADIR.AULA"
+              onPress={handleAñadirPress}
             />
-          </View>
-          {error && <Text style={[styles.error]}>{errorValue}</Text>}
-          <Boton
-            uri="ok"
-            nameBottom="AÑADIR.AULA"
-            onPress={handleAñadirPress}
-          />
-        </View>
+          </ScrollView>
+        </KeyboardAvoidingView>
       )}
     </SafeAreaProvider>
   );

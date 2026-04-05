@@ -3,7 +3,16 @@ import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from "react-native-safe-area-context";
-import { View, Text, TextInput, TouchableOpacity, Image } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from "react-native";
 import { ConnectApi } from "../class/Connect.Api/ConnectApi";
 import Header from "../components/Header";
 import { scaleFont, styles } from "../styles/styles";
@@ -83,108 +92,118 @@ export default function Profesorado({ navigation }: { navigation: any }) {
         style={scaleFont(30)}
       />
 
-      <View
-        style={{ flex: 1, paddingHorizontal: 20, justifyContent: "center" }}
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
       >
-        <View
-          style={[
-            styles.content,
-            styles.shadow,
-            {
-              backgroundColor: "#F5F5F5",
-              paddingVertical: 25,
-              borderRadius: 20,
-            },
-          ]}
+        <ScrollView
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingHorizontal: 20,
+            justifyContent: "center",
+          }}
+          keyboardShouldPersistTaps="handled"
         >
-          <InputText
-            nameInput="USUARIO:"
-            input={handleUsuarioChange}
-            value={usuario}
-            autoCapitalize="characters"
-          />
-
-          <Text style={[styles.text_legend, { marginTop: 15 }]}>
-            CONTRASEÑA:
-          </Text>
           <View
             style={[
-              styles.buscador,
+              styles.content,
               styles.shadow,
               {
-                flexDirection: "row",
-                alignItems: "center",
-                backgroundColor: "#FFF",
-                height: 55,
-                borderRadius: 12,
-                paddingRight: 10,
-                margin: 0,
+                backgroundColor: "#F5F5F5",
+                paddingVertical: 25,
+                borderRadius: 20,
               },
             ]}
           >
-            <TextInput
-              style={{
-                flex: 1,
-                height: "100%",
-                fontSize: 18,
-                paddingLeft: 15,
-                fontFamily: "escolar-bold",
-                color: "#000",
-              }}
-              onChangeText={handleContraseñaChange}
-              value={contraseña}
-              secureTextEntry={secureText}
+            <InputText
+              nameInput="USUARIO:"
+              input={handleUsuarioChange}
+              value={usuario}
               autoCapitalize="characters"
-              autoCorrect={false}
-              autoComplete="off"
             />
-            <TouchableOpacity
-              onPress={() => setSecureText(!secureText)}
-              style={{ padding: 5 }}
+
+            <Text style={[styles.text_legend, { marginTop: 15 }]}>
+              CONTRASEÑA:
+            </Text>
+            <View
+              style={[
+                styles.buscador,
+                styles.shadow,
+                {
+                  flexDirection: "row",
+                  alignItems: "center",
+                  backgroundColor: "#FFF",
+                  height: 55,
+                  borderRadius: 12,
+                  paddingRight: 10,
+                  margin: 0,
+                },
+              ]}
             >
-              <Image
-                source={{
-                  uri: secureText
-                    ? api.getComponent("ojo.png")
-                    : arasaacService.getPictograma("ojo"),
+              <TextInput
+                style={{
+                  flex: 1,
+                  height: "100%",
+                  fontSize: 18,
+                  paddingLeft: 15,
+                  fontFamily: "escolar-bold",
+                  color: "#000",
                 }}
-                style={{ width: 35, height: 35 }}
+                onChangeText={handleContraseñaChange}
+                value={contraseña}
+                secureTextEntry={secureText}
+                autoCapitalize="characters"
+                autoCorrect={false}
+                autoComplete="off"
               />
+              <TouchableOpacity
+                onPress={() => setSecureText(!secureText)}
+                style={{ padding: 5 }}
+              >
+                <Image
+                  source={{
+                    uri: secureText
+                      ? api.getComponent("ojo.png")
+                      : arasaacService.getPictograma("ojo"),
+                  }}
+                  style={{ width: 35, height: 35 }}
+                />
+              </TouchableOpacity>
+            </View>
+
+            <TouchableOpacity
+              onPress={() => navigation.navigate("OlvideContraseña")}
+              style={{ marginTop: 15, alignSelf: "center", padding: 10 }}
+            >
+              <Text
+                style={{
+                  color: "#4C80D7",
+                  fontFamily: "escolar-bold",
+                  textDecorationLine: "underline",
+                }}
+              >
+                ¿OLVIDASTE TU CONTRASEÑA?
+              </Text>
             </TouchableOpacity>
+
+            {!!error && (
+              <View style={[styles.errorContainer]}>
+                <Text style={[styles.error]}>{error}</Text>
+              </View>
+            )}
           </View>
 
-          <TouchableOpacity
-            onPress={() => navigation.navigate("OlvideContraseña")}
-            style={{ marginTop: 15, alignSelf: "center", padding: 10 }}
+          <View
+            style={[
+              styles.navigationButtons,
+              { paddingHorizontal: 0, marginTop: 25 },
+            ]}
           >
-            <Text
-              style={{
-                color: "#4C80D7",
-                fontFamily: "escolar-bold",
-                textDecorationLine: "underline",
-              }}
-            >
-              ¿OLVIDASTE TU CONTRASEÑA?
-            </Text>
-          </TouchableOpacity>
-
-          {!!error && (
-            <View style={[styles.errorContainer]}>
-              <Text style={[styles.error]}>{error}</Text>
-            </View>
-          )}
-        </View>
-
-        <View
-          style={[
-            styles.navigationButtons,
-            { paddingHorizontal: 0, marginTop: 25 },
-          ]}
-        >
-          <Boton uri="borrar" nameBottom="BORRAR" onPress={onBorrarPress} />
-          <Boton uri="ok" nameBottom="ENVIAR" onPress={onEnviarPress} />
-        </View>
-      </View>
+            <Boton uri="borrar" nameBottom="BORRAR" onPress={onBorrarPress} />
+            <Boton uri="ok" nameBottom="ENVIAR" onPress={onEnviarPress} />
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaProvider>
   );
 }

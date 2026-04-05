@@ -15,6 +15,7 @@ const PasoMaterial = ({
 }) => {
   const [selectedVideo, setSelectedVideo] = useState<string>("");
   const [selectedImage, setSelectedImage] = useState<string>("");
+  const [mensaje, setMensaje] = useState<string>("");
   const api = new ConnectApi();
   const arasaacService = new Arasaac();
   const speak = Speak.getInstance();
@@ -26,12 +27,61 @@ const PasoMaterial = ({
   );
   useEffect(() => {
     if (!material) return;
+    const nombre = material.nombre.toUpperCase();
+    const cantidad = material.cantidad;
+    const PREPOSICIONES = new Set([
+      "DE",
+      "DEL",
+      "CON",
+      "SIN",
+      "PARA",
+      "POR",
+      "EN",
+      "A",
+      "AL",
+      "ANTE",
+      "SOBRE",
+      "TRAS",
+      "ENTRE",
+      "DESDE",
+      "HASTA",
+    ]);
+    const pluralizar = (palabra: string): string => {
+      if (palabra.endsWith("Z")) return palabra.slice(0, -1) + "CES";
+      if (palabra.endsWith("S")) return palabra;
+      if (/[AEIOUÁÉÍÓÚ]$/.test(palabra)) return palabra + "S";
+      return palabra + "ES";
+    };
+    const nombrePlural =
+      cantidad > 1
+        ? (() => {
+            const palabras = nombre.split(" ");
+            let pluralizando = true;
+            return palabras
+              .map((p) => {
+                if (PREPOSICIONES.has(p)) pluralizando = false;
+                return pluralizando ? pluralizar(p) : p;
+              })
+              .join(" ");
+          })()
+        : nombre;
+    // Artículo: "UN" (masculino) o "UNA" (femenino) cuando cantidad=1
+    // Heurística: primera palabra termina en "A" → femenino
+    const primeraPalabra = nombre.split(" ")[0];
+    const esFemenino =
+      primeraPalabra.endsWith("A") &&
+      !primeraPalabra.endsWith("MA") &&
+      !primeraPalabra.endsWith("PA");
+    const cantidadTexto =
+      cantidad === 1 ? (esFemenino ? "UNA" : "UN") : String(cantidad);
+    const textoMensaje = `RECOGER ${cantidadTexto} ${nombrePlural}`;
+    setMensaje(textoMensaje);
     setSelectedVideo(material.video);
     setSelectedImage(material.imagen);
     if (accesibilidad.includes("audio")) {
-      speak.hablar(`RECOGER ${material.nombre}`);
+      speak.hablar(textoMensaje);
     }
-  }, [material]);
+  }, [material, accesibilidad]);
 
   if (!material) return null;
 
@@ -57,9 +107,7 @@ const PasoMaterial = ({
           />
         )
       )}
-      <Text style={[styles.text_legend, localStyles.texto]}>
-        RECOGER {material.nombre.toUpperCase()}
-      </Text>
+      <Text style={[styles.text_legend, localStyles.texto]}>{mensaje}</Text>
     </View>
   );
 };

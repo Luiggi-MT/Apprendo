@@ -5,7 +5,16 @@ import {
 } from "react-native-safe-area-context";
 import Header from "../../../../components/Header";
 import { scaleFont, styles } from "../../../../styles/styles";
-import { Image, Text, TouchableOpacity, View, TextInput } from "react-native";
+import {
+  Image,
+  Text,
+  TouchableOpacity,
+  View,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from "react-native";
 import { Arasaac } from "../../../../class/Arasaac/getPictograma";
 import Boton from "../../../../components/Boton";
 import { ConnectApi } from "../../../../class/Connect.Api/ConnectApi";
@@ -180,250 +189,265 @@ export default function CrearMenu({
       {isLoading ? (
         <Splash name={mensajeValue} />
       ) : (
-        <>
-          <View style={[styles.content, styles.shadow]}>
-            {view === 0 && (
-              <View>
-                <TouchableOpacity onPress={() => handleAñadirPress("menu")}>
-                  <Text style={styles.text_legend}>SELECCIONAR FOTO:</Text>
-                  <View style={{ alignItems: "center" }}>
-                    {!isTachado ? (
-                      <Image
-                        style={[
-                          styles.imageBase,
-                          { borderWidth: 1, borderRadius: 5 },
-                        ]}
-                        source={{
-                          uri: arasaacService.getPictogramaId(pictogramaId),
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
+          <ScrollView
+            contentContainerStyle={{ flexGrow: 1 }}
+            keyboardShouldPersistTaps="handled"
+          >
+            <>
+              <View style={[styles.content, styles.shadow]}>
+                {view === 0 && (
+                  <View>
+                    <TouchableOpacity onPress={() => handleAñadirPress("menu")}>
+                      <Text style={styles.text_legend}>SELECCIONAR FOTO:</Text>
+                      <View style={{ alignItems: "center" }}>
+                        {!isTachado ? (
+                          <Image
+                            style={[
+                              styles.imageBase,
+                              { borderWidth: 1, borderRadius: 5 },
+                            ]}
+                            source={{
+                              uri: arasaacService.getPictogramaId(pictogramaId),
+                            }}
+                          />
+                        ) : (
+                          <View style={styles.superPuesto}>
+                            <Image
+                              source={{
+                                uri: arasaacService.getPictogramaId(
+                                  pictogramaId,
+                                ),
+                              }}
+                              style={[
+                                styles.imageBase,
+                                { borderWidth: 1, borderRadius: 5 },
+                              ]}
+                            />
+                            <Image
+                              source={{
+                                uri: arasaacService.getPictograma("fallo"),
+                              }}
+                              style={styles.imageOverlay}
+                            />
+                          </View>
+                        )}
+                      </View>
+                    </TouchableOpacity>
+
+                    <View style={{ marginTop: 15 }}>
+                      <Text style={styles.text_legend}>TACHAR:</Text>
+                      <TouchableOpacity
+                        style={{
+                          flexDirection: "row",
+                          alignItems: "center",
+                          marginTop: 10,
                         }}
+                        onPress={() => setIsTachado(!isTachado)}
+                      >
+                        <View
+                          style={[
+                            styles.radioOuter,
+                            {
+                              borderColor: isTachado ? "#FF0000" : "#555",
+                              marginBottom: 0,
+                            },
+                          ]}
+                        >
+                          {isTachado && <View style={styles.radioInner} />}
+                        </View>
+                        <Text
+                          style={[
+                            styles.text,
+                            { marginLeft: 10, textAlignVertical: "center" },
+                          ]}
+                        >
+                          {isTachado ? "SÍ, TACHADO" : "NO, NORMAL"}
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    <View style={{ marginTop: 15 }}>
+                      <Text style={styles.text_legend}>DESCRIPCION:</Text>
+                      <TextInput
+                        style={[
+                          styles.buscador,
+                          styles.shadow,
+                          {
+                            textAlign: "left",
+                            paddingHorizontal: 15,
+                            height: 50,
+                          },
+                        ]}
+                        placeholder="EJEMPLO CON CARNE..."
+                        onChangeText={handleDescripcionChange}
+                        value={descripcion}
+                        autoCapitalize="characters"
+                        autoCorrect={false}
+                        autoComplete="off"
                       />
-                    ) : (
-                      <View style={styles.superPuesto}>
+                    </View>
+                  </View>
+                )}
+
+                {view === 1 && (
+                  <View>
+                    <Text style={styles.text_legend}>PRIMER PLATO:</Text>
+                    <TextInput
+                      style={[
+                        styles.buscador,
+                        styles.shadow,
+                        {
+                          textAlign: "left",
+                          paddingHorizontal: 15,
+                          height: 50,
+                        },
+                      ]}
+                      placeholder="EJEMPLO: POLLO CON ARROZ..."
+                      onChangeText={handlePrimeroPlatoChange}
+                      value={primerPlato}
+                      autoCapitalize="characters"
+                      autoCorrect={false}
+                      autoComplete="off"
+                    />
+                    <TouchableOpacity
+                      style={{ marginTop: 15 }}
+                      onPress={() => handleAñadirPress("primerPlato")}
+                    >
+                      <Text style={styles.text_legend}>
+                        SELECCIONAR PICTOGRÁMA:
+                      </Text>
+                      <View style={{ alignItems: "center" }}>
                         <Image
                           source={{
-                            uri: arasaacService.getPictogramaId(pictogramaId),
+                            uri: arasaacService.getPictogramaId(primerPlatoId),
                           }}
                           style={[
                             styles.imageBase,
                             { borderWidth: 1, borderRadius: 5 },
                           ]}
                         />
-                        <Image
-                          source={{
-                            uri: arasaacService.getPictograma("fallo"),
-                          }}
-                          style={styles.imageOverlay}
-                        />
                       </View>
-                    )}
+                    </TouchableOpacity>
                   </View>
-                </TouchableOpacity>
+                )}
 
-                <View style={{ marginTop: 15 }}>
-                  <Text style={styles.text_legend}>TACHAR:</Text>
-                  <TouchableOpacity
-                    style={{
-                      flexDirection: "row",
-                      alignItems: "center",
-                      marginTop: 10,
-                    }}
-                    onPress={() => setIsTachado(!isTachado)}
-                  >
-                    <View
+                {view === 2 && (
+                  <View>
+                    <Text style={styles.text_legend}>SEGUNDO PLATO:</Text>
+                    <TextInput
                       style={[
-                        styles.radioOuter,
+                        styles.buscador,
+                        styles.shadow,
                         {
-                          borderColor: isTachado ? "#FF0000" : "#555",
-                          marginBottom: 0,
+                          textAlign: "left",
+                          paddingHorizontal: 15,
+                          height: 50,
                         },
                       ]}
+                      placeholder="EJEMPLO: PESCADO CON PATATAS..."
+                      onChangeText={handleSegundoPlatoChange}
+                      value={segundoPlato}
+                      autoCapitalize="characters"
+                      autoCorrect={false}
+                      autoComplete="off"
+                    />
+                    <TouchableOpacity
+                      style={{ marginTop: 15 }}
+                      onPress={() => handleAñadirPress("segundoPlato")}
                     >
-                      {isTachado && <View style={styles.radioInner} />}
-                    </View>
-                    <Text
-                      style={[
-                        styles.text,
-                        { marginLeft: 10, textAlignVertical: "center" },
-                      ]}
-                    >
-                      {isTachado ? "SÍ, TACHADO" : "NO, NORMAL"}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
+                      <Text style={styles.text_legend}>
+                        SELECCIONAR PICTOGRÁMA:
+                      </Text>
+                      <View style={{ alignItems: "center" }}>
+                        <Image
+                          source={{
+                            uri: arasaacService.getPictogramaId(segundoPlatoId),
+                          }}
+                          style={[
+                            styles.imageBase,
+                            { borderWidth: 1, borderRadius: 5 },
+                          ]}
+                        />
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+                )}
 
-                <View style={{ marginTop: 15 }}>
-                  <Text style={styles.text_legend}>DESCRIPCION:</Text>
-                  <TextInput
-                    style={[
-                      styles.buscador,
-                      styles.shadow,
-                      {
-                        textAlign: "left",
-                        paddingHorizontal: 15,
-                        height: 50,
-                      },
-                    ]}
-                    placeholder="EJEMPLO CON CARNE..."
-                    onChangeText={handleDescripcionChange}
-                    value={descripcion}
-                    autoCapitalize="characters"
-                    autoCorrect={false}
-                    autoComplete="off"
+                {view === 3 && (
+                  <View>
+                    <Text style={styles.text_legend}>POSTRE:</Text>
+                    <TextInput
+                      style={[
+                        styles.buscador,
+                        styles.shadow,
+                        {
+                          textAlign: "left",
+                          paddingHorizontal: 15,
+                          height: 50,
+                        },
+                      ]}
+                      placeholder="EJEMPLO: FLAN CON CHOCOLATE..."
+                      onChangeText={handlePostreChange}
+                      value={postre}
+                      autoCapitalize="characters"
+                      autoCorrect={false}
+                      autoComplete="off"
+                    />
+                    <TouchableOpacity
+                      style={{ marginTop: 15 }}
+                      onPress={() => handleAñadirPress("postre")}
+                    >
+                      <Text style={styles.text_legend}>
+                        SELECCIONAR PICTOGRÁMA:
+                      </Text>
+                      <View style={{ alignItems: "center" }}>
+                        <Image
+                          source={{
+                            uri: arasaacService.getPictogramaId(postreId),
+                          }}
+                          style={[
+                            styles.imageBase,
+                            { borderWidth: 1, borderRadius: 5 },
+                          ]}
+                        />
+                      </View>
+                    </TouchableOpacity>
+                  </View>
+                )}
+              </View>
+              {error && (
+                <Text
+                  style={[
+                    styles.error,
+                    { fontSize: scaleFont(20), marginTop: 10 },
+                  ]}
+                >
+                  {mensajeValue}
+                </Text>
+              )}
+              <View style={styles.navigationButtons}>
+                <Boton
+                  uri="atras"
+                  onPress={handleAtrasPress}
+                  dissable={view === 0}
+                />
+                {view < 3 ? (
+                  <Boton uri="delante" onPress={handleSiguentePress} />
+                ) : (
+                  <Boton
+                    uri="ok"
+                    nameBottom="GUARDAR.MENÚ"
+                    onPress={handleGuardarMenu}
                   />
-                </View>
+                )}
               </View>
-            )}
-
-            {view === 1 && (
-              <View>
-                <Text style={styles.text_legend}>PRIMER PLATO:</Text>
-                <TextInput
-                  style={[
-                    styles.buscador,
-                    styles.shadow,
-                    {
-                      textAlign: "left",
-                      paddingHorizontal: 15,
-                      height: 50,
-                    },
-                  ]}
-                  placeholder="EJEMPLO: POLLO CON ARROZ..."
-                  onChangeText={handlePrimeroPlatoChange}
-                  value={primerPlato}
-                  autoCapitalize="characters"
-                  autoCorrect={false}
-                  autoComplete="off"
-                />
-                <TouchableOpacity
-                  style={{ marginTop: 15 }}
-                  onPress={() => handleAñadirPress("primerPlato")}
-                >
-                  <Text style={styles.text_legend}>
-                    SELECCIONAR PICTOGRÁMA:
-                  </Text>
-                  <View style={{ alignItems: "center" }}>
-                    <Image
-                      source={{
-                        uri: arasaacService.getPictogramaId(primerPlatoId),
-                      }}
-                      style={[
-                        styles.imageBase,
-                        { borderWidth: 1, borderRadius: 5 },
-                      ]}
-                    />
-                  </View>
-                </TouchableOpacity>
-              </View>
-            )}
-
-            {view === 2 && (
-              <View>
-                <Text style={styles.text_legend}>SEGUNDO PLATO:</Text>
-                <TextInput
-                  style={[
-                    styles.buscador,
-                    styles.shadow,
-                    {
-                      textAlign: "left",
-                      paddingHorizontal: 15,
-                      height: 50,
-                    },
-                  ]}
-                  placeholder="EJEMPLO: PESCADO CON PATATAS..."
-                  onChangeText={handleSegundoPlatoChange}
-                  value={segundoPlato}
-                  autoCapitalize="characters"
-                  autoCorrect={false}
-                  autoComplete="off"
-                />
-                <TouchableOpacity
-                  style={{ marginTop: 15 }}
-                  onPress={() => handleAñadirPress("segundoPlato")}
-                >
-                  <Text style={styles.text_legend}>
-                    SELECCIONAR PICTOGRÁMA:
-                  </Text>
-                  <View style={{ alignItems: "center" }}>
-                    <Image
-                      source={{
-                        uri: arasaacService.getPictogramaId(segundoPlatoId),
-                      }}
-                      style={[
-                        styles.imageBase,
-                        { borderWidth: 1, borderRadius: 5 },
-                      ]}
-                    />
-                  </View>
-                </TouchableOpacity>
-              </View>
-            )}
-
-            {view === 3 && (
-              <View>
-                <Text style={styles.text_legend}>POSTRE:</Text>
-                <TextInput
-                  style={[
-                    styles.buscador,
-                    styles.shadow,
-                    {
-                      textAlign: "left",
-                      paddingHorizontal: 15,
-                      height: 50,
-                    },
-                  ]}
-                  placeholder="EJEMPLO: FLAN CON CHOCOLATE..."
-                  onChangeText={handlePostreChange}
-                  value={postre}
-                  autoCapitalize="characters"
-                  autoCorrect={false}
-                  autoComplete="off"
-                />
-                <TouchableOpacity
-                  style={{ marginTop: 15 }}
-                  onPress={() => handleAñadirPress("postre")}
-                >
-                  <Text style={styles.text_legend}>
-                    SELECCIONAR PICTOGRÁMA:
-                  </Text>
-                  <View style={{ alignItems: "center" }}>
-                    <Image
-                      source={{
-                        uri: arasaacService.getPictogramaId(postreId),
-                      }}
-                      style={[
-                        styles.imageBase,
-                        { borderWidth: 1, borderRadius: 5 },
-                      ]}
-                    />
-                  </View>
-                </TouchableOpacity>
-              </View>
-            )}
-          </View>
-          {error && (
-            <Text
-              style={[styles.error, { fontSize: scaleFont(20), marginTop: 10 }]}
-            >
-              {mensajeValue}
-            </Text>
-          )}
-          <View style={styles.navigationButtons}>
-            <Boton
-              uri="atras"
-              onPress={handleAtrasPress}
-              dissable={view === 0}
-            />
-            {view < 3 ? (
-              <Boton uri="delante" onPress={handleSiguentePress} />
-            ) : (
-              <Boton
-                uri="ok"
-                nameBottom="GUARDAR.MENÚ"
-                onPress={handleGuardarMenu}
-              />
-            )}
-          </View>
-        </>
+            </>
+          </ScrollView>
+        </KeyboardAvoidingView>
       )}
     </SafeAreaProvider>
   );

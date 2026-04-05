@@ -5,6 +5,9 @@ import {
   TextInput,
   TouchableOpacity,
   Image,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
 } from "react-native";
 import React, { useState } from "react";
 import {
@@ -138,6 +141,35 @@ const CrearMaterial = ({ navigation }: { navigation: any }) => {
     }
   };
 
+  const grabarVideo = async () => {
+    const { status } = await ImagePicker.requestCameraPermissionsAsync();
+    if (status !== "granted") {
+      setError("Se necesitan permisos para acceder a la cámara.");
+      return;
+    }
+    const result = await ImagePicker.launchCameraAsync({
+      mediaTypes: videoMediaType,
+      allowsEditing: false,
+      quality: 1,
+    });
+    if (!result.canceled && result.assets[0]?.uri) {
+      const videoUri = result.assets[0].uri;
+      try {
+        const videoFile = new File(videoUri);
+        const base64Video = await videoFile.base64();
+        if (!base64Video) {
+          setError("NO SE PUDO LEER EL VIDEO. INTENTA CON OTRO ARCHIVO.");
+          return;
+        }
+        setError("");
+        setSelectedVideo(videoUri);
+        setVideoSend(`data:video/mp4;base64,${base64Video}`);
+      } catch (e) {
+        setError("NO SE PUDO LEER EL VIDEO. INTENTA CON OTRO ARCHIVO.");
+      }
+    }
+  };
+
   const seleccionarVideo = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
@@ -231,197 +263,242 @@ const CrearMaterial = ({ navigation }: { navigation: any }) => {
       {isCreate ? (
         <Splash name="CREANDO EL MATERIAL" />
       ) : (
-        <>
-          <View style={[styles.content, styles.shadow]}>
-            {view === 0 && (
-              <View>
-                <Text style={[styles.text_legend]}>NOMBRE DEL MATERIAL:</Text>
-                <TextInput
-                  style={[
-                    styles.buscador,
-                    styles.shadow,
-                    { textAlign: "left", paddingHorizontal: 15, height: 50 },
-                  ]}
-                  placeholder="EJ: LÁPIZ, CUADERNO, REGLA..."
-                  onChangeText={handleNombreChange}
-                  value={nombre}
-                  autoCapitalize="characters"
-                  autoCorrect={false}
-                />
-                <Text style={[styles.text_legend, { marginTop: 20 }]}>
-                  COLOR
-                </Text>
-                <ColorPicker
-                  colors={COLORS}
-                  initialColor={selectedColor}
-                  onChange={setSelectedColor}
-                />
-              </View>
-            )}
-            {view === 1 && (
-              <View>
-                <Text style={[styles.text_legend]}>PICTOGRAMA: </Text>
-                <TouchableOpacity
-                  style={{ marginTop: 15 }}
-                  onPress={() => handleAñadirPress("material")}
-                >
-                  <Image
-                    source={{ uri: arasaacService.getPictogramaId(materialId) }}
-                    style={[
-                      styles.imageBase,
-                      { borderWidth: 1, borderRadius: 5 },
-                    ]}
-                  />
-                </TouchableOpacity>
-                <Text style={[styles.text_legend, { marginTop: 20 }]}>
-                  CANTIDAD:
-                </Text>
-                <TextInput
-                  style={[
-                    styles.buscador,
-                    styles.shadow,
-                    { textAlign: "left", paddingHorizontal: 15, height: 50 },
-                  ]}
-                  placeholder="EJ: 1, 2, 3..."
-                  onChangeText={handleCantidadChange}
-                  value={cantidad !== null ? cantidad.toString() : ""}
-                  keyboardType="numeric"
-                />
-                <Text style={[styles.text_legend, { marginTop: 20 }]}>
-                  FORMA:
-                </Text>
-                <TextInput
-                  style={[
-                    styles.buscador,
-                    styles.shadow,
-                    { textAlign: "left", paddingHorizontal: 15, height: 50 },
-                  ]}
-                  placeholder="EJ: CUADRADO, CÍRCULO..."
-                  onChangeText={handleFormaChange}
-                  value={forma}
-                  autoCapitalize="characters"
-                />
-                <Text style={[styles.text_legend, { marginTop: 20 }]}>
-                  TAMAÑO:
-                </Text>
-                <TextInput
-                  style={[
-                    styles.buscador,
-                    styles.shadow,
-                    { textAlign: "left", paddingHorizontal: 15, height: 50 },
-                  ]}
-                  placeholder="EJ: PEQUEÑO, MEDIANO, GRANDE..."
-                  onChangeText={handleTamañoChange}
-                  value={tamaño}
-                  autoCapitalize="characters"
-                />
-              </View>
-            )}
-            {view === 2 && (
-              <View>
-                <Text style={[styles.text_legend]}>FOTO:</Text>
-                {selectedImage === "" && (
-                  <>
-                    <View style={stylesLocal.imageSourceRow}>
-                      <TouchableOpacity
-                        style={stylesLocal.imageSourceBtn}
-                        onPress={seleccionarDesdeGaleria}
-                      >
-                        <Text style={stylesLocal.imageSourceBtnText}>
-                          🖼 GALERÍA
-                        </Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
-                        style={stylesLocal.imageSourceBtn}
-                        onPress={tomarFoto}
-                      >
-                        <Text style={stylesLocal.imageSourceBtnText}>
-                          📷 CÁMARA
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-                  </>
-                )}
-                {selectedImage !== "" && (
-                  <View style={stylesLocal.imageContainer}>
-                    <Image
-                      style={styles.imageBase}
-                      source={{ uri: selectedImage }}
-                    />
-                    <TouchableOpacity
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
+          <ScrollView
+            contentContainerStyle={{ flexGrow: 1 }}
+            keyboardShouldPersistTaps="handled"
+          >
+            <>
+              <View style={[styles.content, styles.shadow]}>
+                {view === 0 && (
+                  <View>
+                    <Text style={[styles.text_legend]}>
+                      NOMBRE DEL MATERIAL:
+                    </Text>
+                    <TextInput
                       style={[
-                        stylesLocal.deleteCircleBtn,
-                        { top: -10, right: -10 },
+                        styles.buscador,
+                        styles.shadow,
+                        {
+                          textAlign: "left",
+                          paddingHorizontal: 15,
+                          height: 50,
+                        },
                       ]}
-                      onPress={() => setSelectedImage("")}
-                    >
-                      <Text style={stylesLocal.deleteCircleBtnText}>✕</Text>
-                    </TouchableOpacity>
+                      placeholder="EJ: LÁPIZ, CUADERNO, REGLA..."
+                      onChangeText={handleNombreChange}
+                      value={nombre}
+                      autoCapitalize="characters"
+                      autoCorrect={false}
+                    />
+                    <Text style={[styles.text_legend, { marginTop: 20 }]}>
+                      COLOR
+                    </Text>
+                    <ColorPicker
+                      colors={COLORS}
+                      initialColor={selectedColor}
+                      onChange={setSelectedColor}
+                    />
                   </View>
                 )}
-                <Text style={[styles.text_legend, { marginTop: 20 }]}>
-                  VIDEO:
-                </Text>
-                {selectedVideo === "" && (
-                  <TouchableOpacity
-                    style={stylesLocal.imageSourceBtn}
-                    onPress={seleccionarVideo}
-                  >
-                    <Text style={stylesLocal.imageSourceBtnText}>🎬 VIDEO</Text>
-                  </TouchableOpacity>
-                )}
-                {selectedVideo !== "" && (
-                  <View style={stylesLocal.videoContainer}>
-                    <VideoView
-                      style={stylesLocal.videoPreview}
-                      player={player}
-                      nativeControls
-                      contentFit="contain"
-                      allowsFullscreen
-                      allowsPictureInPicture
-                    />
+                {view === 1 && (
+                  <View>
+                    <Text style={[styles.text_legend]}>PICTOGRAMA: </Text>
                     <TouchableOpacity
-                      style={stylesLocal.deleteCircleBtn}
-                      onPress={() => {
-                        setSelectedVideo("");
-                        setVideoSend("");
-                      }}
+                      style={{ marginTop: 15 }}
+                      onPress={() => handleAñadirPress("material")}
                     >
-                      <Text style={stylesLocal.deleteCircleBtnText}>✕</Text>
+                      <Image
+                        source={{
+                          uri: arasaacService.getPictogramaId(materialId),
+                        }}
+                        style={[
+                          styles.imageBase,
+                          { borderWidth: 1, borderRadius: 5 },
+                        ]}
+                      />
                     </TouchableOpacity>
+                    <Text style={[styles.text_legend, { marginTop: 20 }]}>
+                      CANTIDAD:
+                    </Text>
+                    <TextInput
+                      style={[
+                        styles.buscador,
+                        styles.shadow,
+                        {
+                          textAlign: "left",
+                          paddingHorizontal: 15,
+                          height: 50,
+                        },
+                      ]}
+                      placeholder="EJ: 1, 2, 3..."
+                      onChangeText={handleCantidadChange}
+                      value={cantidad !== null ? cantidad.toString() : ""}
+                      keyboardType="numeric"
+                    />
+                    <Text style={[styles.text_legend, { marginTop: 20 }]}>
+                      FORMA:
+                    </Text>
+                    <TextInput
+                      style={[
+                        styles.buscador,
+                        styles.shadow,
+                        {
+                          textAlign: "left",
+                          paddingHorizontal: 15,
+                          height: 50,
+                        },
+                      ]}
+                      placeholder="EJ: CUADRADO, CÍRCULO..."
+                      onChangeText={handleFormaChange}
+                      value={forma}
+                      autoCapitalize="characters"
+                    />
+                    <Text style={[styles.text_legend, { marginTop: 20 }]}>
+                      TAMAÑO:
+                    </Text>
+                    <TextInput
+                      style={[
+                        styles.buscador,
+                        styles.shadow,
+                        {
+                          textAlign: "left",
+                          paddingHorizontal: 15,
+                          height: 50,
+                        },
+                      ]}
+                      placeholder="EJ: PEQUEÑO, MEDIANO, GRANDE..."
+                      onChangeText={handleTamañoChange}
+                      value={tamaño}
+                      autoCapitalize="characters"
+                    />
+                  </View>
+                )}
+                {view === 2 && (
+                  <View>
+                    <Text style={[styles.text_legend]}>FOTO:</Text>
+                    {selectedImage === "" && (
+                      <>
+                        <View style={stylesLocal.imageSourceRow}>
+                          <TouchableOpacity
+                            style={stylesLocal.imageSourceBtn}
+                            onPress={seleccionarDesdeGaleria}
+                          >
+                            <Text style={stylesLocal.imageSourceBtnText}>
+                              🖼 GALERÍA
+                            </Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            style={stylesLocal.imageSourceBtn}
+                            onPress={tomarFoto}
+                          >
+                            <Text style={stylesLocal.imageSourceBtnText}>
+                              📷 CÁMARA
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
+                      </>
+                    )}
+                    {selectedImage !== "" && (
+                      <View style={stylesLocal.imageContainer}>
+                        <Image
+                          style={styles.imageBase}
+                          source={{ uri: selectedImage }}
+                        />
+                        <TouchableOpacity
+                          style={[
+                            stylesLocal.deleteCircleBtn,
+                            { top: -10, right: -10 },
+                          ]}
+                          onPress={() => setSelectedImage("")}
+                        >
+                          <Text style={stylesLocal.deleteCircleBtnText}>✕</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                    <Text style={[styles.text_legend, { marginTop: 20 }]}>
+                      VIDEO:
+                    </Text>
+                    {selectedVideo === "" && (
+                      <View style={stylesLocal.imageSourceRow}>
+                        <TouchableOpacity
+                          style={stylesLocal.imageSourceBtn}
+                          onPress={seleccionarVideo}
+                        >
+                          <Text style={stylesLocal.imageSourceBtnText}>
+                            🎬 GALERÍA
+                          </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          style={stylesLocal.imageSourceBtn}
+                          onPress={grabarVideo}
+                        >
+                          <Text style={stylesLocal.imageSourceBtnText}>
+                            📹 GRABAR
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
+                    {selectedVideo !== "" && (
+                      <View style={stylesLocal.videoContainer}>
+                        <VideoView
+                          style={stylesLocal.videoPreview}
+                          player={player}
+                          nativeControls
+                          contentFit="contain"
+                          allowsFullscreen
+                          allowsPictureInPicture
+                        />
+                        <TouchableOpacity
+                          style={stylesLocal.deleteCircleBtn}
+                          onPress={() => {
+                            setSelectedVideo("");
+                            setVideoSend("");
+                          }}
+                        >
+                          <Text style={stylesLocal.deleteCircleBtnText}>✕</Text>
+                        </TouchableOpacity>
+                      </View>
+                    )}
                   </View>
                 )}
               </View>
-            )}
-          </View>
-          {error !== "" && (
-            <Text
-              style={[styles.error, { marginTop: 10, fontSize: scaleFont(19) }]}
-            >
-              {error}
-            </Text>
-          )}
-          <View style={[styles.navigationButtons]}>
-            <Boton
-              uri="atras"
-              onPress={handleAtrasPress}
-              dissable={view === 0}
-            />
-            {view < 2 ? (
-              <Boton
-                uri="delante"
-                onPress={handleSiguientePress}
-                dissable={view === 2}
-              />
-            ) : (
-              <Boton
-                uri="ok"
-                onPress={handleCreaPress}
-                nameBottom="CREAR.MATERIAL"
-              />
-            )}
-          </View>
-        </>
+              {error !== "" && (
+                <Text
+                  style={[
+                    styles.error,
+                    { marginTop: 10, fontSize: scaleFont(19) },
+                  ]}
+                >
+                  {error}
+                </Text>
+              )}
+              <View style={[styles.navigationButtons]}>
+                <Boton
+                  uri="atras"
+                  onPress={handleAtrasPress}
+                  dissable={view === 0}
+                />
+                {view < 2 ? (
+                  <Boton
+                    uri="delante"
+                    onPress={handleSiguientePress}
+                    dissable={view === 2}
+                  />
+                ) : (
+                  <Boton
+                    uri="ok"
+                    onPress={handleCreaPress}
+                    nameBottom="CREAR.MATERIAL"
+                  />
+                )}
+              </View>
+            </>
+          </ScrollView>
+        </KeyboardAvoidingView>
       )}
     </SafeAreaProvider>
   );

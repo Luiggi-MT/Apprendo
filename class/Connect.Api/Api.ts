@@ -2,7 +2,14 @@ import * as Notifications from 'expo-notifications';
 import * as Device from 'expo-device'; 
 import { Platform } from 'react-native';
 import Constants from 'expo-constants';
+import { Storage } from '../Storage/Storage';
 export class Api {
+    private static readonly TOKEN_KEY = 'userToken';
+
+    protected static async getAuthHeader(): Promise<Record<string, string>> {
+        const token = await Storage.getItem(Api.TOKEN_KEY);
+        return token ? { 'Authorization': `Bearer ${token}` } : {};
+    }
     //protected static apiUrl: string = "http://127.0.0.1:5000";
     protected static apiUrl: string = "http://192.168.1.129:5000";
     //protected static apiUrl: string = "https://apprendo.duckdns.org/api";

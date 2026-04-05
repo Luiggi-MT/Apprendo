@@ -1,5 +1,14 @@
 import React, { useState } from "react";
-import { View, Text, TouchableOpacity, Image, TextInput } from "react-native";
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Image,
+  TextInput,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from "react-native";
 import {
   SafeAreaProvider,
   useSafeAreaInsets,
@@ -16,6 +25,10 @@ import { ActivityIndicator } from "react-native-paper";
 import { ImagePassword } from "../../../class/Interface/ImagePassword";
 import { tarjetaDescipcion_styles } from "../../../styles/tarjetaDescripcion_styles";
 import { Arasaac } from "../../../class/Arasaac/getPictograma";
+import LottieView from "lottie-react-native";
+
+const ERROR_TIME_MS = 2500;
+const OK_TIME_MS = 2000;
 
 export default function CrearEstudiante({ navigation }: { navigation: any }) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
@@ -46,6 +59,8 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
   const [visualizacionValue, setVisualizacionValue] = useState("diarias");
 
   const [asistenteVozValue, setAsistenteVozValue] = useState<string>("none");
+  const [errorAnimation, setErrorAnimation] = useState(false);
+  const [okAnimation, setOkAnimation] = useState(false);
 
   const [asistenteVozItems, setAsistenteVozItems] = useState([
     { label: "NINGUNO", value: "none" },
@@ -79,7 +94,8 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
   const seleccionaImagen = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
     if (status !== "granted") {
-      Alert.alert("Se necesita permiso para acceder a la galeria");
+      setError(true);
+      setErrorMessage(["Se necesita permiso para acceder a la galeria"]);
       return;
     }
     const result = await ImagePicker.launchImageLibraryAsync({
@@ -138,16 +154,16 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
     }
     setError(false);
     setErrorMessage([]);
+    setIsCreate(true);
     const newStudent: Students = {
-      username: text,
+      username: text.toUpperCase(),
       foto: selectedImage || "porDefecto.png",
       tipoContraseña: contraseñaValue,
       accesibilidad: accesibilidadValue.join(","),
       preferenciasVisualizacion: visualizacionValue,
       asistenteVoz: asistenteVozValue,
-      contraseña: password,
+      contraseña: password.toUpperCase(),
     };
-    setIsCreate(true);
 
     const response = await api.createStudent(
       newStudent,
@@ -155,16 +171,26 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
       distractorsImages,
     );
 
+    console.log("Respuesta de createStudent:", response);
     if (response.ok) {
-      setTimeout(() => {
-        setIsCreate(false);
+      setIsCreate(false);
+      setOkAnimation(true);
+      setErrorMessage([]);
+      setError(false);
+      setTimeout(async () => {
+        setOkAnimation(false);
         navigation.goBack({
           actualizar: true,
         });
-      }, 2000);
+      }, OK_TIME_MS);
     } else {
       setIsCreate(false);
-      setErrorMessage(["Error al crear el estudiante."]);
+      setErrorAnimation(true);
+      setError(true);
+      setErrorMessage([response.message.toUpperCase()]);
+      setTimeout(async () => {
+        setErrorAnimation(false);
+      }, ERROR_TIME_MS);
       return;
     }
   };
@@ -191,230 +217,271 @@ export default function CrearEstudiante({ navigation }: { navigation: any }) {
         style={scaleFont(20)}
       />
 
-      {isCreate ? (
-        <View style={[styles.content, styles.shadow]}>
-          <ActivityIndicator size="large" color="#FF8C42" />
-          <Text
-            style={[
-              styles.text_legend,
-              {
-                textAlign: "center",
-                marginTop: 20,
-                fontSize: scaleFont(18),
-                fontWeight: "bold",
-                color: "#333",
-              },
-            ]}
-          >
-            CREANDO AL ESTUDIANTE...
-          </Text>
-          <Text
-            style={[
-              styles.text,
-              { fontSize: scaleFont(15), marginTop: 10, color: "#666" },
-            ]}
-          >
-            POR FAVOR, ESPERE UN MOMENTO.
-          </Text>
-        </View>
-      ) : view === 0 ? (
-        <View style={[styles.content, styles.shadow]}>
-          <TouchableOpacity onPress={seleccionaImagen}>
-            <Text style={styles.text_legend}>SELECCIONAR FOTO:</Text>
-            <Image
-              style={[tarjetaDescipcion_styles.imageTarjet]}
-              source={{ uri: selectedImage }}
-            />
-          </TouchableOpacity>
-          <Text style={styles.text_legend}>NOMBRE DE USUARIO:</Text>
-          <TextInput
-            style={[styles.buscador, styles.shadow]}
-            onChangeText={handleTextChange}
-            value={text}
-            autoCapitalize="characters"
-            autoCorrect={false}
-            autoComplete="off"
-          />
-
-          <Text style={styles.text_legend}>TIPO DE CONTRASEÑA:</Text>
-          <View style={{ zIndex: 900 }}>
-            <DropDownPicker
-              open={openContraseña}
-              value={contraseñaValue}
-              items={contraseñaItems}
-              setOpen={setOpenContraseña}
-              setValue={setContraseñaValue}
-              setItems={setContraseñaItems}
-              style={[styles.shadow, styles.buscador, { width: "50%" }]}
-              textStyle={styles.dropdownTextStyle}
-            />
-          </View>
-
-          <Text style={styles.text_legend}>NUEVA CONTRASEÑA:</Text>
-          {contraseñaValue === "alfanumerica" ? (
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <ScrollView
+          contentContainerStyle={{ flexGrow: 1 }}
+          keyboardShouldPersistTaps="handled"
+        >
+          {isCreate ? (
+            <View style={[styles.content, styles.shadow]}>
+              <ActivityIndicator size="large" color="#FF8C42" />
+              <Text
+                style={[
+                  styles.text_legend,
+                  {
+                    textAlign: "center",
+                    marginTop: 20,
+                    fontSize: scaleFont(18),
+                    fontWeight: "bold",
+                    color: "#333",
+                  },
+                ]}
+              >
+                CREANDO AL ESTUDIANTE...
+              </Text>
+              <Text
+                style={[
+                  styles.text,
+                  { fontSize: scaleFont(15), marginTop: 10, color: "#666" },
+                ]}
+              >
+                POR FAVOR, ESPERE UN MOMENTO.
+              </Text>
+            </View>
+          ) : isCreate === false && errorAnimation === true ? (
             <View
-              style={[
-                styles.buscador,
-                styles.shadow,
-                {
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  paddingRight: 15,
-                },
-              ]}
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
             >
+              <LottieView
+                source={require("../../../assets/animations/error.json")}
+                autoPlay
+                loop={false}
+                style={{ width: 700, height: 700, alignSelf: "center" }}
+              />
+            </View>
+          ) : okAnimation === true ? (
+            <View
+              style={{
+                flex: 1,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <LottieView
+                source={require("../../../assets/animations/success.json")}
+                autoPlay
+                loop={false}
+                style={{ width: 700, height: 700, alignSelf: "center" }}
+              />
+            </View>
+          ) : view === 0 ? (
+            <View style={[styles.content, styles.shadow]}>
+              <TouchableOpacity onPress={seleccionaImagen}>
+                <Text style={styles.text_legend}>SELECCIONAR FOTO:</Text>
+                <Image
+                  style={[tarjetaDescipcion_styles.imageTarjet]}
+                  source={{ uri: selectedImage }}
+                />
+              </TouchableOpacity>
+              <Text style={styles.text_legend}>NOMBRE DE USUARIO:</Text>
               <TextInput
-                style={{ flex: 1, height: "100%" }}
-                onChangeText={handlePasswordChange}
-                value={password}
-                secureTextEntry={secureText}
+                style={[styles.buscador, styles.shadow]}
+                onChangeText={handleTextChange}
+                value={text}
+                autoCapitalize="characters"
                 autoCorrect={false}
                 autoComplete="off"
               />
-              <TouchableOpacity onPress={() => setSecureText(!secureText)}>
-                {secureText && (
-                  <Image
-                    source={{ uri: api.getComponent("ojo.png") }}
-                    style={styles.image}
+
+              <Text style={styles.text_legend}>TIPO DE CONTRASEÑA:</Text>
+              <View style={{ zIndex: 900 }}>
+                <DropDownPicker
+                  open={openContraseña}
+                  value={contraseñaValue}
+                  items={contraseñaItems}
+                  setOpen={setOpenContraseña}
+                  setValue={setContraseñaValue}
+                  setItems={setContraseñaItems}
+                  style={[styles.shadow, styles.buscador, { width: "50%" }]}
+                  textStyle={styles.dropdownTextStyle}
+                />
+              </View>
+
+              <Text style={styles.text_legend}>NUEVA CONTRASEÑA:</Text>
+              {contraseñaValue === "alfanumerica" ? (
+                <View
+                  style={[
+                    styles.buscador,
+                    styles.shadow,
+                    {
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      paddingRight: 15,
+                    },
+                  ]}
+                >
+                  <TextInput
+                    style={{ flex: 1, height: "100%" }}
+                    onChangeText={handlePasswordChange}
+                    value={password}
+                    secureTextEntry={secureText}
+                    autoCorrect={false}
+                    autoComplete="off"
                   />
-                )}
-                {!secureText && (
-                  <Image
-                    source={{ uri: arasaacService.getPictograma("ojo") }}
-                    style={styles.image}
+                  <TouchableOpacity onPress={() => setSecureText(!secureText)}>
+                    {secureText && (
+                      <Image
+                        source={{ uri: api.getComponent("ojo.png") }}
+                        style={styles.image}
+                      />
+                    )}
+                    {!secureText && (
+                      <Image
+                        source={{ uri: arasaacService.getPictograma("ojo") }}
+                        style={styles.image}
+                      />
+                    )}
+                  </TouchableOpacity>
+                </View>
+              ) : contraseñaValue === "pin" ? (
+                <View
+                  style={[
+                    styles.buscador,
+                    styles.shadow,
+                    {
+                      flexDirection: "row",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                      paddingRight: 15,
+                    },
+                  ]}
+                >
+                  <TextInput
+                    style={{ flex: 1, height: "100%" }}
+                    onChangeText={handlePasswordChange}
+                    value={password}
+                    keyboardType="number-pad"
+                    secureTextEntry={secureText}
                   />
-                )}
-              </TouchableOpacity>
-            </View>
-          ) : contraseñaValue === "pin" ? (
-            <View
-              style={[
-                styles.buscador,
-                styles.shadow,
-                {
-                  flexDirection: "row",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  paddingRight: 15,
-                },
-              ]}
-            >
-              <TextInput
-                style={{ flex: 1, height: "100%" }}
-                onChangeText={handlePasswordChange}
-                value={password}
-                keyboardType="number-pad"
-                secureTextEntry={secureText}
-              />
-              <TouchableOpacity onPress={() => setSecureText(!secureText)}>
-                {secureText && (
-                  <Image
-                    source={{ uri: api.getComponent("ojo.png") }}
-                    style={styles.image}
-                  />
-                )}
-                {!secureText && (
-                  <Image
-                    source={{ uri: arasaacService.getPictograma("ojo") }}
-                    style={styles.image}
-                  />
-                )}
-              </TouchableOpacity>
+                  <TouchableOpacity onPress={() => setSecureText(!secureText)}>
+                    {secureText && (
+                      <Image
+                        source={{ uri: api.getComponent("ojo.png") }}
+                        style={styles.image}
+                      />
+                    )}
+                    {!secureText && (
+                      <Image
+                        source={{ uri: arasaacService.getPictograma("ojo") }}
+                        style={styles.image}
+                      />
+                    )}
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <Boton
+                  uri="olvideContraseña"
+                  nameBottom="ESTABLECER.CONTRASEÑA"
+                  onPress={handleEstablecerContraseñaPress}
+                />
+              )}
+              <View style={styles.navigationButtons}>
+                <View></View>
+
+                <Boton uri="delante" onPress={handleAccesibilidadPress} />
+              </View>
             </View>
           ) : (
-            <Boton
-              uri="olvideContraseña"
-              nameBottom="ESTABLECER.CONTRASEÑA"
-              onPress={handleEstablecerContraseñaPress}
-            />
+            <>
+              <View style={[styles.content, styles.shadow]}>
+                <Text style={styles.text_legend}>ACCESIBILIDAD:</Text>
+                <View style={{ zIndex: 1000 }}>
+                  <DropDownPicker
+                    multiple={true}
+                    min={1}
+                    max={3}
+                    placeholder="SELECCIONAR OPCIONES"
+                    mode="BADGE"
+                    listMode="SCROLLVIEW"
+                    dropDownContainerStyle={{
+                      maxHeight: 200,
+                    }}
+                    open={openAccesibilidad}
+                    value={accesibilidadValue}
+                    items={accesibilidadItems}
+                    setOpen={setOpenAccesibilidad}
+                    setValue={setAccesibilidadValue}
+                    setItems={setAccesibilidadItems}
+                    style={[styles.shadow, styles.buscador, { width: "95%" }]}
+                    textStyle={styles.dropdownTextStyle}
+                  />
+                </View>
+
+                <Text style={styles.text_legend}>
+                  PREFERENCIAS DE VISUALIZACIÓN DE TAREAS:
+                </Text>
+                <View style={{ zIndex: 900 }}>
+                  <DropDownPicker
+                    open={openVisualizacion}
+                    value={visualizacionValue}
+                    items={visualizacionItems}
+                    setOpen={setOpenVisualizacion}
+                    setValue={setVisualizacionValue}
+                    setItems={setVisualizacionItems}
+                    listMode="SCROLLVIEW"
+                    dropDownContainerStyle={{
+                      maxHeight: 200,
+                    }}
+                    style={[styles.shadow, styles.buscador, { width: "70%" }]}
+                    textStyle={styles.dropdownTextStyle}
+                  />
+                </View>
+                <Text style={styles.text_legend}>ASISTENTE DE VOZ:</Text>
+                <View style={{ zIndex: 800 }}>
+                  <DropDownPicker
+                    open={openAsistenteVoz}
+                    value={asistenteVozValue}
+                    items={asistenteVozItems}
+                    setOpen={setOpenAsistenteVoz}
+                    setValue={setAsistenteVozValue}
+                    setItems={setAsistenteVozItems}
+                    listMode="SCROLLVIEW"
+                    dropDownContainerStyle={{
+                      maxHeight: 200,
+                    }}
+                    style={[styles.shadow, styles.buscador, { width: "70%" }]}
+                    textStyle={styles.dropdownTextStyle}
+                  />
+                </View>
+
+                <View style={styles.navigationButtons}>
+                  <Boton uri="atras" onPress={handlePerfilPress} />
+
+                  <Boton
+                    uri="ok"
+                    nameBottom="AÑADIR.ESTUDIANTE"
+                    onPress={handleAddPress}
+                  />
+                </View>
+                {error &&
+                  errorMessage.map((msg, i) => (
+                    <Text key={i} style={[styles.error, { margin: 10 }]}>
+                      {msg}
+                    </Text>
+                  ))}
+              </View>
+            </>
           )}
-          <View style={styles.navigationButtons}>
-            <View></View>
-
-            <Boton uri="delante" onPress={handleAccesibilidadPress} />
-          </View>
-        </View>
-      ) : (
-        <>
-          <View style={[styles.content, styles.shadow]}>
-            <Text style={styles.text_legend}>ACCESIBILIDAD:</Text>
-            <View style={{ zIndex: 1000 }}>
-              <DropDownPicker
-                multiple={true}
-                min={1}
-                max={3}
-                placeholder="SELECCIONAR OPCIONES"
-                mode="BADGE"
-                listMode="SCROLLVIEW"
-                dropDownContainerStyle={{
-                  maxHeight: 200,
-                }}
-                open={openAccesibilidad}
-                value={accesibilidadValue}
-                items={accesibilidadItems}
-                setOpen={setOpenAccesibilidad}
-                setValue={setAccesibilidadValue}
-                setItems={setAccesibilidadItems}
-                style={[styles.shadow, styles.buscador, { width: "95%" }]}
-                textStyle={styles.dropdownTextStyle}
-              />
-            </View>
-
-            <Text style={styles.text_legend}>
-              PREFERENCIAS DE VISUALIZACIÓN DE TAREAS:
-            </Text>
-            <View style={{ zIndex: 900 }}>
-              <DropDownPicker
-                open={openVisualizacion}
-                value={visualizacionValue}
-                items={visualizacionItems}
-                setOpen={setOpenVisualizacion}
-                setValue={setVisualizacionValue}
-                setItems={setVisualizacionItems}
-                listMode="SCROLLVIEW"
-                dropDownContainerStyle={{
-                  maxHeight: 200,
-                }}
-                style={[styles.shadow, styles.buscador, { width: "70%" }]}
-                textStyle={styles.dropdownTextStyle}
-              />
-            </View>
-            <Text style={styles.text_legend}>ASISTENTE DE VOZ:</Text>
-            <View style={{ zIndex: 800 }}>
-              <DropDownPicker
-                open={openAsistenteVoz}
-                value={asistenteVozValue}
-                items={asistenteVozItems}
-                setOpen={setOpenAsistenteVoz}
-                setValue={setAsistenteVozValue}
-                setItems={setAsistenteVozItems}
-                listMode="SCROLLVIEW"
-                dropDownContainerStyle={{
-                  maxHeight: 200,
-                }}
-                style={[styles.shadow, styles.buscador, { width: "70%" }]}
-                textStyle={styles.dropdownTextStyle}
-              />
-            </View>
-
-            <View style={styles.navigationButtons}>
-              <Boton uri="atras" onPress={handlePerfilPress} />
-
-              <Boton
-                uri="ok"
-                nameBottom="AÑADIR.ESTUDIANTE"
-                onPress={handleAddPress}
-              />
-            </View>
-          </View>
-          <View>
-            {error && (
-              <Text style={[styles.error, { margin: 10 }]}>{errorMessage}</Text>
-            )}
-          </View>
-        </>
-      )}
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaProvider>
   );
 }

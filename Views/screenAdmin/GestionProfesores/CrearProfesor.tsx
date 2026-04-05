@@ -5,7 +5,14 @@ import {
 } from "react-native-safe-area-context";
 import Header from "../../../components/Header";
 import { scaleFont, styles } from "../../../styles/styles";
-import { Text, TextInput, View } from "react-native";
+import {
+  Text,
+  TextInput,
+  View,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+} from "react-native";
 import { shadow } from "react-native-paper";
 import Boton from "../../../components/Boton";
 import Splash from "../../../components/Splash";
@@ -65,35 +72,47 @@ export default function CrearProfesor({ navigation }: { navigation: any }) {
       />
       {isLoading && <Splash name="CREANDO AL PROFESOR" />}
       {!isLoading && (
-        <>
-          <View style={[styles.content, styles.shadow]}>
-            <Text style={[styles.text_legend]}>USUARIO:</Text>
-            <TextInput
-              style={[styles.buscador]}
-              onChangeText={handleUsernameChange}
-              value={username}
-              placeholder="INTRODUCIR NOMBRE DE USUARIO"
-              autoCapitalize="characters"
-              autoCorrect={false}
-              autoComplete="off"
-            />
-            <Text style={[styles.text_legend]}>PALABRA CLAVE:</Text>
-            <TextInput
-              style={[styles.buscador]}
-              onChangeText={handlePalabraClaveChange}
-              value={palabraClave}
-              placeholder="INTRODUCIR PALABRA CLAVE"
-            />
-          </View>
-          {error && <Text style={[styles.error]}>{errorValue}</Text>}
-          <View style={[styles.bottomContainerHeder, { alignItems: "center" }]}>
-            <Boton
-              nameBottom="AÑADIR.PROFESOR"
-              uri="ok"
-              onPress={handleAñadirProfesorPress}
-            />
-          </View>
-        </>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === "ios" ? "padding" : "height"}
+        >
+          <ScrollView
+            contentContainerStyle={{ flexGrow: 1 }}
+            keyboardShouldPersistTaps="handled"
+          >
+            <>
+              <View style={[styles.content, styles.shadow]}>
+                <Text style={[styles.text_legend]}>USUARIO:</Text>
+                <TextInput
+                  style={[styles.buscador]}
+                  onChangeText={handleUsernameChange}
+                  value={username}
+                  placeholder="INTRODUCIR NOMBRE DE USUARIO"
+                  autoCapitalize="characters"
+                  autoCorrect={false}
+                  autoComplete="off"
+                />
+                <Text style={[styles.text_legend]}>PALABRA CLAVE:</Text>
+                <TextInput
+                  style={[styles.buscador]}
+                  onChangeText={handlePalabraClaveChange}
+                  value={palabraClave}
+                  placeholder="INTRODUCIR PALABRA CLAVE"
+                />
+              </View>
+              {error && <Text style={[styles.error]}>{errorValue}</Text>}
+              <View
+                style={[styles.bottomContainerHeder, { alignItems: "center" }]}
+              >
+                <Boton
+                  nameBottom="AÑADIR.PROFESOR"
+                  uri="ok"
+                  onPress={handleAñadirProfesorPress}
+                />
+              </View>
+            </>
+          </ScrollView>
+        </KeyboardAvoidingView>
       )}
     </SafeAreaProvider>
   );
